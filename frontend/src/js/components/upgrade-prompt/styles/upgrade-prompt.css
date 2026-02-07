@@ -29,8 +29,8 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 0.75rem;
-  background: linear-gradient(to bottom right, #eff6ff, rgba(219, 234, 254, 0.5));
-  border: 1px solid rgba(59, 130, 246, 0.15);
+  background: linear-gradient(to bottom right, var(--primary-50), var(--primary-a06));
+  border: 1px solid var(--primary-a15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,20 +39,20 @@
 
 .up-inline-icon i {
   font-size: 1.125rem;
-  color: var(--blue-500, #3b82f6);
+  color: var(--primary-500);
 }
 
 .up-inline-title {
-  font-family: var(--font, 'Jost', sans-serif);
+  font-family: var(--font);
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--text-900, #171717);
+  color: var(--text-900);
   margin: 0 0 0.25rem;
 }
 
 .up-inline-desc {
   font-size: 0.8125rem;
-  color: var(--text-500, #737373);
+  color: var(--text-500);
   margin: 0 0 0.75rem;
 }
 
@@ -63,9 +63,9 @@
   padding: 0.5rem 1rem;
   border-radius: 0.625rem;
   border: none;
-  background: var(--blue-500, #3b82f6);
-  color: #fff;
-  font-family: var(--font, 'Jost', sans-serif);
+  background: var(--primary-500);
+  color: var(--bg-white);
+  font-family: var(--font);
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
@@ -73,7 +73,7 @@
 }
 
 .up-inline-btn:hover {
-  background: var(--blue-600, #2563eb);
+  background: var(--primary-600);
   transform: translateY(-1px);
 }
 
@@ -95,11 +95,11 @@
 }
 
 .up-mini-card {
-  background: var(--bg-white, #fff);
-  border: 1px solid rgba(59, 130, 246, 0.15);
+  background: var(--bg-white);
+  border: 1px solid var(--primary-a15);
   border-radius: 0.875rem;
   padding: 1.25rem;
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 16px var(--primary-a10), 0 1px 3px var(--black-a04);
 }
 
 .up-mini-header {
@@ -113,8 +113,8 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 0.625rem;
-  background: linear-gradient(to bottom right, #eff6ff, rgba(219, 234, 254, 0.5));
-  border: 1px solid rgba(59, 130, 246, 0.15);
+  background: linear-gradient(to bottom right, var(--primary-50), var(--primary-a06));
+  border: 1px solid var(--primary-a15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,21 +123,21 @@
 
 .up-mini-icon i {
   font-size: 1rem;
-  color: var(--blue-500, #3b82f6);
+  color: var(--primary-500);
 }
 
 .up-mini-title {
-  font-family: var(--font, 'Jost', sans-serif);
+  font-family: var(--font);
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--text-900, #171717);
+  color: var(--text-900);
   margin: 0;
   line-height: 1.3;
 }
 
 .up-mini-desc {
   font-size: 0.8125rem;
-  color: var(--text-500, #737373);
+  color: var(--text-500);
   margin: 0.125rem 0 0;
 }
 
@@ -153,11 +153,11 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.75rem;
-  color: var(--text-500, #737373);
+  color: var(--text-500);
 }
 
 .up-mini-feature i {
-  color: var(--blue-500, #3b82f6);
+  color: var(--primary-500);
   font-size: 0.875rem;
 }
 
@@ -175,9 +175,9 @@
   padding: 0.5625rem 1rem;
   border-radius: 0.625rem;
   border: none;
-  background: var(--blue-500, #3b82f6);
-  color: #fff;
-  font-family: var(--font, 'Jost', sans-serif);
+  background: var(--primary-500);
+  color: var(--bg-white);
+  font-family: var(--font);
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
@@ -185,7 +185,7 @@
 }
 
 .up-mini-btn-primary:hover {
-  background: var(--blue-600, #2563eb);
+  background: var(--primary-600);
 }
 
 .up-mini-btn-primary:active {
@@ -199,10 +199,10 @@
   justify-content: center;
   padding: 0.5625rem 1rem;
   border-radius: 0.625rem;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--black-a06);
   background: transparent;
-  color: var(--text-700, #404040);
-  font-family: var(--font, 'Jost', sans-serif);
+  color: var(--text-700);
+  font-family: var(--font);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -210,5 +210,5 @@
 }
 
 .up-mini-btn-secondary:hover {
-  background: var(--bg-slate, #f8fafc);
+  background: var(--bg-slate);
 }
