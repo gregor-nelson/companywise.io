@@ -50,69 +50,63 @@
   --risk-high-bg:       linear-gradient(to bottom right, #fbeae7, rgba(212, 53, 28, 0.08));
   --risk-high-border:   rgba(212, 53, 28, 0.2);
 
-  /* ── Primary alpha scale ── */
-  --primary-a03: rgba(29, 112, 184, 0.03);
-  --primary-a06: rgba(29, 112, 184, 0.06);
-  --primary-a10: rgba(29, 112, 184, 0.10);
-  --primary-a12: rgba(29, 112, 184, 0.12);
-  --primary-a15: rgba(29, 112, 184, 0.15);
-  --primary-a25: rgba(29, 112, 184, 0.25);
-  --primary-a30: rgba(29, 112, 184, 0.30);
-  --primary-a45: rgba(29, 112, 184, 0.45);
+  /* ── Alpha scales (color-mix) ── */
+  --primary-a03: color-mix(in srgb, #1d70b8  3%, transparent);
+  --primary-a06: color-mix(in srgb, #1d70b8  6%, transparent);
+  --primary-a10: color-mix(in srgb, #1d70b8 10%, transparent);
+  --primary-a12: color-mix(in srgb, #1d70b8 12%, transparent);
+  --primary-a15: color-mix(in srgb, #1d70b8 15%, transparent);
+  --primary-a25: color-mix(in srgb, #1d70b8 25%, transparent);
+  --primary-a30: color-mix(in srgb, #1d70b8 30%, transparent);
+  --primary-a45: color-mix(in srgb, #1d70b8 45%, transparent);
 
-  /* ── Green alpha scale ── */
-  --green-a03: rgba(0, 112, 60, 0.03);
-  --green-a06: rgba(0, 112, 60, 0.06);
-  --green-a08: rgba(0, 112, 60, 0.08);
-  --green-a10: rgba(0, 112, 60, 0.10);
-  --green-a12: rgba(0, 112, 60, 0.12);
-  --green-a15: rgba(0, 112, 60, 0.15);
-  --green-a19: rgba(0, 112, 60, 0.19);
-  --green-a20: rgba(0, 112, 60, 0.20);
+  --green-a03: color-mix(in srgb, #00703c  3%, transparent);
+  --green-a06: color-mix(in srgb, #00703c  6%, transparent);
+  --green-a08: color-mix(in srgb, #00703c  8%, transparent);
+  --green-a10: color-mix(in srgb, #00703c 10%, transparent);
+  --green-a12: color-mix(in srgb, #00703c 12%, transparent);
+  --green-a15: color-mix(in srgb, #00703c 15%, transparent);
+  --green-a19: color-mix(in srgb, #00703c 19%, transparent);
+  --green-a20: color-mix(in srgb, #00703c 20%, transparent);
 
-  /* ── Amber alpha scale ── */
-  --amber-a06: rgba(244, 119, 56, 0.06);
-  --amber-a08: rgba(244, 119, 56, 0.08);
-  --amber-a10: rgba(244, 119, 56, 0.10);
-  --amber-a15: rgba(244, 119, 56, 0.15);
-  --amber-a20: rgba(244, 119, 56, 0.20);
-  --amber-a25: rgba(244, 119, 56, 0.25);
-  --amber-a30: rgba(244, 119, 56, 0.30);
+  --amber-a06: color-mix(in srgb, #f47738  6%, transparent);
+  --amber-a08: color-mix(in srgb, #f47738  8%, transparent);
+  --amber-a10: color-mix(in srgb, #f47738 10%, transparent);
+  --amber-a15: color-mix(in srgb, #f47738 15%, transparent);
+  --amber-a20: color-mix(in srgb, #f47738 20%, transparent);
+  --amber-a25: color-mix(in srgb, #f47738 25%, transparent);
+  --amber-a30: color-mix(in srgb, #f47738 30%, transparent);
 
-  /* ── Red alpha scale ── */
-  --red-a06: rgba(212, 53, 28, 0.06);
-  --red-a08: rgba(212, 53, 28, 0.08);
-  --red-a10: rgba(212, 53, 28, 0.10);
-  --red-a15: rgba(212, 53, 28, 0.15);
-  --red-a20: rgba(212, 53, 28, 0.20);
-  --red-a30: rgba(212, 53, 28, 0.30);
+  --red-a06: color-mix(in srgb, #d4351c  6%, transparent);
+  --red-a08: color-mix(in srgb, #d4351c  8%, transparent);
+  --red-a10: color-mix(in srgb, #d4351c 10%, transparent);
+  --red-a15: color-mix(in srgb, #d4351c 15%, transparent);
+  --red-a20: color-mix(in srgb, #d4351c 20%, transparent);
+  --red-a30: color-mix(in srgb, #d4351c 30%, transparent);
 
-  /* ── Black overlay alpha scale ── */
-  --black-a03: rgba(0, 0, 0, 0.03);
-  --black-a04: rgba(0, 0, 0, 0.04);
-  --black-a05: rgba(0, 0, 0, 0.05);
-  --black-a06: rgba(0, 0, 0, 0.06);
-  --black-a08: rgba(0, 0, 0, 0.08);
-  --black-a10: rgba(0, 0, 0, 0.10);
-  --black-a12: rgba(0, 0, 0, 0.12);
-  --black-a15: rgba(0, 0, 0, 0.15);
-  --black-a20: rgba(0, 0, 0, 0.20);
-  --black-a25: rgba(0, 0, 0, 0.25);
-  --black-a50: rgba(0, 0, 0, 0.50);
-  --black-a55: rgba(0, 0, 0, 0.55);
+  --black-a03: color-mix(in srgb, black  3%, transparent);
+  --black-a04: color-mix(in srgb, black  4%, transparent);
+  --black-a05: color-mix(in srgb, black  5%, transparent);
+  --black-a06: color-mix(in srgb, black  6%, transparent);
+  --black-a08: color-mix(in srgb, black  8%, transparent);
+  --black-a10: color-mix(in srgb, black 10%, transparent);
+  --black-a12: color-mix(in srgb, black 12%, transparent);
+  --black-a15: color-mix(in srgb, black 15%, transparent);
+  --black-a20: color-mix(in srgb, black 20%, transparent);
+  --black-a25: color-mix(in srgb, black 25%, transparent);
+  --black-a50: color-mix(in srgb, black 50%, transparent);
+  --black-a55: color-mix(in srgb, black 55%, transparent);
 
-  /* ── Ink (text-derived: rgb(11,12,12)) ── */
-  --ink-a03: rgba(11, 12, 12, 0.03);
-  --ink-a04: rgba(11, 12, 12, 0.04);
-  --ink-a05: rgba(11, 12, 12, 0.05);
-  --ink-a06: rgba(11, 12, 12, 0.06);
-  --ink-a08: rgba(11, 12, 12, 0.08);
-  --ink-a12: rgba(11, 12, 12, 0.12);
-  --ink-a15: rgba(11, 12, 12, 0.15);
-  --ink-a20: rgba(11, 12, 12, 0.20);
+  --ink-a03: color-mix(in srgb, #0b0c0c  3%, transparent);
+  --ink-a04: color-mix(in srgb, #0b0c0c  4%, transparent);
+  --ink-a05: color-mix(in srgb, #0b0c0c  5%, transparent);
+  --ink-a06: color-mix(in srgb, #0b0c0c  6%, transparent);
+  --ink-a08: color-mix(in srgb, #0b0c0c  8%, transparent);
+  --ink-a12: color-mix(in srgb, #0b0c0c 12%, transparent);
+  --ink-a15: color-mix(in srgb, #0b0c0c 15%, transparent);
+  --ink-a20: color-mix(in srgb, #0b0c0c 20%, transparent);
 
-  /* ── Yellow alpha ── */
-  --yellow-a45: rgba(255, 221, 0, 0.45);
+  --yellow-a45: color-mix(in srgb, #ffdd00 45%, transparent);
 
   /* ── Composite gradients ── */
   --gradient-subtle:       linear-gradient(to bottom right, var(--primary-a06), var(--primary-a03));
@@ -126,13 +120,6 @@
   --section-gap: clamp(3rem, 6vw, 6rem);
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* ── Backwards compat (remove in Phase F after all files migrated) ── */
-  --blue-500: var(--primary-500);
-  --blue-600: var(--primary-600);
-  --blue-50:  var(--primary-50);
-  --blue-100: var(--primary-100);
-  --bg-blue-tint: var(--primary-100);
-  --green-glow: var(--green-a12);
 }
 
 *, *::before, *::after { box-sizing: border-box; }

@@ -89,7 +89,7 @@
   border-radius: 100px;
   border: 1px solid var(--primary-a15);
   background: linear-gradient(to bottom right, var(--primary-50), var(--primary-a06));
-  color: var(--blue-500);
+  color: var(--primary-500);
   margin-bottom: 1rem;
 }
 
@@ -171,7 +171,7 @@
   right: 1rem;
   font-size: 2.5rem;
   font-weight: 800;
-  color: var(--blue-500);
+  color: var(--primary-500);
   opacity: 0.08;
   line-height: 1;
   pointer-events: none;
@@ -210,7 +210,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.375rem;
-  color: var(--blue-500);
+  color: var(--primary-500);
 }
 
 /* Icon Variants */
@@ -277,7 +277,7 @@
 }
 
 .hiw-search-bar i {
-  color: var(--blue-500);
+  color: var(--primary-500);
   font-size: 0.875rem;
 }
 
@@ -289,7 +289,7 @@
 .hiw-search-cursor {
   width: 2px;
   height: 14px;
-  background: var(--blue-500);
+  background: var(--primary-500);
   animation: cursor-blink 1s step-end infinite;
 }
 
@@ -404,7 +404,7 @@
 .hiw-progress-fill {
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, var(--blue-500), var(--primary-600));
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
   border-radius: 2px;
   transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -512,7 +512,7 @@
   align-items: center;
   gap: 0.625rem;
   padding: 0.875rem 1.75rem;
-  background: var(--blue-500);
+  background: var(--primary-500);
   color: var(--bg-white);
   font-family: var(--font);
   font-weight: 500;
@@ -525,7 +525,7 @@
 }
 
 .hiw-cta-btn:hover {
-  background: var(--blue-600);
+  background: var(--primary-600);
   transform: translateY(-2px);
   box-shadow: 0 12px 24px var(--primary-a25);
 }

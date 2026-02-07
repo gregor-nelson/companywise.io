@@ -213,7 +213,7 @@
 
 .hero-search-form:focus-within {
   border-color: var(--primary-500);
-  box-shadow: 0 4px 6px -1px var(--black-a10), 0 2px 4px -2px var(--black-a10), 0 0 0 3px var(--primary-a15); /* derived from --blue-500 */
+  box-shadow: 0 4px 6px -1px var(--black-a10), 0 2px 4px -2px var(--black-a10), 0 0 0 3px var(--primary-a15);
 }
 
 .hero-search-prefix {
