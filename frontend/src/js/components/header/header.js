@@ -156,10 +156,10 @@ function generateHeaderHTML() {
           .join('')}
 
         <div class="w-px h-5 mx-2 bg-neutral-200"></div>
-        <div id="header-credit-badge" class="flex items-center"></div>
-        <a href="#" data-nav-item data-label="Get started" class="ml-1 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-blue-500/25">
-          Get started
-        </a>
+        <button id="header-account-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/50 text-blue-600 hover:from-blue-100 hover:to-blue-200/50 hover:border-blue-300/50 hover:-translate-y-px hover:shadow-sm transition-all cursor-pointer">
+          <i class="ph-fill ph-star text-xs"></i>
+          <span data-credit-count>0 credits</span>
+        </button>
       </nav>
 
       <!-- Hamburger -->
@@ -256,8 +256,11 @@ function generateDrawerHTML() {
             .join('')}
         </div>
 
-        <div class="flex gap-3 mb-5">
-          <a href="#" data-nav-link class="flex-1 text-center py-2.5 text-sm font-medium text-white bg-blue-500 rounded-xl hover:bg-blue-600">Get started</a>
+        <div class="flex justify-center mb-5">
+          <button id="drawer-account-btn" class="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium rounded-full bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/50 text-blue-600 cursor-pointer">
+            <i class="ph-fill ph-star text-xs"></i>
+            <span data-credit-count>0 credits</span>
+          </button>
         </div>
 
         <div class="flex justify-center gap-4 pt-3 border-t border-neutral-100">
@@ -622,14 +625,6 @@ function showError(actionId, message) {
    ============================================ */
 
 function handleNavigation(href, label) {
-  // "Get started" → open purchase dialog instead of dead /signup
-  if (label === 'Get started') {
-    if (window.CompanyWisePurchase) {
-      window.CompanyWisePurchase.open();
-    }
-    return;
-  }
-
   // Anchor links — smooth scroll
   if (href.startsWith('#')) {
     const target = document.querySelector(href);
@@ -830,9 +825,32 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeader({ container });
   }
 
-  // Mount credit badge in desktop nav
-  const badgeContainer = document.getElementById('header-credit-badge');
-  if (badgeContainer && window.CompanyWiseCreditBadge) {
-    window.CompanyWiseCreditBadge.create(badgeContainer);
+  // Account buttons — show credit count, open account modal
+  function updateCreditCounts() {
+    var Wallet = window.CompanyWiseWallet;
+    var balance = Wallet ? Wallet.getBalance() : 0;
+    var text = balance + ' credit' + (balance !== 1 ? 's' : '');
+    document.querySelectorAll('[data-credit-count]').forEach(function (el) {
+      el.textContent = text;
+    });
   }
+
+  var headerAccountBtn = document.getElementById('header-account-btn');
+  if (headerAccountBtn) {
+    headerAccountBtn.addEventListener('click', function () {
+      if (window.CompanyWiseAccount) window.CompanyWiseAccount.open();
+    });
+  }
+
+  var drawerAccountBtn = document.getElementById('drawer-account-btn');
+  if (drawerAccountBtn) {
+    drawerAccountBtn.addEventListener('click', function () {
+      closeDrawer(function () {
+        if (window.CompanyWiseAccount) window.CompanyWiseAccount.open();
+      });
+    });
+  }
+
+  updateCreditCounts();
+  document.addEventListener('creditWalletChanged', updateCreditCounts);
 });

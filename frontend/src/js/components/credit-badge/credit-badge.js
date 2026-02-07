@@ -18,7 +18,6 @@
 
       const badge = document.createElement('div');
       badge.className = 'cb-badge';
-      badge.style.display = 'none';
       container.appendChild(badge);
 
       const instance = { container, badge };
@@ -37,13 +36,8 @@
     update(instance) {
       const badge = instance.badge;
       const Wallet = window.CompanyWiseWallet;
+      const balance = Wallet ? Wallet.getBalance() : 0;
 
-      if (!Wallet || !Wallet.hasWallet()) {
-        badge.style.display = 'none';
-        return;
-      }
-
-      const balance = Wallet.getBalance();
       badge.style.display = 'inline-flex';
       badge.innerHTML = `
         <i class="ph-fill ph-star cb-badge-icon"></i>

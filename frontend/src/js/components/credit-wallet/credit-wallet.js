@@ -155,22 +155,26 @@
      * @returns {{ token: string, passphrase: string, chainId: string }}
      */
     purchaseCredits: function (creditCount, tier) {
+      var existing = loadWallet();
+      var carryOver = existing ? existing.remaining : 0;
+      var mergedCredits = carryOver + creditCount;
+
       var seed = 'cw_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 14);
-      var chain = generateChain(seed, creditCount);
-      var anchor = chain[creditCount]; // top of chain = H^n(seed)
+      var chain = generateChain(seed, mergedCredits);
+      var anchor = chain[mergedCredits]; // top of chain = H^n(seed)
       var chainId = 'ch_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
-      var token = encodeSeed(seed, creditCount);
+      var token = encodeSeed(seed, mergedCredits);
       var passphrase = hashToWords(simpleHash(seed));
 
       var wallet = {
         chainId: chainId,
         seed: seed,
         anchor: anchor,
-        remaining: creditCount,
-        totalPurchased: creditCount,
+        remaining: mergedCredits,
+        totalPurchased: (existing ? existing.totalPurchased : 0) + creditCount,
         tier: tier,
         purchasedAt: new Date().toISOString(),
-        spentOn: [],
+        spentOn: existing ? existing.spentOn : [],
       };
 
       saveWallet(wallet);
