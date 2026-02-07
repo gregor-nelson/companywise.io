@@ -157,7 +157,6 @@ function generateHeaderHTML() {
 
         <div class="w-px h-5 mx-2 bg-neutral-200"></div>
         <div id="header-credit-badge" class="flex items-center"></div>
-        <a href="/login" data-nav-item data-label="Log in" class="px-3 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors rounded-lg hover:bg-neutral-50">Log in</a>
         <a href="#" data-nav-item data-label="Get started" class="ml-1 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-blue-500/25">
           Get started
         </a>
@@ -257,10 +256,8 @@ function generateDrawerHTML() {
             .join('')}
         </div>
 
-        <!-- Auth buttons -->
         <div class="flex gap-3 mb-5">
-          <a href="/login" data-nav-link class="flex-1 text-center py-2.5 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50">Log in</a>
-          <a href="/signup" data-nav-link class="flex-1 text-center py-2.5 text-sm font-medium text-white bg-blue-500 rounded-xl hover:bg-blue-600">Get started</a>
+          <a href="#" data-nav-link class="flex-1 text-center py-2.5 text-sm font-medium text-white bg-blue-500 rounded-xl hover:bg-blue-600">Get started</a>
         </div>
 
         <div class="flex justify-center gap-4 pt-3 border-t border-neutral-100">

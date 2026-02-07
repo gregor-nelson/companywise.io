@@ -662,8 +662,8 @@
       card.innerHTML = `
         <div class="hero-verdict-header">
           <div>
-            <h3 class="hero-verdict-company-name">${company.name}</h3>
-            <p class="hero-verdict-company-meta">${company.number} · ${company.type}</p>
+            <h3 class="hero-verdict-company-name">${escapeHtml(company.name)}</h3>
+            <p class="hero-verdict-company-meta">${escapeHtml(company.number)} · ${escapeHtml(company.type)}</p>
           </div>
           <div class="hero-verdict-badge hero-verdict-badge--${company.risk}">
             <i class="ph-fill ${badgeIcon}"></i>
@@ -685,11 +685,11 @@
           </div>
           <div class="hero-verdict-meta-item">
             <span class="hero-verdict-meta-label">Sector</span>
-            <div class="hero-verdict-meta-value">${company.sicCode.split(' - ')[1]}</div>
+            <div class="hero-verdict-meta-value">${escapeHtml(company.sicCode.split(' - ')[1])}</div>
           </div>
         </div>
         <div class="hero-verdict-flags">
-          ${company.flags
+          ${(company.flags || [])
             .map(
               (f) => `
             <div class="hero-verdict-flag-item hero-verdict-flag-item--${f.type}">

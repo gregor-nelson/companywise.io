@@ -24,6 +24,14 @@
     init() {
       this.createContainer();
       this.bindGlobalEvents();
+
+      // Re-render modal if credits change while it's open
+      document.addEventListener('creditWalletChanged', () => {
+        if (this.isOpen && this.currentCompany) {
+          this.render(this.currentCompany);
+          this.bindModalEvents();
+        }
+      });
     },
 
     // Create persistent container in body
@@ -90,8 +98,8 @@
               <div class="report-modal-header">
                 <div class="report-modal-header-inner">
                   <div class="report-modal-header-info">
-                    <h2 class="report-modal-title">${company.name}</h2>
-                    <p class="report-modal-subtitle">${company.number} · ${company.type}</p>
+                    <h2 class="report-modal-title">${escapeHtml(company.name)}</h2>
+                    <p class="report-modal-subtitle">${escapeHtml(company.number)} · ${escapeHtml(company.type)}</p>
                   </div>
                   <div class="report-modal-header-actions">
                     <span class="report-modal-badge report-modal-badge--${company.risk}">
@@ -131,13 +139,13 @@
                       </div>
                       <div class="report-overview-item">
                         <div class="report-overview-label">Business Activity</div>
-                        <div class="report-overview-value">${company.sicCode.split(' - ')[1] || company.sicCode}</div>
+                        <div class="report-overview-value">${escapeHtml(company.sicCode.split(' - ')[1] || company.sicCode)}</div>
                       </div>
                     </div>
                     <div class="report-overview-grid" style="margin-top: 0.75rem;">
                       <div class="report-overview-item" style="grid-column: span 2;">
                         <div class="report-overview-label">Registered Address</div>
-                        <div class="report-overview-value">${company.address}</div>
+                        <div class="report-overview-value">${escapeHtml(company.address)}</div>
                       </div>
                     </div>
                   </div>
@@ -151,7 +159,7 @@
                   </h3>
                   <div class="report-section-content">
                     <div class="report-flags-list">
-                      ${company.flags.map(flag => `
+                      ${(company.flags || []).map(flag => `
                         <div class="report-flag-item report-flag-item--${flag.type}">
                           <i class="ph-fill ${flag.icon}"></i>
                           <span class="report-flag-text">${flag.text}</span>
@@ -539,8 +547,8 @@
                           <i class="ph ph-user"></i>
                         </div>
                         <div class="report-director-info">
-                          <div class="report-director-name">${director.name}</div>
-                          <div class="report-director-meta">${director.role} \u00B7 Appointed ${new Date(director.appointed).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}</div>
+                          <div class="report-director-name">${escapeHtml(director.name)}</div>
+                          <div class="report-director-meta">${escapeHtml(director.role)} \u00B7 Appointed ${new Date(director.appointed).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}</div>
                         </div>
                       </div>
                     `).join('')}

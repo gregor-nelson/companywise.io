@@ -17,6 +17,13 @@
 (function () {
   'use strict';
 
+  // ---- Utility ----
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
   // ---- Premium Report Component ----
   const PremiumReport = {
     container: null,
@@ -150,7 +157,7 @@
         <nav class="pr-breadcrumb pr-fade-up">
           <a href="../../../pages/Home/home.html">Home</a>
           <i class="ph ph-caret-right"></i>
-          <span>${c.name}</span>
+          <span>${escapeHtml(c.name)}</span>
         </nav>
       `;
     },
@@ -172,8 +179,8 @@
         <div class="pr-header pr-fade-up">
           <div class="pr-header-top">
             <div class="pr-header-info">
-              <h1 class="pr-company-name">${c.name}</h1>
-              <p class="pr-company-meta">${c.number} · ${c.type}</p>
+              <h1 class="pr-company-name">${escapeHtml(c.name)}</h1>
+              <p class="pr-company-meta">${escapeHtml(c.number)} · ${escapeHtml(c.type)}</p>
             </div>
             <div class="pr-header-actions">
               <span class="pr-badge pr-badge--${c.risk}">
@@ -301,7 +308,7 @@
               </div>
               <div class="pr-overview-item pr-overview-item--full">
                 <div class="pr-overview-label">Registered Address</div>
-                <div class="pr-overview-value">${c.address}</div>
+                <div class="pr-overview-value">${escapeHtml(c.address)}</div>
               </div>
             </div>
           </div>
@@ -578,8 +585,8 @@
                         <i class="ph ph-user"></i>
                       </div>
                       <div class="pr-director-info">
-                        <div class="pr-director-name">${dir.name}</div>
-                        <div class="pr-director-role">${dir.role} · Appointed ${appointedDate}</div>
+                        <div class="pr-director-name">${escapeHtml(dir.name)}</div>
+                        <div class="pr-director-role">${escapeHtml(dir.role)} · Appointed ${appointedDate}</div>
                         <div class="pr-director-tags">
                           <span class="pr-director-tag pr-director-tag--info">
                             <i class="ph ph-calendar-blank"></i>

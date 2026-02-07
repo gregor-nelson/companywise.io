@@ -20,78 +20,6 @@
   const UpgradePrompt = {
     miniDialogEl: null,
 
-    // ---- Inline Mode ----
-    // Renders a blur overlay + lock icon + CTA over a container
-    renderInline(container, options) {
-      if (!container) return;
-
-      options = options || {};
-      var title = options.title || 'Premium Content';
-      var hasCredits = options.hasCredits || false;
-      var onUnlock = options.onUnlock || null;
-
-      // Add blur to existing content
-      container.style.position = 'relative';
-      var existingContent = container.querySelector('.up-inline-content');
-      if (!existingContent) {
-        // Wrap existing children in a blurred container
-        var wrapper = document.createElement('div');
-        wrapper.className = 'up-inline-content';
-        while (container.firstChild) {
-          wrapper.appendChild(container.firstChild);
-        }
-        container.appendChild(wrapper);
-      }
-
-      // Remove any existing overlay
-      var existing = container.querySelector('.up-inline-overlay');
-      if (existing) existing.remove();
-
-      var overlay = document.createElement('div');
-      overlay.className = 'up-inline-overlay';
-      overlay.innerHTML = `
-        <div class="up-inline-card">
-          <div class="up-inline-icon">
-            <i class="ph ph-lock-simple"></i>
-          </div>
-          <h4 class="up-inline-title">${title}</h4>
-          <p class="up-inline-desc">
-            ${hasCredits
-              ? 'Use 1 credit to unlock this section'
-              : 'Purchase credits to access premium data'}
-          </p>
-          <button class="up-inline-btn">
-            <i class="ph ${hasCredits ? 'ph-lock-simple-open' : 'ph-star'}"></i>
-            ${hasCredits ? 'Unlock with 1 Credit' : 'Get Credits'}
-          </button>
-        </div>
-      `;
-      container.appendChild(overlay);
-
-      var btn = overlay.querySelector('.up-inline-btn');
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (hasCredits && onUnlock) {
-          onUnlock();
-        } else if (window.CompanyWisePurchase) {
-          window.CompanyWisePurchase.open();
-        }
-      });
-    },
-
-    // Remove inline overlay from a container
-    removeInline(container) {
-      if (!container) return;
-      var overlay = container.querySelector('.up-inline-overlay');
-      if (overlay) overlay.remove();
-
-      // Unwrap the blurred content
-      var wrapper = container.querySelector('.up-inline-content');
-      if (wrapper) {
-        wrapper.classList.remove('up-inline-content');
-      }
-    },
-
     // ---- Mini-Dialog Mode ----
     // Card that appears below hero verdict card
     showMiniDialog(company) {
@@ -111,7 +39,7 @@
             </div>
             <div>
               <h4 class="up-mini-title">Unlock Premium Report</h4>
-              <p class="up-mini-desc">Get the full analysis for ${companyName}</p>
+              <p class="up-mini-desc">Get the full analysis for ${escapeHtml(companyName)}</p>
             </div>
           </div>
           <div class="up-mini-features">
@@ -162,7 +90,7 @@
       if (buyBtn) {
         buyBtn.addEventListener('click', function () {
           if (window.CompanyWisePurchase) {
-            window.CompanyWisePurchase.open();
+            window.CompanyWisePurchase.open({ returnTo: company });
           }
         });
       }
@@ -189,9 +117,16 @@
     }
   };
 
+  // Auto-dismiss mini-dialog when credits become available
+  document.addEventListener('creditWalletChanged', function () {
+    if (!UpgradePrompt.miniDialogEl) return;
+    var Wallet = window.CompanyWiseWallet;
+    if (Wallet && Wallet.getBalance() > 0) {
+      UpgradePrompt.hideMiniDialog();
+    }
+  });
+
   window.CompanyWiseUpgrade = {
-    renderInline: function (container, options) { return UpgradePrompt.renderInline(container, options); },
-    removeInline: function (container) { return UpgradePrompt.removeInline(container); },
     showMiniDialog: function (company) { return UpgradePrompt.showMiniDialog(company); },
     hideMiniDialog: function () { return UpgradePrompt.hideMiniDialog(); }
   };

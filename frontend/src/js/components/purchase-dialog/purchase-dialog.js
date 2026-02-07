@@ -276,7 +276,13 @@
                 </div>
 
                 <div class="pd-delivery-actions">
-                  <button class="pd-btn-primary" id="pd-done">
+                  ${this.options.returnTo ? `
+                    <button class="pd-btn-primary" id="pd-go-report">
+                      <i class="ph ph-arrow-right"></i>
+                      Go to Report
+                    </button>
+                  ` : ''}
+                  <button class="${this.options.returnTo ? 'pd-btn-secondary' : 'pd-btn-primary'}" id="pd-done">
                     Done
                   </button>
                   <button class="pd-btn-secondary" id="pd-download">
@@ -386,6 +392,17 @@
         if (downloadBtn) {
           downloadBtn.addEventListener('click', () => {
             this.downloadWallet();
+          });
+        }
+
+        const goReportBtn = document.getElementById('pd-go-report');
+        if (goReportBtn) {
+          goReportBtn.addEventListener('click', () => {
+            const co = this.options.returnTo;
+            if (co && window.CompanyWiseWallet) {
+              window.CompanyWiseWallet.spendCredit(co.number);
+              window.location.href = '../Report/Premium/premium-report.html?company=' + encodeURIComponent(co.number);
+            }
           });
         }
 

@@ -28,6 +28,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import re
 import sqlite3
 import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -52,6 +53,35 @@ logger = logging.getLogger(__name__)
 # Performance tuning constants
 COMMIT_BATCH_SIZE = 500  # Commit every N files
 PARALLEL_WORKERS = 4     # Number of parallel parsing workers
+
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def normalize_date_to_iso(date_str: str | None) -> str | None:
+    """Normalize a date string to ISO format (YYYY-MM-DD).
+
+    Handles formats found in Companies House data:
+    - ISO: "2023-02-28" (returned as-is)
+    - Long text: "28 February 2023" / "1 March 2022"
+    - Dot notation: "28.2.23" / "1.3.22" (2-digit year)
+    - Slash notation: "28/02/2023" (DD/MM/YYYY)
+    - Dash with full year: "28-2-2023" (D-M-YYYY)
+    - US text: "February 28, 2023"
+    """
+    if not date_str:
+        return None
+    date_str = date_str.strip()
+    if not date_str:
+        return None
+    if _ISO_DATE_RE.match(date_str):
+        return date_str
+    for fmt in ("%d %B %Y", "%d.%m.%y", "%d/%m/%Y", "%d-%m-%Y", "%B %d, %Y"):
+        try:
+            return datetime.strptime(date_str, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    logger.warning(f"Could not parse date: '{date_str}'")
+    return date_str
 
 
 @dataclass
@@ -122,10 +152,16 @@ class ResolutionCache:
         namespace = concept_raw.split(":")[0] if ":" in concept_raw else None
 
         cursor = self.conn.execute(
-            "INSERT INTO concepts (concept_raw, concept, namespace) VALUES (?, ?, ?)",
+            "INSERT OR IGNORE INTO concepts (concept_raw, concept, namespace) VALUES (?, ?, ?)",
             (concept_raw, concept, namespace)
         )
         concept_id = cursor.lastrowid
+        if concept_id == 0:
+            # Row already existed (conflict on UNIQUE concept_raw)
+            row = self.conn.execute(
+                "SELECT id FROM concepts WHERE concept_raw = ?", (concept_raw,)
+            ).fetchone()
+            concept_id = row["id"]
         self._concepts[concept_raw] = concept_id
         return concept_id
 
@@ -145,10 +181,15 @@ class ResolutionCache:
                 dimension_pattern_id = self._dim_patterns[pattern_hash]
             else:
                 cursor = self.conn.execute(
-                    "INSERT INTO dimension_patterns (dimensions, pattern_hash) VALUES (?, ?)",
+                    "INSERT OR IGNORE INTO dimension_patterns (dimensions, pattern_hash) VALUES (?, ?)",
                     (dims_json, pattern_hash)
                 )
                 dimension_pattern_id = cursor.lastrowid
+                if dimension_pattern_id == 0:
+                    row = self.conn.execute(
+                        "SELECT id FROM dimension_patterns WHERE pattern_hash = ?", (pattern_hash,)
+                    ).fetchone()
+                    dimension_pattern_id = row["id"]
                 self._dim_patterns[pattern_hash] = dimension_pattern_id
 
         # Step 2: Resolve context definition
@@ -166,7 +207,7 @@ class ResolutionCache:
             return self._ctx_defs[definition_hash]
 
         cursor = self.conn.execute(
-            """INSERT INTO context_definitions
+            """INSERT OR IGNORE INTO context_definitions
                (period_type, instant_date, start_date, end_date, dimension_pattern_id, definition_hash)
                VALUES (?, ?, ?, ?, ?, ?)""",
             (
@@ -179,6 +220,11 @@ class ResolutionCache:
             )
         )
         ctx_def_id = cursor.lastrowid
+        if ctx_def_id == 0:
+            row = self.conn.execute(
+                "SELECT id FROM context_definitions WHERE definition_hash = ?", (definition_hash,)
+            ).fetchone()
+            ctx_def_id = row["id"]
         self._ctx_defs[definition_hash] = ctx_def_id
         return ctx_def_id
 
@@ -299,9 +345,9 @@ def bulk_insert_filing(
             batch_id,
             source_file,
             source_type,
-            parsed.balance_sheet_date or "unknown",
-            parsed.period_start_date,
-            parsed.period_end_date,
+            normalize_date_to_iso(parsed.balance_sheet_date) or "unknown",
+            normalize_date_to_iso(parsed.period_start_date),
+            normalize_date_to_iso(parsed.period_end_date),
             datetime.now().isoformat()
         )
     )

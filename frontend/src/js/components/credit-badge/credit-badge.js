@@ -57,6 +57,16 @@
       this.instances.forEach(instance => this.update(instance));
     },
 
+    destroy(instance) {
+      const idx = this.instances.indexOf(instance);
+      if (idx !== -1) {
+        this.instances.splice(idx, 1);
+      }
+      if (instance.badge && instance.badge.parentNode) {
+        instance.badge.parentNode.removeChild(instance.badge);
+      }
+    },
+
     init() {
       document.addEventListener('creditWalletChanged', () => {
         this.updateAll();
@@ -68,7 +78,8 @@
 
   window.CompanyWiseCreditBadge = {
     create: (container) => CreditBadge.create(container),
-    updateAll: () => CreditBadge.updateAll()
+    updateAll: () => CreditBadge.updateAll(),
+    destroy: (instance) => CreditBadge.destroy(instance)
   };
 
 })();
