@@ -1,16 +1,23 @@
-# Bulk loader pipeline
-# See docs/HANDOVER_IMPLEMENTATION.md for process flow
+# Bulk loader pipeline — v2 schema (Prune + Normalize)
+# See docs/SESSION_12_PLAN.md for implementation details
 """
 Bulk loader for Companies House daily ZIP files.
 
 Processes daily ZIP archives containing iXBRL/XBRL filings and loads
-parsed data into SQLite database.
+parsed data into SQLite database using the v2 schema with lookup tables.
+
+v2 changes from v1:
+- ResolutionCache maps parser output to lookup table IDs before inserting
+- No more contexts/units table inserts
+- Facts reference concept_id and context_id (INTEGER FKs) instead of inline strings
+- Unit resolved to measure string inline on numeric_facts
 
 Performance optimizations:
 - Batch commits (every N files instead of per-file)
 - executemany() for bulk inserts
 - Multiprocessing for parallel parsing
 - Optimized PRAGMA settings during bulk load
+- Resolution cache pre-loaded at batch start, accumulates during batch
 
 Usage:
     python -m backend.loader.bulk_loader "path/to/Accounts_Bulk_Data-2023-12-01.zip"
@@ -18,6 +25,7 @@ Usage:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import sqlite3
@@ -32,6 +40,7 @@ from typing import Any
 from backend.db.connection import get_connection, init_db
 # Use fast lxml-based parser (14x faster than BeautifulSoup)
 from backend.parser.ixbrl_fast import ParsedIXBRL, parse_ixbrl_fast as parse_ixbrl
+from backend.parser.ixbrl import normalize_concept
 
 # Configure logging
 logging.basicConfig(
@@ -71,6 +80,107 @@ class ParsedFile:
     source_type: str
     parsed: ParsedIXBRL | None = None
     error: str | None = None
+
+
+class ResolutionCache:
+    """Caches for resolving parser output to v2 lookup table IDs.
+
+    Maps parser output (concept_raw strings, Context objects, Unit objects)
+    to their corresponding database IDs in the lookup tables. Pre-loads
+    existing entries at construction; inserts new ones on cache miss.
+    """
+
+    def __init__(self, conn: sqlite3.Connection):
+        self.conn = conn
+        self._concepts: dict[str, int] = {}       # concept_raw -> concept_id
+        self._dim_patterns: dict[str, int] = {}    # pattern_hash -> dimension_pattern_id
+        self._ctx_defs: dict[str, int] = {}        # definition_hash -> context_definition_id
+        self._load_existing()
+
+    def _load_existing(self):
+        """Pre-load existing lookup entries from database."""
+        for row in self.conn.execute("SELECT id, concept_raw FROM concepts"):
+            self._concepts[row["concept_raw"]] = row["id"]
+        for row in self.conn.execute("SELECT id, pattern_hash FROM dimension_patterns"):
+            self._dim_patterns[row["pattern_hash"]] = row["id"]
+        for row in self.conn.execute("SELECT id, definition_hash FROM context_definitions"):
+            self._ctx_defs[row["definition_hash"]] = row["id"]
+
+        logger.info(
+            f"ResolutionCache loaded: {len(self._concepts)} concepts, "
+            f"{len(self._dim_patterns)} dimension patterns, "
+            f"{len(self._ctx_defs)} context definitions"
+        )
+
+    def resolve_concept(self, concept_raw: str) -> int:
+        """Resolve a concept_raw string to its concept_id in the lookup table."""
+        if concept_raw in self._concepts:
+            return self._concepts[concept_raw]
+
+        # Insert new concept
+        concept = normalize_concept(concept_raw)
+        namespace = concept_raw.split(":")[0] if ":" in concept_raw else None
+
+        cursor = self.conn.execute(
+            "INSERT INTO concepts (concept_raw, concept, namespace) VALUES (?, ?, ?)",
+            (concept_raw, concept, namespace)
+        )
+        concept_id = cursor.lastrowid
+        self._concepts[concept_raw] = concept_id
+        return concept_id
+
+    def resolve_context(self, context) -> int:
+        """Resolve a parsed Context object to its context_definition_id.
+
+        1. Hash dimensions JSON -> lookup/insert dimension_pattern
+        2. Hash full context definition -> lookup/insert context_definition
+        """
+        # Step 1: Resolve dimension pattern
+        dimension_pattern_id = None
+        if context.dimensions:
+            dims_json = json.dumps(context.dimensions, sort_keys=True)
+            pattern_hash = hashlib.sha256(dims_json.encode()).hexdigest()
+
+            if pattern_hash in self._dim_patterns:
+                dimension_pattern_id = self._dim_patterns[pattern_hash]
+            else:
+                cursor = self.conn.execute(
+                    "INSERT INTO dimension_patterns (dimensions, pattern_hash) VALUES (?, ?)",
+                    (dims_json, pattern_hash)
+                )
+                dimension_pattern_id = cursor.lastrowid
+                self._dim_patterns[pattern_hash] = dimension_pattern_id
+
+        # Step 2: Resolve context definition
+        # Build canonical string for hashing
+        def_parts = "|".join([
+            context.period_type or "",
+            context.instant_date or "",
+            context.start_date or "",
+            context.end_date or "",
+            str(dimension_pattern_id) if dimension_pattern_id is not None else "",
+        ])
+        definition_hash = hashlib.sha256(def_parts.encode()).hexdigest()
+
+        if definition_hash in self._ctx_defs:
+            return self._ctx_defs[definition_hash]
+
+        cursor = self.conn.execute(
+            """INSERT INTO context_definitions
+               (period_type, instant_date, start_date, end_date, dimension_pattern_id, definition_hash)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (
+                context.period_type,
+                context.instant_date,
+                context.start_date,
+                context.end_date,
+                dimension_pattern_id,
+                definition_hash,
+            )
+        )
+        ctx_def_id = cursor.lastrowid
+        self._ctx_defs[definition_hash] = ctx_def_id
+        return ctx_def_id
 
 
 def detect_source_type(filename: str) -> str:
@@ -164,10 +274,14 @@ def bulk_insert_filing(
     company_number: str,
     batch_id: int,
     source_file: str,
-    source_type: str
+    source_type: str,
+    cache: ResolutionCache,
 ) -> int:
     """
     Insert a complete filing with all related data using batch operations.
+
+    v2: Uses ResolutionCache to resolve concepts, contexts, and units
+    to lookup table IDs before inserting facts.
 
     Returns:
         The filing ID
@@ -193,92 +307,79 @@ def bulk_insert_filing(
     )
     filing_id = cursor.lastrowid
 
-    # Bulk insert contexts
-    if parsed.contexts:
-        conn.executemany(
-            """
-            INSERT INTO contexts (
-                filing_id, context_ref, entity_identifier, entity_scheme,
-                period_type, instant_date, start_date, end_date,
-                dimensions, segment_raw
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            [
-                (
-                    filing_id,
-                    ctx.context_ref,
-                    ctx.entity_identifier,
-                    ctx.entity_scheme,
-                    ctx.period_type,
-                    ctx.instant_date,
-                    ctx.start_date,
-                    ctx.end_date,
-                    json.dumps(ctx.dimensions) if ctx.dimensions else None,
-                    ctx.segment_raw
-                )
-                for ctx in parsed.contexts
-            ]
-        )
+    # Build per-filing resolution maps
+    unit_map: dict[str, str] = {}      # unit_ref -> measure string
+    context_map: dict[str, int] = {}   # context_ref -> context_definition_id
 
-    # Bulk insert units
-    if parsed.units:
-        conn.executemany(
-            """
-            INSERT INTO units (filing_id, unit_ref, measure_raw, measure)
-            VALUES (?, ?, ?, ?)
-            """,
-            [(filing_id, u.unit_ref, u.measure_raw, u.measure) for u in parsed.units]
-        )
+    for unit in parsed.units:
+        unit_map[unit.unit_ref] = unit.measure
+
+    for ctx in parsed.contexts:
+        context_map[ctx.context_ref] = cache.resolve_context(ctx)
 
     # Bulk insert numeric facts
     if parsed.numeric_facts:
-        conn.executemany(
-            """
-            INSERT INTO numeric_facts (
-                filing_id, concept_raw, concept, context_ref, unit_ref,
-                value_raw, value, sign, decimals, scale, format
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            [
-                (
-                    filing_id,
-                    f.concept_raw,
-                    f.concept,
-                    f.context_ref,
-                    f.unit_ref,
-                    f.value_raw,
-                    f.value,
-                    f.sign,
-                    f.decimals,
-                    f.scale,
-                    f.format
+        numeric_rows = []
+        for f in parsed.numeric_facts:
+            if f.context_ref not in context_map:
+                logger.warning(
+                    f"Skipping numeric fact {f.concept_raw}: "
+                    f"context_ref '{f.context_ref}' not found in filing {source_file}"
                 )
-                for f in parsed.numeric_facts
-            ]
-        )
+                continue
+
+            unit = None
+            if f.unit_ref:
+                if f.unit_ref in unit_map:
+                    unit = unit_map[f.unit_ref]
+                else:
+                    logger.warning(
+                        f"unit_ref '{f.unit_ref}' not found in filing {source_file}, setting unit=None"
+                    )
+
+            numeric_rows.append((
+                filing_id,
+                cache.resolve_concept(f.concept_raw),
+                context_map[f.context_ref],
+                unit,
+                f.value,
+            ))
+
+        if numeric_rows:
+            conn.executemany(
+                """
+                INSERT INTO numeric_facts (filing_id, concept_id, context_id, unit, value)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                numeric_rows
+            )
 
     # Bulk insert text facts
     if parsed.text_facts:
-        conn.executemany(
-            """
-            INSERT INTO text_facts (
-                filing_id, concept_raw, concept, context_ref,
-                value, format, "escape"
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            [
-                (
-                    filing_id,
-                    f.concept_raw,
-                    f.concept,
-                    f.context_ref,
-                    f.value,
-                    f.format,
-                    f.escape
+        text_rows = []
+        for f in parsed.text_facts:
+            if f.context_ref not in context_map:
+                logger.warning(
+                    f"Skipping text fact {f.concept_raw}: "
+                    f"context_ref '{f.context_ref}' not found in filing {source_file}"
                 )
-                for f in parsed.text_facts
-            ]
-        )
+                continue
+
+            text_rows.append((
+                filing_id,
+                cache.resolve_concept(f.concept_raw),
+                context_map[f.context_ref],
+                f.value,
+            ))
+
+        if text_rows:
+            conn.executemany(
+                """
+                INSERT INTO text_facts (filing_id, concept_id, context_id, value)
+                VALUES (?, ?, ?, ?)
+                """,
+                text_rows
+            )
 
     return filing_id
 
@@ -357,6 +458,9 @@ def load_batch(zip_path: str | Path, workers: int = PARALLEL_WORKERS) -> BatchRe
     try:
         # Configure for bulk load performance
         configure_for_bulk_load(conn)
+
+        # Create resolution cache (pre-loads existing lookup entries)
+        cache = ResolutionCache(conn)
 
         with zipfile.ZipFile(zip_path, 'r') as zf:
             # Get list of processable files
@@ -440,7 +544,8 @@ def load_batch(zip_path: str | Path, workers: int = PARALLEL_WORKERS) -> BatchRe
                     # Insert filing with all data
                     bulk_insert_filing(
                         conn, pf.parsed, company_number,
-                        batch_id, pf.source_file, pf.source_type
+                        batch_id, pf.source_file, pf.source_type,
+                        cache
                     )
                     files_processed += 1
 
@@ -501,6 +606,9 @@ def load_batch_sequential(zip_path: str | Path) -> BatchResult:
     try:
         configure_for_bulk_load(conn)
 
+        # Create resolution cache
+        cache = ResolutionCache(conn)
+
         with zipfile.ZipFile(zip_path, 'r') as zf:
             entries = [
                 name for name in zf.namelist()
@@ -547,7 +655,8 @@ def load_batch_sequential(zip_path: str | Path) -> BatchResult:
 
                         bulk_insert_filing(
                             conn, pf.parsed, company_number,
-                            batch_id, pf.source_file, pf.source_type
+                            batch_id, pf.source_file, pf.source_type,
+                            cache
                         )
                         files_processed += 1
 

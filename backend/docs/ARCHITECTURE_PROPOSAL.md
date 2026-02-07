@@ -907,52 +907,110 @@ Both `concept_raw` and `concept` are stored in every fact row:
 
 ---
 
-## 17. Proposed Normalized Schema
+## 17. Proposed Schema v2: Prune + Normalize
 
-### 17.1 Design Philosophy Change
+### 17.1 Revised Design Philosophy
 
-| Original Principle | Revised Principle |
-|--------------------|-------------------|
-| Store everything inline | **Normalize repetitive strings to lookup tables** |
-| String references everywhere | **Use INTEGER foreign keys** |
-| Preserve both raw and normalized | **Preserve raw in lookup table, reference by ID** |
+The v1 schema aimed to be a **perfect mirror** of the source XBRL — storing every attribute, namespace prefix, formatting hint, and rendering parameter from the original files. The storage audit (Section 16) revealed this approach produces a **165 GB database at scale**, which is impractical.
 
-**Data preservation guarantee is maintained** — the raw values still exist, just in a normalized structure.
+**Key insight:** Most of the stored data is iXBRL/XBRL plumbing — namespace prefixes, formatting hints, rendering attributes, internal reference IDs — that no user of CompanyWise.io will ever see or query. Premium customers need **accurate financial data**, not the ability to reconstruct the original iXBRL rendering.
 
-### 17.2 New Lookup Tables
+| v1 Principle | v2 Principle |
+|-------------|-------------|
+| Perfect mirror of source XBRL | **Complete preservation of all user-relevant financial data** |
+| Store both raw and normalized forms | **Store the accurate parsed value; drop raw display strings** |
+| Preserve every XML attribute | **Preserve what has analytical value; drop rendering plumbing** |
+| String references everywhere | **INTEGER foreign keys to lookup tables** |
 
-#### `concepts` (NEW)
+**Data accuracy guarantee:** Every financial fact — its value, concept identity, reporting period, currency unit, and dimensional context — is preserved with full precision. Taxonomy lineage (`concept_raw`, `namespace`) is retained in the `concepts` lookup table. What is dropped is exclusively XBRL rendering/plumbing metadata that has zero bearing on data accuracy or analytical value.
 
-Deduplicated concept definitions.
+### 17.2 Column-Level Analysis: Keep vs Drop
+
+#### `numeric_facts` (currently 11 columns, 1.08M rows per batch)
+
+| Column | Verdict | Reasoning |
+|--------|---------|-----------|
+| `concept` | **KEEP** (via lookup) | Core identifier — "what is this number?" |
+| `concept_raw` | **MOVE to lookup** | Taxonomy lineage preserved once in `concepts` table, not 1.08M times |
+| `value` | **KEEP** | The accurate parsed number (sign + scale already applied) |
+| `value_raw` | **DROP** | Display string from HTML (e.g., `"762,057"`). Already fully parsed into `value`. Only useful for round-tripping to iXBRL rendering. |
+| `sign` | **DROP** | Already incorporated into `value` during parsing |
+| `decimals` | **DROP** | Parsing parameter, already applied to produce `value` |
+| `scale` | **DROP** | Parsing parameter, already applied to produce `value` |
+| `format` | **DROP** | iXBRL rendering hint (e.g., `ixt2:numdotdecimal`). No analytical purpose. |
+| `context_ref` | **RESOLVE + DROP** | Users need the period/dimensions, not the string `"FY1Current"`. Resolved during loading. |
+| `unit_ref` | **RESOLVE + DROP** | Users need `"GBP"`, not the internal reference `"GBP-1"`. Resolved during loading. |
+
+**Result: 11 columns → 5 columns** (`filing_id`, `concept_id`, `context_id`, `unit`, `value`)
+
+#### `text_facts` (currently 8 columns, 1.30M rows per batch)
+
+| Column | Verdict | Reasoning |
+|--------|---------|-----------|
+| `concept` | **KEEP** (via lookup) | Core identifier |
+| `concept_raw` | **MOVE to lookup** | Same as numeric |
+| `value` | **KEEP** | The actual text/HTML content |
+| `format` | **DROP** | iXBRL rendering hint |
+| `escape` | **DROP** | iXBRL HTML rendering flag |
+| `context_ref` | **RESOLVE + DROP** | Same as numeric |
+
+**Result: 8 columns → 4 columns** (`filing_id`, `concept_id`, `context_id`, `value`)
+
+#### `contexts` (currently 11 columns, 3.15M rows per batch)
+
+| Column | Verdict | Reasoning |
+|--------|---------|-----------|
+| `context_ref` | **DROP** | Internal XBRL reference ID. Used transiently during loading, never stored. |
+| `period_type` | **KEEP** (in lookup) | Users need instant vs. duration |
+| `instant_date` | **KEEP** (in lookup) | |
+| `start_date` / `end_date` | **KEEP** (in lookup) | |
+| `dimensions` | **KEEP** (in lookup) | Critical — distinguishes current vs. prior year, segments, etc. |
+| `entity_identifier` | **DROP** | Always duplicates `filings.company_number` |
+| `entity_scheme` | **DROP** | Constant: always `"http://www.companieshouse.gov.uk/"` |
+| `segment_raw` | **DROP** | 100% NULL in all data (verified Session 9) |
+
+**Result:** Entire per-filing `contexts` table replaced by global `context_definitions` lookup. **3.15M rows → ~144,650 unique definitions.**
+
+#### `units` (currently 5 columns, 115K rows per batch)
+
+| Column | Verdict | Reasoning |
+|--------|---------|-----------|
+| `unit_ref` | **DROP** | Internal XBRL reference ID. Resolved during loading. |
+| `measure_raw` | **DROP** | Namespace-prefixed form (`"iso4217:GBP"`). |
+| `measure` | **INLINE on facts** | Only 10 unique values. Resolved and stored directly as `unit` on `numeric_facts`. |
+
+**Result: `units` table eliminated entirely.** Unit resolved during loading and stored inline.
+
+### 17.3 Schema v2: Lookup Tables
+
+#### `concepts` (NEW — global, cross-filing)
 
 ```sql
 CREATE TABLE concepts (
     id INTEGER PRIMARY KEY,
-    concept_raw TEXT NOT NULL UNIQUE,  -- e.g., "uk-core:Equity"
-    concept TEXT NOT NULL,             -- e.g., "Equity"
-    namespace TEXT                     -- e.g., "uk-core"
+    concept_raw TEXT NOT NULL UNIQUE,  -- "uk-core:Equity" (full taxonomy reference)
+    concept TEXT NOT NULL,             -- "Equity" (query-friendly name)
+    namespace TEXT                     -- "uk-core" (taxonomy source)
 );
 ```
 
-**Expected rows:** **~3,630** (verified: 2,177 numeric + 1,453 text concept_raw values)
+**Expected rows:** ~3,630 (verified). Grows slowly as new taxonomy concepts appear in future batches.
 
-#### `dimension_patterns` (NEW)
+**Note:** `concept_raw` is preserved here — not dropped from the system, just stored once instead of 2.38M times. Full taxonomy traceability is retained at zero per-row cost.
 
-Deduplicated dimension JSON patterns.
+#### `dimension_patterns` (NEW — global, cross-filing)
 
 ```sql
 CREATE TABLE dimension_patterns (
     id INTEGER PRIMARY KEY,
     dimensions TEXT NOT NULL UNIQUE,   -- Full JSON string
-    pattern_hash TEXT                  -- Optional: for faster lookup
+    pattern_hash TEXT NOT NULL UNIQUE  -- SHA-256 for fast dedup lookup
 );
 ```
 
-**Expected rows:** **~3,009** (verified from actual data)
+**Expected rows:** ~3,009 (verified). Grows slowly.
 
-#### `context_definitions` (NEW - replaces per-filing contexts)
-
-Deduplicated context structures (period + dimensions).
+#### `context_definitions` (NEW — global, cross-filing)
 
 ```sql
 CREATE TABLE context_definitions (
@@ -962,119 +1020,324 @@ CREATE TABLE context_definitions (
     start_date TEXT,
     end_date TEXT,
     dimension_pattern_id INTEGER REFERENCES dimension_patterns(id),
-    definition_hash TEXT UNIQUE        -- Hash of all fields for dedup
+    definition_hash TEXT NOT NULL UNIQUE  -- Hash of all fields for fast dedup
 );
 ```
 
-**Expected rows:** **~144,650** unique combinations (verified) vs 3.15M currently = **95.4% reduction**
+**Expected rows:** ~144,650 unique combinations per batch (verified). Will grow across batches as new date combinations appear, but dramatically less than 3.15M per batch in v1.
 
-### 17.3 Modified Tables
+### 17.4 Schema v2: Modified Core Tables
 
-#### `numeric_facts` (MODIFIED)
+#### `numeric_facts` (11 columns → 5)
 
 ```sql
 CREATE TABLE numeric_facts (
     id INTEGER PRIMARY KEY,
     filing_id INTEGER NOT NULL REFERENCES filings(id),
-    concept_id INTEGER NOT NULL REFERENCES concepts(id),      -- WAS: concept_raw, concept
-    context_id INTEGER NOT NULL REFERENCES context_definitions(id),  -- WAS: context_ref TEXT
-    unit_ref TEXT,                     -- Keep as-is (small cardinality)
-    value_raw TEXT NOT NULL,
-    value REAL,
-    sign TEXT,
-    decimals INTEGER,
-    scale INTEGER,
-    format TEXT
+    concept_id INTEGER NOT NULL REFERENCES concepts(id),
+    context_id INTEGER NOT NULL REFERENCES context_definitions(id),
+    unit TEXT,            -- Resolved measure: "GBP", "shares", "pure", etc.
+    value REAL NOT NULL
 );
 ```
 
-**Savings per row:** ~53 bytes (concept strings) + ~32 bytes (context_ref) = **~85 bytes/row**
-**Total savings:** 1,081,996 rows × 85 bytes = **~88 MB**
-
-#### `text_facts` (MODIFIED)
+#### `text_facts` (8 columns → 4)
 
 ```sql
 CREATE TABLE text_facts (
     id INTEGER PRIMARY KEY,
     filing_id INTEGER NOT NULL REFERENCES filings(id),
-    concept_id INTEGER NOT NULL REFERENCES concepts(id),      -- WAS: concept_raw, concept
-    context_id INTEGER NOT NULL REFERENCES context_definitions(id),  -- WAS: context_ref TEXT
-    value TEXT,
-    format TEXT,
-    escape TEXT
+    concept_id INTEGER NOT NULL REFERENCES concepts(id),
+    context_id INTEGER NOT NULL REFERENCES context_definitions(id),
+    value TEXT
 );
 ```
 
-**Savings:** 1,295,741 rows × ~70 bytes = **~87 MB**
+#### `units` — ELIMINATED
 
-#### `contexts` (MODIFIED - now just a filing-to-context mapping)
+Resolved at load time. The 10 unique measure values (`GBP`, `shares`, `pure`, `USD`, `EUR`, etc.) are stored inline on `numeric_facts.unit`.
+
+#### `contexts` — REPLACED by `context_definitions`
+
+The per-filing `contexts` table is eliminated. Facts point directly to global `context_definitions`. The `context_ref` string is used transiently during loading to map facts to their resolved context, then discarded.
+
+### 17.5 Schema v2: Unchanged Tables
+
+`batches`, `companies`, `filings` — unchanged. These tables are already efficient and contain no duplicated data.
+
+**One addition to `filings`:** Normalize `balance_sheet_date` to ISO format during ingestion (see Section 18.4 finding on inconsistent date formats).
+
+### 17.6 Complete Schema v2 DDL
 
 ```sql
-CREATE TABLE filing_contexts (
+-- Schema version
+CREATE TABLE IF NOT EXISTS schema_version (
+    version INTEGER PRIMARY KEY,
+    applied_at TEXT NOT NULL
+);
+
+-- Batch tracking (unchanged)
+CREATE TABLE IF NOT EXISTS batches (
+    id INTEGER PRIMARY KEY,
+    filename TEXT NOT NULL UNIQUE,
+    source_url TEXT,
+    downloaded_at TEXT NOT NULL,
+    file_count INTEGER,
+    processed_at TEXT
+);
+
+-- Companies (unchanged)
+CREATE TABLE IF NOT EXISTS companies (
+    company_number TEXT PRIMARY KEY,
+    name TEXT,
+    jurisdiction TEXT
+);
+
+-- Filings (unchanged except balance_sheet_date normalized to ISO)
+CREATE TABLE IF NOT EXISTS filings (
+    id INTEGER PRIMARY KEY,
+    company_number TEXT NOT NULL REFERENCES companies(company_number),
+    batch_id INTEGER REFERENCES batches(id),
+    source_file TEXT NOT NULL UNIQUE,
+    source_type TEXT NOT NULL CHECK (source_type IN ('ixbrl_html', 'xbrl_xml', 'cic_zip')),
+    balance_sheet_date TEXT NOT NULL,
+    period_start_date TEXT,
+    period_end_date TEXT,
+    loaded_at TEXT NOT NULL,
+    file_hash TEXT
+);
+
+-- Lookup: concept definitions (global, cross-filing)
+CREATE TABLE IF NOT EXISTS concepts (
+    id INTEGER PRIMARY KEY,
+    concept_raw TEXT NOT NULL UNIQUE,
+    concept TEXT NOT NULL,
+    namespace TEXT
+);
+
+-- Lookup: dimension patterns (global, cross-filing)
+CREATE TABLE IF NOT EXISTS dimension_patterns (
+    id INTEGER PRIMARY KEY,
+    dimensions TEXT NOT NULL UNIQUE,
+    pattern_hash TEXT NOT NULL UNIQUE
+);
+
+-- Lookup: context definitions (global, cross-filing)
+CREATE TABLE IF NOT EXISTS context_definitions (
+    id INTEGER PRIMARY KEY,
+    period_type TEXT NOT NULL CHECK (period_type IN ('instant', 'duration', 'forever')),
+    instant_date TEXT,
+    start_date TEXT,
+    end_date TEXT,
+    dimension_pattern_id INTEGER REFERENCES dimension_patterns(id),
+    definition_hash TEXT NOT NULL UNIQUE
+);
+
+-- Numeric facts (slimmed: 11 → 5 columns)
+CREATE TABLE IF NOT EXISTS numeric_facts (
     id INTEGER PRIMARY KEY,
     filing_id INTEGER NOT NULL REFERENCES filings(id),
-    context_ref TEXT NOT NULL,         -- Original ID from file (e.g., "ctx_1")
-    context_definition_id INTEGER NOT NULL REFERENCES context_definitions(id),
-    entity_identifier TEXT,
-    entity_scheme TEXT,
-    segment_raw TEXT,                  -- Preserve original XML if needed
-    UNIQUE(filing_id, context_ref)
+    concept_id INTEGER NOT NULL REFERENCES concepts(id),
+    context_id INTEGER NOT NULL REFERENCES context_definitions(id),
+    unit TEXT,
+    value REAL NOT NULL
 );
+
+-- Text facts (slimmed: 8 → 4 columns)
+CREATE TABLE IF NOT EXISTS text_facts (
+    id INTEGER PRIMARY KEY,
+    filing_id INTEGER NOT NULL REFERENCES filings(id),
+    concept_id INTEGER NOT NULL REFERENCES concepts(id),
+    context_id INTEGER NOT NULL REFERENCES context_definitions(id),
+    value TEXT
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_filings_company ON filings(company_number);
+CREATE INDEX IF NOT EXISTS idx_filings_date ON filings(balance_sheet_date);
+CREATE INDEX IF NOT EXISTS idx_filings_batch ON filings(batch_id);
+
+CREATE INDEX IF NOT EXISTS idx_concepts_name ON concepts(concept);
+
+CREATE INDEX IF NOT EXISTS idx_context_def_hash ON context_definitions(definition_hash);
+CREATE INDEX IF NOT EXISTS idx_context_def_period ON context_definitions(period_type, instant_date);
+
+CREATE INDEX IF NOT EXISTS idx_numeric_filing ON numeric_facts(filing_id);
+CREATE INDEX IF NOT EXISTS idx_numeric_concept ON numeric_facts(concept_id);
+CREATE INDEX IF NOT EXISTS idx_numeric_filing_concept ON numeric_facts(filing_id, concept_id);
+CREATE INDEX IF NOT EXISTS idx_numeric_context ON numeric_facts(context_id);
+
+CREATE INDEX IF NOT EXISTS idx_text_filing ON text_facts(filing_id);
+CREATE INDEX IF NOT EXISTS idx_text_concept ON text_facts(concept_id);
+
+-- Convenience views for human-readable queries
+CREATE VIEW IF NOT EXISTS numeric_facts_v AS
+SELECT
+    nf.id, nf.filing_id, nf.value, nf.unit,
+    c.concept, c.concept_raw, c.namespace,
+    cd.period_type, cd.instant_date, cd.start_date, cd.end_date,
+    dp.dimensions
+FROM numeric_facts nf
+JOIN concepts c ON nf.concept_id = c.id
+JOIN context_definitions cd ON nf.context_id = cd.id
+LEFT JOIN dimension_patterns dp ON cd.dimension_pattern_id = dp.id;
+
+CREATE VIEW IF NOT EXISTS text_facts_v AS
+SELECT
+    tf.id, tf.filing_id, tf.value,
+    c.concept, c.concept_raw, c.namespace,
+    cd.period_type, cd.instant_date, cd.start_date, cd.end_date,
+    dp.dimensions
+FROM text_facts tf
+JOIN concepts c ON tf.concept_id = c.id
+JOIN context_definitions cd ON tf.context_id = cd.id
+LEFT JOIN dimension_patterns dp ON cd.dimension_pattern_id = dp.id;
+
+INSERT OR IGNORE INTO schema_version (version, applied_at)
+VALUES (2, datetime('now'));
 ```
 
-**Savings:** Dimensions JSON (481 MB) moved to lookup table = **~475 MB saved**
+### 17.7 Estimated Size Reduction
 
-### 17.4 Estimated Size Reduction
+| Component | v1 (Current) | v2 (Proposed) | Savings |
+|-----------|-------------|---------------|---------|
+| `contexts.dimensions` (481 MB) | 2.98M inline JSON strings | 3,009 patterns in lookup | **~480 MB** |
+| `concept_raw` on facts (95 MB) | 2.38M inline strings | 3,630 rows in `concepts` | **~95 MB** |
+| `concept` on facts (53 MB) | 2.38M inline strings | INTEGER FK | **~44 MB** |
+| `context_ref` strings (155 MB) | TEXT FK across 3 tables | INTEGER FK, no stored ref | **~155 MB** |
+| `value_raw` on numeric_facts | ~20 MB | Dropped | **~20 MB** |
+| `sign`, `decimals`, `scale`, `format` | ~40 MB | Dropped | **~40 MB** |
+| `format`, `escape` on text_facts | ~15 MB | Dropped | **~15 MB** |
+| `entity_identifier`, `entity_scheme` | ~50 MB | Dropped | **~50 MB** |
+| `measure_raw`, `unit_ref` overhead | ~15 MB | Dropped (unit inlined) | **~15 MB** |
+| `units` table (115K rows) | ~5 MB | Eliminated | **~5 MB** |
+| Context rows (3.15M → 144K) | ~200 MB | ~10 MB | **~190 MB** |
+| Index reduction | ~400 MB | ~150 MB | **~250 MB** |
+| **Total** | **1,624 MB** | **~400-500 MB** | **~70-75%** |
 
-**Verified estimates (Session 9):**
+**Projection for full dataset:**
 
-| Component | Current | Normalized | Savings |
-|-----------|---------|------------|---------|
-| contexts.dimensions | 481.0 MB | ~0.5 MB (3,009 patterns) | **480.5 MB (99.9%)** |
-| concept strings | 148.4 MB | ~0.4 MB (3,630 concepts) | **148 MB** |
-| context_ref strings | 154.8 MB | ~20 MB (INTs) | **135 MB** |
-| Context rows | 3.15M rows | 144,650 rows | **95.4% row reduction** |
-| Index reduction | ~400 MB | ~200 MB | **200 MB** |
-| **Total** | **1,624 MB** | **~550-650 MB** | **~60-65%** |
+| Batches | v1 Schema | v2 Schema |
+|---------|-----------|-----------|
+| 1 batch | 1.62 GB | ~0.4-0.5 GB |
+| 103 batches | ~165 GB | **~40-50 GB** |
+| With historical (200+) | ~325 GB | **~80-100 GB** |
 
-**Note:** The unique counts are higher than originally estimated, but the savings remain substantial because the duplication factor is still enormous (3,009 patterns stored 2.98M times, 3,630 concepts stored 2.38M times).
+### 17.8 Customer-Facing Data Preservation Audit
 
-### 17.5 Migration Strategy
+**Everything a premium customer needs is preserved:**
 
-**Option A: Fresh Start (Recommended)**
-1. Drop existing database
-2. Create new schema with lookup tables
-3. Modify parser to populate lookup tables during ingestion
-4. Re-ingest the single batch as a test
-5. Verify size reduction before proceeding with full ingestion
+| Customer Need | Data Source | Preserved? |
+|---------------|------------|------------|
+| Company identification | `companies.company_number`, `companies.name` | Yes |
+| Filing metadata | `filings.*` (dates, source, batch) | Yes |
+| Financial values | `numeric_facts.value` | Yes — exact parsed value |
+| What the value represents | `concepts.concept` via FK | Yes — e.g. "Equity", "TurnoverRevenue" |
+| Taxonomy source | `concepts.concept_raw`, `concepts.namespace` | Yes — stored once in lookup |
+| Reporting period | `context_definitions.period_type`, dates | Yes |
+| Dimensional breakdowns | `dimension_patterns.dimensions` via FK | Yes — current/prior year, segments |
+| Currency/unit | `numeric_facts.unit` | Yes — "GBP", "shares" |
+| Text disclosures | `text_facts.value` | Yes — full text/HTML content |
+| Audit trail | `filings.source_file`, `filings.file_hash`, `batches.*` | Yes |
 
-**Option B: In-Place Migration**
-1. Create new lookup tables
-2. Populate from existing data: `INSERT INTO concepts SELECT DISTINCT ...`
-3. Add new columns with foreign keys
-4. Backfill foreign key values
-5. Drop old string columns
-6. VACUUM database
+**What is dropped (none customer-facing):**
 
-Option A is cleaner and recommended since only 1 batch has been loaded.
+| Dropped Data | Why It's Safe to Drop |
+|-------------|----------------------|
+| `value_raw` ("762,057") | Display formatting. Parsed value `-762057.0` is the accurate data. |
+| `sign`, `decimals`, `scale` | Parsing parameters already applied to produce `value`. |
+| `format` | iXBRL rendering instruction (e.g., `ixt2:numdotdecimal`). |
+| `escape` | iXBRL HTML rendering flag. |
+| `context_ref` ("FY1Current") | Arbitrary XBRL internal ID. Resolved to period + dimensions. |
+| `unit_ref` ("GBP-1") | Arbitrary XBRL internal ID. Resolved to "GBP". |
+| `entity_identifier` | Duplicate of `filings.company_number`. |
+| `entity_scheme` | Constant across all data (`companieshouse.gov.uk`). |
+| `segment_raw` | 100% NULL — never populated. |
+| `measure_raw` ("iso4217:GBP") | Namespace-prefixed unit. Normalized to "GBP". |
 
-### 17.6 Code Changes Required
+### 17.9 Migration Strategy: Fresh Start
+
+Since only 1 batch is loaded, a fresh start is the clear choice (Option A from v1 proposal).
+
+1. Write new `schema.sql` with v2 DDL
+2. Modify loader to resolve concepts/contexts/units during loading
+3. Delete existing database
+4. Re-ingest single batch
+5. Verify size (~400-500 MB target) and data accuracy
+
+### 17.10 Loader Changes
+
+The loading pipeline changes from single-phase inserts to resolve-then-insert:
+
+```
+Parser Output (unchanged)
+    │
+    ▼
+┌──────────────────────────────────────────────┐
+│ Resolution Phase (per filing)                │
+│                                              │
+│ 1. For each parsed concept_raw:              │
+│    → INSERT OR IGNORE into concepts          │
+│    → Cache concept_raw → concept_id          │
+│                                              │
+│ 2. For each parsed context:                  │
+│    → Hash dimensions → lookup/insert         │
+│      dimension_pattern                       │
+│    → Hash (period + dimension_pattern_id)    │
+│      → lookup/insert context_definition      │
+│    → Cache context_ref → context_def_id      │
+│                                              │
+│ 3. For each parsed unit:                     │
+│    → Cache unit_ref → measure string         │
+└──────────────────────────────────────────────┘
+    │
+    ▼
+┌──────────────────────────────────────────────┐
+│ Insert Phase (per filing)                    │
+│                                              │
+│ INSERT INTO numeric_facts (                  │
+│   filing_id, concept_id, context_id,         │
+│   unit, value                                │
+│ )                                            │
+│                                              │
+│ INSERT INTO text_facts (                     │
+│   filing_id, concept_id, context_id,         │
+│   value                                      │
+│ )                                            │
+└──────────────────────────────────────────────┘
+```
+
+**Performance note:** The `concepts` and `dimension_patterns` caches are loaded once at batch start (~3,600 + ~3,000 entries, fits in memory trivially). The `context_definitions` cache grows during the batch but all lookups are Python dict operations (nanoseconds). Database INSERTs only occur for genuinely new patterns.
+
+### 17.11 Code Changes Required
 
 | File | Changes |
 |------|---------|
-| `src/db/schema.sql` | New lookup tables, modified fact tables |
-| `src/parser/ixbrl.py` | Return concept/context IDs instead of strings |
-| `src/loader/bulk_loader.py` | Upsert to lookup tables, get IDs, insert facts |
-| `src/db/queries.py` | JOIN to lookup tables for queries |
+| `backend/db/schema.sql` | Replace with v2 DDL (lookup tables, slimmed fact tables, drop units table) |
+| `backend/loader/bulk_loader.py` | Add resolution phase with concept/context/unit caches, resolve-then-insert |
+| `backend/db/queries.py` | JOIN through `concepts` and `context_definitions` for all fact queries |
+| `backend/db/connection.py` | No changes |
+| `backend/parser/ixbrl_fast.py` | No changes — parser output unchanged, resolution happens in loader |
 
-### 17.7 Trade-offs
+### 17.12 Trade-offs
 
 | Benefit | Cost |
 |---------|------|
-| 60-70% smaller database | Slightly more complex queries (JOINs) |
-| Faster queries (smaller indexes) | Parser must do lookups during insert |
-| Manageable at scale (103+ batches) | Migration effort if data already loaded |
-| Still preserves all original data | Two-phase insert (lookup then fact) |
+| **70-75% smaller database** | Slightly more complex loader (resolution phase) |
+| Simpler fact tables (fewer columns) | Queries require JOINs to `concepts`/`context_definitions` |
+| Faster queries (smaller rows, INTEGER indexes) | Initial cache load at batch start (~milliseconds) |
+| Scales to 103+ batches (~40-50 GB vs ~165 GB) | Cannot reconstruct original iXBRL display formatting |
+| Cleaner data model (only user-relevant data) | One-time effort to rewrite loader + queries |
+| No `units` table to maintain | — |
+
+### 17.13 Risks and Mitigations
+
+| Risk | Likelihood | Mitigation |
+|------|-----------|------------|
+| Dropped column turns out to be needed | Low | `concept_raw` preserved in lookup. Other dropped data is purely XBRL plumbing. Source ZIPs can be re-parsed if ever needed. |
+| `context_definitions` grows too large across batches | Low | Growth is O(unique dates × dimension patterns), not O(rows). Estimated ~500K-1M across all batches. |
+| JOINs slow down queries | Very Low | INTEGER PK JOINs in SQLite are near-zero cost. Convenience views hide complexity. |
+| Hash collisions in dedup | Negligible | SHA-256 collision probability is effectively zero at these data volumes. |
 
 ---
 
@@ -1084,35 +1347,38 @@ Option A is cleaner and recommended since only 1 batch has been loaded.
 
 | Priority | Action | Owner |
 |----------|--------|-------|
-| **P0** | Review and approve normalized schema design | Stakeholder |
-| **P0** | Implement new schema with lookup tables | Developer |
-| **P0** | Modify parser to use normalized inserts | Developer |
-| **P1** | Test with single batch, verify ~60% size reduction | Developer |
-| **P1** | Benchmark query performance with JOINs | Developer |
+| **P0** | Review v2 schema proposal (Section 17) — verify all customer-facing data is preserved (Section 17.8) | Stakeholder |
+| **P0** | Implement v2 schema DDL with lookup tables and slimmed fact tables | Developer |
+| **P0** | Modify loader for resolve-then-insert pipeline (Section 17.10) | Developer |
+| **P1** | Test with single batch, verify ~70-75% size reduction (~400-500 MB) | Developer |
+| **P1** | Benchmark query performance with JOINs vs convenience views | Developer |
 
 ### 18.2 Decision Required
 
-**Question:** Should we proceed with the normalized schema (Section 17) or explore alternatives?
+**Question:** Should we proceed with the v2 "Prune + Normalize" schema (Section 17)?
 
 | Option | Pros | Cons |
 |--------|------|------|
-| **A. Normalize (Recommended)** | 60-70% size reduction, proven technique | Requires code changes |
-| B. Compress dimensions only | Simpler change, ~30% reduction | Doesn't address concept duplication |
-| C. External compression (gzip DB) | No code changes | Query performance degraded |
+| **A. Prune + Normalize (Recommended)** | 70-75% size reduction, simpler fact tables, proven technique | Drops ability to reconstruct iXBRL display formatting |
+| B. Normalize only (v1 proposal) | 60-65% reduction, preserves all raw values | More columns, larger rows, slightly less savings |
+| C. Prune only (drop columns, no lookup tables) | Simpler code changes, ~40% reduction | Still has string duplication, less savings |
 | D. Accept large DB | No changes | 165 GB is impractical |
 
 ### 18.3 Open Questions for Discussion
 
 1. ~~**Segment preservation:** Is `segment_raw` (original XML) still required, or is `dimensions` JSON sufficient?~~
-   **RESOLVED (Session 9):** `segment_raw` is **100% NULL** in the current data — it was never populated. Can be safely dropped from the schema.
+   **RESOLVED (Session 9):** `segment_raw` is **100% NULL** in the current data. Dropped in v2.
 
-2. **Query patterns:** What are the primary query patterns? This affects which indexes to keep.
+2. ~~**Unit normalization:** Should units be normalized?~~
+   **RESOLVED (Session 10):** With only 10 unique measures, the `units` table is eliminated entirely. The resolved measure value (e.g., "GBP") is stored inline on `numeric_facts.unit`.
 
-3. **Historical priority:** Do we need all 200+ historical batches, or is recent data sufficient?
+3. **Query patterns:** What are the primary query patterns? This affects which indexes to keep.
 
-4. **Hardware constraints:** What storage is available for the final database?
+4. **Historical priority:** Do we need all 200+ historical batches, or is recent data sufficient?
 
-5. **Unit normalization:** With only **10 unique unit measures** (GBP, pure, shares, USD, EUR, tonnes, kWh, etc.), normalization is not worthwhile. Keep `unit_ref` as-is.
+5. **Hardware constraints:** What storage is available for the final database?
+
+6. **Customer data review (NEW):** Does Section 17.8 (Customer-Facing Data Preservation Audit) cover all premium customer use cases? Are there any dropped columns that a paying user would actually need?
 
 ### 18.4 Additional Findings (Session 9)
 

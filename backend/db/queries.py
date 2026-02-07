@@ -1,7 +1,11 @@
-# Data access layer - query functions
-# See docs/ARCHITECTURE_PROPOSAL.md Section 8.2 for function signatures
+# Data access layer - query functions (v2 schema)
+# See docs/SESSION_12_PLAN.md Step 4 for rewrite specification
 """
 Query functions for retrieving Companies House data from SQLite.
+
+v2 schema: Facts reference lookup tables (concepts, context_definitions,
+dimension_patterns) via INTEGER foreign keys. All fact queries use JOINs
+to return human-readable data.
 
 All functions use read-only connections and return dicts/lists for easy serialization.
 """
@@ -106,30 +110,29 @@ def get_numeric_facts(filing_id: int, concept: str | None = None) -> list[dict]:
         concept: Optional normalized concept name to filter by (e.g., "Equity")
 
     Returns:
-        List of numeric fact dicts with all columns including value_raw and value
+        List of numeric fact dicts with value, unit, concept info, and period info
     """
     conn = get_connection(read_only=True)
     try:
+        base_query = """
+            SELECT
+                nf.id, nf.filing_id, nf.value, nf.unit,
+                c.concept, c.concept_raw, c.namespace,
+                cd.period_type, cd.instant_date, cd.start_date, cd.end_date,
+                dp.dimensions
+            FROM numeric_facts nf
+            JOIN concepts c ON nf.concept_id = c.id
+            JOIN context_definitions cd ON nf.context_id = cd.id
+            LEFT JOIN dimension_patterns dp ON cd.dimension_pattern_id = dp.id
+            WHERE nf.filing_id = ?
+        """
         if concept:
             cursor = conn.execute(
-                """
-                SELECT id, filing_id, concept_raw, concept, context_ref, unit_ref,
-                       value_raw, value, sign, decimals, scale, format
-                FROM numeric_facts
-                WHERE filing_id = ? AND concept = ?
-                """,
+                base_query + " AND c.concept = ?",
                 (filing_id, concept)
             )
         else:
-            cursor = conn.execute(
-                """
-                SELECT id, filing_id, concept_raw, concept, context_ref, unit_ref,
-                       value_raw, value, sign, decimals, scale, format
-                FROM numeric_facts
-                WHERE filing_id = ?
-                """,
-                (filing_id,)
-            )
+            cursor = conn.execute(base_query, (filing_id,))
         return [dict(row) for row in cursor.fetchall()]
     finally:
         conn.close()
@@ -144,30 +147,29 @@ def get_text_facts(filing_id: int, concept: str | None = None) -> list[dict]:
         concept: Optional normalized concept name to filter by
 
     Returns:
-        List of text fact dicts
+        List of text fact dicts with value, concept info, and period info
     """
     conn = get_connection(read_only=True)
     try:
+        base_query = """
+            SELECT
+                tf.id, tf.filing_id, tf.value,
+                c.concept, c.concept_raw, c.namespace,
+                cd.period_type, cd.instant_date, cd.start_date, cd.end_date,
+                dp.dimensions
+            FROM text_facts tf
+            JOIN concepts c ON tf.concept_id = c.id
+            JOIN context_definitions cd ON tf.context_id = cd.id
+            LEFT JOIN dimension_patterns dp ON cd.dimension_pattern_id = dp.id
+            WHERE tf.filing_id = ?
+        """
         if concept:
             cursor = conn.execute(
-                """
-                SELECT id, filing_id, concept_raw, concept, context_ref,
-                       value, format, "escape"
-                FROM text_facts
-                WHERE filing_id = ? AND concept = ?
-                """,
+                base_query + " AND c.concept = ?",
                 (filing_id, concept)
             )
         else:
-            cursor = conn.execute(
-                """
-                SELECT id, filing_id, concept_raw, concept, context_ref,
-                       value, format, "escape"
-                FROM text_facts
-                WHERE filing_id = ?
-                """,
-                (filing_id,)
-            )
+            cursor = conn.execute(base_query, (filing_id,))
         return [dict(row) for row in cursor.fetchall()]
     finally:
         conn.close()
@@ -175,7 +177,7 @@ def get_text_facts(filing_id: int, concept: str | None = None) -> list[dict]:
 
 def get_contexts(filing_id: int) -> list[dict]:
     """
-    Get all contexts for a filing.
+    Get all context definitions used by facts in a filing.
 
     Args:
         filing_id: Database ID of the filing
@@ -187,40 +189,41 @@ def get_contexts(filing_id: int) -> list[dict]:
     try:
         cursor = conn.execute(
             """
-            SELECT id, filing_id, context_ref, entity_identifier, entity_scheme,
-                   period_type, instant_date, start_date, end_date,
-                   dimensions, segment_raw
-            FROM contexts
-            WHERE filing_id = ?
+            SELECT DISTINCT
+                cd.id, cd.period_type, cd.instant_date, cd.start_date, cd.end_date,
+                dp.dimensions
+            FROM context_definitions cd
+            LEFT JOIN dimension_patterns dp ON cd.dimension_pattern_id = dp.id
+            WHERE cd.id IN (
+                SELECT context_id FROM numeric_facts WHERE filing_id = ?
+                UNION
+                SELECT context_id FROM text_facts WHERE filing_id = ?
+            )
             """,
-            (filing_id,)
+            (filing_id, filing_id)
         )
         return [dict(row) for row in cursor.fetchall()]
     finally:
         conn.close()
 
 
-def get_units(filing_id: int) -> list[dict]:
+def get_units(filing_id: int) -> list[str]:
     """
-    Get all units for a filing.
+    Get all distinct units used in numeric facts for a filing.
 
     Args:
         filing_id: Database ID of the filing
 
     Returns:
-        List of unit dicts with measure_raw and measure
+        List of unit strings (e.g., ["GBP", "shares"])
     """
     conn = get_connection(read_only=True)
     try:
         cursor = conn.execute(
-            """
-            SELECT id, filing_id, unit_ref, measure_raw, measure
-            FROM units
-            WHERE filing_id = ?
-            """,
+            "SELECT DISTINCT unit FROM numeric_facts WHERE filing_id = ? AND unit IS NOT NULL",
             (filing_id,)
         )
-        return [dict(row) for row in cursor.fetchall()]
+        return [row["unit"] for row in cursor.fetchall()]
     finally:
         conn.close()
 
@@ -264,37 +267,44 @@ def get_filing_with_facts(filing_id: int) -> dict | None:
         company_row = cursor.fetchone()
         result["company_name"] = company_row["name"] if company_row else None
 
-        # Get contexts
+        # Get contexts used by this filing's facts
         cursor = conn.execute(
             """
-            SELECT id, filing_id, context_ref, entity_identifier, entity_scheme,
-                   period_type, instant_date, start_date, end_date,
-                   dimensions, segment_raw
-            FROM contexts
-            WHERE filing_id = ?
+            SELECT DISTINCT
+                cd.id, cd.period_type, cd.instant_date, cd.start_date, cd.end_date,
+                dp.dimensions
+            FROM context_definitions cd
+            LEFT JOIN dimension_patterns dp ON cd.dimension_pattern_id = dp.id
+            WHERE cd.id IN (
+                SELECT context_id FROM numeric_facts WHERE filing_id = ?
+                UNION
+                SELECT context_id FROM text_facts WHERE filing_id = ?
+            )
             """,
-            (filing_id,)
+            (filing_id, filing_id)
         )
         result["contexts"] = [dict(row) for row in cursor.fetchall()]
 
-        # Get units
+        # Get distinct units
         cursor = conn.execute(
-            """
-            SELECT id, filing_id, unit_ref, measure_raw, measure
-            FROM units
-            WHERE filing_id = ?
-            """,
+            "SELECT DISTINCT unit FROM numeric_facts WHERE filing_id = ? AND unit IS NOT NULL",
             (filing_id,)
         )
-        result["units"] = [dict(row) for row in cursor.fetchall()]
+        result["units"] = [row["unit"] for row in cursor.fetchall()]
 
         # Get numeric facts
         cursor = conn.execute(
             """
-            SELECT id, filing_id, concept_raw, concept, context_ref, unit_ref,
-                   value_raw, value, sign, decimals, scale, format
-            FROM numeric_facts
-            WHERE filing_id = ?
+            SELECT
+                nf.id, nf.filing_id, nf.value, nf.unit,
+                c.concept, c.concept_raw, c.namespace,
+                cd.period_type, cd.instant_date, cd.start_date, cd.end_date,
+                dp.dimensions
+            FROM numeric_facts nf
+            JOIN concepts c ON nf.concept_id = c.id
+            JOIN context_definitions cd ON nf.context_id = cd.id
+            LEFT JOIN dimension_patterns dp ON cd.dimension_pattern_id = dp.id
+            WHERE nf.filing_id = ?
             """,
             (filing_id,)
         )
@@ -303,10 +313,16 @@ def get_filing_with_facts(filing_id: int) -> dict | None:
         # Get text facts
         cursor = conn.execute(
             """
-            SELECT id, filing_id, concept_raw, concept, context_ref,
-                   value, format, "escape"
-            FROM text_facts
-            WHERE filing_id = ?
+            SELECT
+                tf.id, tf.filing_id, tf.value,
+                c.concept, c.concept_raw, c.namespace,
+                cd.period_type, cd.instant_date, cd.start_date, cd.end_date,
+                dp.dimensions
+            FROM text_facts tf
+            JOIN concepts c ON tf.concept_id = c.id
+            JOIN context_definitions cd ON tf.context_id = cd.id
+            LEFT JOIN dimension_patterns dp ON cd.dimension_pattern_id = dp.id
+            WHERE tf.filing_id = ?
             """,
             (filing_id,)
         )
@@ -389,14 +405,17 @@ def get_facts_by_concept(concept: str, limit: int = 1000) -> list[dict]:
         cursor = conn.execute(
             """
             SELECT
-                nf.id, nf.filing_id, nf.concept_raw, nf.concept,
-                nf.value_raw, nf.value, nf.sign, nf.scale,
+                nf.id, nf.filing_id, nf.value, nf.unit,
+                c.concept, c.concept_raw,
                 f.company_number, f.balance_sheet_date,
-                c.name as company_name
+                co.name as company_name,
+                cd.period_type, cd.instant_date, cd.start_date, cd.end_date
             FROM numeric_facts nf
+            JOIN concepts c ON nf.concept_id = c.id
             JOIN filings f ON nf.filing_id = f.id
-            LEFT JOIN companies c ON f.company_number = c.company_number
-            WHERE nf.concept = ?
+            LEFT JOIN companies co ON f.company_number = co.company_number
+            JOIN context_definitions cd ON nf.context_id = cd.id
+            WHERE c.concept = ?
             LIMIT ?
             """,
             (concept, limit)
@@ -411,13 +430,14 @@ def get_database_stats() -> dict[str, Any]:
     Get statistics about the database contents.
 
     Returns:
-        Dict with counts for companies, filings, facts, etc.
+        Dict with counts for companies, filings, facts, lookup tables, etc.
     """
     conn = get_connection(read_only=True)
     try:
         stats = {}
 
-        for table in ["companies", "filings", "numeric_facts", "text_facts", "contexts", "units", "batches"]:
+        for table in ["companies", "filings", "numeric_facts", "text_facts",
+                      "concepts", "dimension_patterns", "context_definitions", "batches"]:
             cursor = conn.execute(f"SELECT COUNT(*) FROM {table}")
             stats[f"{table}_count"] = cursor.fetchone()[0]
 

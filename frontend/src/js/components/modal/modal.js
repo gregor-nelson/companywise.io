@@ -7,6 +7,13 @@
 (function() {
   'use strict';
 
+  // ---- Utility ----
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
   // ---- Report Modal Component ----
   const ReportModal = {
     container: null,
@@ -178,38 +185,14 @@
                   </div>
                 </section>
 
-                <!-- Section: Financial Snapshot -->
-                ${this.renderFinancialSnapshot(company)}
+                <!-- Section: Financial Snapshot (Premium-gated) -->
+                ${this.renderPremiumGated(company, 'financial')}
 
-                <!-- Section: Directors -->
-                <section class="report-section">
-                  <h3 class="report-section-title">
-                    <i class="ph ph-users"></i>
-                    Directors
-                  </h3>
-                  <div class="report-section-content">
-                    ${company.directors && company.directors.length > 0 ? `
-                      <div class="report-directors-list">
-                        ${company.directors.map(director => `
-                          <div class="report-director-item">
-                            <div class="report-director-avatar">
-                              <i class="ph ph-user"></i>
-                            </div>
-                            <div class="report-director-info">
-                              <div class="report-director-name">${director.name}</div>
-                              <div class="report-director-meta">${director.role} · Appointed ${new Date(director.appointed).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}</div>
-                            </div>
-                          </div>
-                        `).join('')}
-                      </div>
-                    ` : `
-                      <div class="report-placeholder">
-                        <i class="ph ph-user-circle-dashed"></i>
-                        Director information will be available when connected to Companies House API
-                      </div>
-                    `}
-                  </div>
-                </section>
+                <!-- Section: Directors (Premium-gated) -->
+                ${this.renderPremiumGated(company, 'directors')}
+
+                <!-- Section: CCJs & Charges (Premium-gated) -->
+                ${this.renderPremiumGated(company, 'ccjs')}
 
                 <!-- Section: Recommendation -->
                 <section class="report-section report-section--highlight">
@@ -234,7 +217,9 @@
                     <i class="ph ph-database"></i>
                     Data sourced from Companies House
                   </p>
-                  <!-- Future: credit balance, download PDF button -->
+                  <div class="report-modal-footer-actions">
+                    ${this.renderFooterUpgrade(company)}
+                  </div>
                 </div>
               </div>
 
@@ -258,6 +243,25 @@
 
       if (backdrop) {
         backdrop.addEventListener('click', () => this.close());
+      }
+
+      // Unlock buttons in locked sections
+      this.container.querySelectorAll('.report-unlock-btn[data-unlock]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (window.CompanyWisePurchase) {
+            window.CompanyWisePurchase.open();
+          }
+        });
+      });
+
+      // Footer upgrade button
+      const footerUpgrade = document.getElementById('report-footer-upgrade');
+      if (footerUpgrade) {
+        footerUpgrade.addEventListener('click', () => {
+          if (window.CompanyWisePurchase) {
+            window.CompanyWisePurchase.open();
+          }
+        });
       }
     },
 
@@ -464,6 +468,195 @@
 
           </div>
         </section>
+      `;
+    },
+
+    // Check if user has premium access for this company
+    hasPremiumAccess(company) {
+      const Wallet = window.CompanyWiseWallet;
+      return Wallet && Wallet.hasAccess(company.number);
+    },
+
+    // Render a premium-gated section (blurred if locked)
+    renderPremiumGated(company, sectionType) {
+      const unlocked = this.hasPremiumAccess(company);
+
+      if (sectionType === 'financial') {
+        if (unlocked) {
+          return this.renderFinancialSnapshot(company);
+        }
+        return `
+          <section class="report-section report-locked-section" data-locked="financial">
+            <h3 class="report-section-title">
+              <i class="ph ph-chart-line-up"></i>
+              Financial Snapshot
+              <span class="report-premium-badge"><i class="ph ph-star"></i> Premium</span>
+            </h3>
+            <div class="report-section-content report-locked-blur">
+              <div class="report-financials-grid">
+                <div class="report-financial-item">
+                  <div class="report-financial-label">Turnover</div>
+                  <div class="report-financial-value">\u00A3XX.Xm</div>
+                </div>
+                <div class="report-financial-item">
+                  <div class="report-financial-label">Gross Profit</div>
+                  <div class="report-financial-value">\u00A3X.Xm</div>
+                </div>
+                <div class="report-financial-item">
+                  <div class="report-financial-label">Net Assets</div>
+                  <div class="report-financial-value">\u00A3XX.Xm</div>
+                </div>
+                <div class="report-financial-item">
+                  <div class="report-financial-label">Cash Position</div>
+                  <div class="report-financial-value">\u00A3X.Xm</div>
+                </div>
+              </div>
+            </div>
+            <div class="report-locked-overlay">
+              <button class="report-unlock-btn" data-unlock="financial">
+                <i class="ph ph-lock-simple-open"></i>
+                Unlock with Premium
+              </button>
+            </div>
+          </section>
+        `;
+      }
+
+      if (sectionType === 'directors') {
+        if (unlocked) {
+          return `
+            <section class="report-section">
+              <h3 class="report-section-title">
+                <i class="ph ph-users"></i>
+                Directors
+              </h3>
+              <div class="report-section-content">
+                ${company.directors && company.directors.length > 0 ? `
+                  <div class="report-directors-list">
+                    ${company.directors.map(director => `
+                      <div class="report-director-item">
+                        <div class="report-director-avatar">
+                          <i class="ph ph-user"></i>
+                        </div>
+                        <div class="report-director-info">
+                          <div class="report-director-name">${director.name}</div>
+                          <div class="report-director-meta">${director.role} \u00B7 Appointed ${new Date(director.appointed).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}</div>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : `
+                  <div class="report-placeholder">
+                    <i class="ph ph-user-circle-dashed"></i>
+                    Director information will be available when connected to Companies House API
+                  </div>
+                `}
+              </div>
+            </section>
+          `;
+        }
+
+        const dirCount = company.directors ? company.directors.length : 0;
+        return `
+          <section class="report-section report-locked-section" data-locked="directors">
+            <h3 class="report-section-title">
+              <i class="ph ph-users"></i>
+              Directors${dirCount > 0 ? ` (${dirCount})` : ''}
+              <span class="report-premium-badge"><i class="ph ph-star"></i> Premium</span>
+            </h3>
+            <div class="report-section-content report-locked-blur">
+              <div class="report-directors-list">
+                <div class="report-director-item">
+                  <div class="report-director-avatar"><i class="ph ph-user"></i></div>
+                  <div class="report-director-info">
+                    <div class="report-director-name">Director Name Hidden</div>
+                    <div class="report-director-meta">Role \u00B7 Appointed Jan 2020</div>
+                  </div>
+                </div>
+                <div class="report-director-item">
+                  <div class="report-director-avatar"><i class="ph ph-user"></i></div>
+                  <div class="report-director-info">
+                    <div class="report-director-name">Director Name Hidden</div>
+                    <div class="report-director-meta">Role \u00B7 Appointed Mar 2019</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="report-locked-overlay">
+              <button class="report-unlock-btn" data-unlock="directors">
+                <i class="ph ph-lock-simple-open"></i>
+                Unlock with Premium
+              </button>
+            </div>
+          </section>
+        `;
+      }
+
+      if (sectionType === 'ccjs') {
+        if (unlocked) {
+          return `
+            <section class="report-section">
+              <h3 class="report-section-title">
+                <i class="ph ph-gavel"></i>
+                CCJs & Charges
+              </h3>
+              <div class="report-section-content">
+                <div class="report-placeholder">
+                  <i class="ph ph-shield-check"></i>
+                  No registered charges or CCJs found. This data will be enriched from Companies House API.
+                </div>
+              </div>
+            </section>
+          `;
+        }
+
+        return `
+          <section class="report-section report-locked-section" data-locked="ccjs">
+            <h3 class="report-section-title">
+              <i class="ph ph-gavel"></i>
+              CCJs & Charges
+              <span class="report-premium-badge"><i class="ph ph-star"></i> Premium</span>
+            </h3>
+            <div class="report-section-content report-locked-blur">
+              <div class="report-placeholder">
+                <i class="ph ph-gavel"></i>
+                County Court Judgements and charge data
+              </div>
+            </div>
+            <div class="report-locked-overlay">
+              <button class="report-unlock-btn" data-unlock="ccjs">
+                <i class="ph ph-lock-simple-open"></i>
+                Unlock with Premium
+              </button>
+            </div>
+          </section>
+        `;
+      }
+
+      return '';
+    },
+
+    // Render footer upgrade CTA + credit badge
+    renderFooterUpgrade(company) {
+      const Wallet = window.CompanyWiseWallet;
+      const hasAccess = this.hasPremiumAccess(company);
+
+      if (hasAccess) {
+        const balance = Wallet ? Wallet.getBalance() : 0;
+        return `
+          <span class="report-modal-footer-text" style="color: var(--risk-low);">
+            <i class="ph-fill ph-shield-check"></i>
+            Premium unlocked
+          </span>
+          ${balance > 0 ? `<span class="report-modal-footer-text"><i class="ph-fill ph-star"></i> ${balance} credit${balance !== 1 ? 's' : ''} left</span>` : ''}
+        `;
+      }
+
+      return `
+        <button class="report-unlock-btn report-unlock-btn--footer" id="report-footer-upgrade">
+          <i class="ph ph-star"></i>
+          Get Premium Access
+        </button>
       `;
     },
 

@@ -1,13 +1,81 @@
 # Implementation Handover: Companies House Data Layer
 
 **Date:** 2026-02-05
-**Status:** Phase 1 COMPLETE - Ready for Full Data Load
+**Status:** Phase 1 COMPLETE - Schema v2 Implemented, Ready for Full Data Load
 **Data Acquisition:** Complete (103 daily batches, 1.4M+ files)
-**Last Updated:** 2026-02-05 (Session 8: Storage Optimization + Batch Script)
+**Last Updated:** 2026-02-07 (Session 12: Schema v2 — Prune + Normalize)
 
 ---
 
 ## Session Log
+
+### Session 12: Schema v2 — Prune + Normalize (2026-02-07)
+
+**MAJOR SCHEMA MIGRATION: 84% DATABASE SIZE REDUCTION**
+
+**Planning docs:** `docs/SESSION_12_PLAN.md` (step-by-step plan), `docs/ARCHITECTURE_PROPOSAL.md` Section 17 (full v2 design)
+
+**Problem:** v1 schema stored every XBRL attribute and produced 1.62 GB from 1 batch (35,119 filings). Extrapolated to 103 batches: ~165 GB. Impractical.
+
+**Solution:** Schema v2 drops XBRL rendering plumbing and normalizes repeated data into lookup tables:
+- 3 new lookup tables: `concepts`, `dimension_patterns`, `context_definitions`
+- 2 tables eliminated: `contexts`, `units`
+- `numeric_facts` slimmed from 11 columns to 5
+- `text_facts` slimmed from 8 columns to 4
+- Convenience views (`numeric_facts_v`, `text_facts_v`) for human-readable queries
+
+**Phase 0 — Blocker Resolution:**
+
+| Blocker | Investigation | Result |
+|---------|--------------|--------|
+| `entity_identifier` safe to drop? | Queried all 3.15M contexts. 3,148,955 match `company_number` exactly. 2,002 contain the scheme URL (parsing artifact in 155 filings). 0 contain a different company number. | **Safe to drop** |
+| `value REAL` stays nullable? | Design correction — `value_raw` is being dropped so nullable `value` is the safety valve for unparseable values | **Confirmed** |
+| Source ZIP archival? | Policy decision | **Deferred** — decide before full 103-batch ingestion |
+
+**Phase 1 — Code Changes (4 files):**
+
+| File | Change | Details |
+|------|--------|---------|
+| `backend/db/schema.sql` | **Full rewrite** | v2 DDL: 3 new lookup tables, slimmed fact tables, 2 convenience views, 12 indexes, schema version 2 |
+| `backend/db/connection.py` | **Modified** | `verify_schema()` expected tables updated: removed `contexts`/`units`, added `concepts`/`dimension_patterns`/`context_definitions` |
+| `backend/loader/bulk_loader.py` | **Major rewrite** | Added `ResolutionCache` class with 3 caches (concepts, dimension patterns, context definitions). Resolve-then-insert pipeline. Per-filing `unit_map`/`context_map` transient maps. Edge case handling: missing `context_ref` → skip fact with warning, missing `unit_ref` → set `unit=None` with warning. New import: `hashlib`. New import: `normalize_concept` from `backend.parser.ixbrl`. |
+| `backend/db/queries.py` | **Full rewrite** | All fact/context/unit queries rewritten with JOINs through lookup tables. `get_contexts()` now queries `context_definitions` via subquery on facts. `get_units()` returns `list[str]` instead of `list[dict]`. `get_facts_by_concept()` JOINs through `concepts`. `get_database_stats()` updated table list. |
+
+**Phase 2 — Verification Results:**
+
+| Check | Result |
+|-------|--------|
+| Database size | **255 MB** (was 1,624 MB) — **84.3% reduction** |
+| companies | 35,067 (exact match) |
+| filings | 35,119 (exact match) |
+| numeric_facts | 1,081,996 (exact match) |
+| text_facts | 1,295,741 (exact match) |
+| concepts | 3,630 (matches Session 9 audit) |
+| dimension_patterns | 3,009 (matches Session 9 audit) |
+| context_definitions | 144,650 (matches Session 9 audit) |
+| Orphaned concept refs | 0 (numeric + text) |
+| Orphaned context refs | 0 (numeric + text) |
+| Convenience views | Working — return correct concept names, periods, dimensions |
+| Ingestion | 35,119 files processed, 0 failures |
+
+**Projection at scale:**
+
+| Batches | v1 | v2 |
+|---------|-----|-----|
+| 1 batch | 1,624 MB | 255 MB |
+| 103 batches | ~165 GB | **~26 GB** |
+
+**Files NOT modified (parser output unchanged):**
+- `backend/parser/ixbrl.py` — dataclasses unchanged
+- `backend/parser/ixbrl_fast.py` — parser unchanged
+- `scripts/load_all_batches.py` — calls `load_batch()` internally, works with v2
+
+**Next Steps:**
+1. Full data load: `python scripts/load_all_batches.py` (103 batches, ~26 GB estimated)
+2. Decide source ZIP archival strategy before source expiry
+3. Proceed to Phase 2 (risk scoring)
+
+---
 
 ### Session 8: Storage Optimization + Batch Loading Script (2026-02-05)
 

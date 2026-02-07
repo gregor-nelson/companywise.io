@@ -181,10 +181,11 @@ def verify_schema(conn: sqlite3.Connection) -> dict:
         "batches",
         "companies",
         "filings",
+        "concepts",
+        "dimension_patterns",
+        "context_definitions",
         "numeric_facts",
         "text_facts",
-        "contexts",
-        "units"
     }
 
     # Get actual tables

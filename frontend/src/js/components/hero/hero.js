@@ -42,6 +42,13 @@
     }).join(' ');
   };
 
+  // ---- Utility ----
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
   // ---- Hero Component ----
   const Hero = {
     container: null,
@@ -697,20 +704,57 @@
           <span>${company.recommendation}</span>
         </div>
         <div class="hero-verdict-actions">
-          <button class="hero-verdict-btn" id="hero-view-report-btn">
+          <button class="hero-verdict-btn hero-verdict-btn--secondary" id="hero-view-free-btn">
             <i class="ph ph-file-text"></i>
-            View Full Report
+            View Free Report
+          </button>
+          <button class="hero-verdict-btn hero-verdict-btn--primary" id="hero-view-premium-btn">
+            <i class="ph ph-star"></i>
+            Get Premium Report
           </button>
         </div>
       `;
 
-      // Bind button event
-      const reportBtn = document.getElementById('hero-view-report-btn');
-      if (reportBtn) {
-        reportBtn.addEventListener('click', () => {
-          // Future: check credits here before opening modal
+      // Bind free report button
+      const freeBtn = document.getElementById('hero-view-free-btn');
+      if (freeBtn) {
+        freeBtn.addEventListener('click', () => {
           if (window.CompanyWiseModal) {
             window.CompanyWiseModal.open(this.currentCompany);
+          }
+        });
+      }
+
+      // Bind premium report button
+      const premiumBtn = document.getElementById('hero-view-premium-btn');
+      if (premiumBtn) {
+        premiumBtn.addEventListener('click', () => {
+          const Wallet = window.CompanyWiseWallet;
+          const co = this.currentCompany;
+          if (!co) return;
+
+          // Already has access — navigate to premium report
+          if (Wallet && Wallet.hasAccess(co.number)) {
+            window.location.href = '../Report/Premium/premium-report.html?company=' + encodeURIComponent(co.number);
+            return;
+          }
+
+          // Has credits — spend one and navigate
+          if (Wallet && Wallet.getBalance() > 0) {
+            if (Wallet.spendCredit(co.number)) {
+              window.location.href = '../Report/Premium/premium-report.html?company=' + encodeURIComponent(co.number);
+            } else {
+              // Spend failed — treat as no credits
+              if (window.CompanyWiseUpgrade) {
+                window.CompanyWiseUpgrade.showMiniDialog(co);
+              }
+            }
+            return;
+          }
+
+          // No wallet / no credits — show mini-dialog
+          if (window.CompanyWiseUpgrade) {
+            window.CompanyWiseUpgrade.showMiniDialog(co);
           }
         });
       }

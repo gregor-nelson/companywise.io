@@ -266,6 +266,22 @@
     // -------------------------------------------------------------------------
 
     queryElements() {
+      // Wire "Buy credits" buttons to purchase dialog
+      this.container.querySelectorAll('.prc-card[data-tier]').forEach(card => {
+        const tier = card.dataset.tier;
+        if (tier === 'free') return;
+
+        const cta = card.querySelector('.prc-cta');
+        if (cta) {
+          cta.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (window.CompanyWisePurchase) {
+              window.CompanyWisePurchase.open({ tier });
+            }
+          });
+        }
+      });
+
       return {
         blurAccents: [...this.container.querySelectorAll('.prc-blur-accent')],
         cards: [...this.container.querySelectorAll('.prc-card')],

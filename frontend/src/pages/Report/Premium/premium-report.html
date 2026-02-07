@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Report — CompanyWise</title>
+  <meta name="description" content="Detailed company risk report with financial analysis, director history, filing compliance, and actionable recommendations for UK freelancers.">
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Phosphor Icons -->
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="../../../styles/main.css">
+  <link rel="stylesheet" href="../../../js/components/header/styles/header.css">
+  <link rel="stylesheet" href="../../../js/components/footer/styles/footer.css">
+
+  <!-- Premium Report Styles -->
+  <link rel="stylesheet" href="../../../js/components/premium-report/styles/premium-report.css">
+
+  <!-- Payment Flow Component Styles -->
+  <link rel="stylesheet" href="../../../js/components/purchase-dialog/styles/purchase-dialog.css">
+  <link rel="stylesheet" href="../../../js/components/credit-badge/styles/credit-badge.css">
+  <link rel="stylesheet" href="../../../js/components/upgrade-prompt/styles/upgrade-prompt.css">
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Jost', 'system-ui', 'sans-serif'],
+            jost: ['Jost', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="min-h-screen font-sans">
+
+  <!-- ====== HEADER (injected by header.js) ====== -->
+  <div id="header-container"></div>
+
+
+  <!-- ====== PREMIUM REPORT (injected by premium-report.js) ====== -->
+  <main class="pr-page">
+    <div id="premium-report-container" class="pr-container"></div>
+  </main>
+
+
+  <!-- ====== FOOTER (injected by footer.js) ====== -->
+  <div id="footer-container"></div>
+
+
+  <!-- Scripts -->
+  <script src="../../../js/data/mock-data.js"></script>
+  <script src="../../../js/components/header/header.js"></script>
+  <script src="../../../js/components/footer/footer.js"></script>
+
+  <!-- Payment Flow Components (before premium-report.js) -->
+  <script src="../../../js/components/credit-wallet/credit-wallet.js"></script>
+  <script src="../../../js/components/purchase-dialog/purchase-dialog.js"></script>
+  <script src="../../../js/components/credit-badge/credit-badge.js"></script>
+  <script src="../../../js/components/upgrade-prompt/upgrade-prompt.js"></script>
+
+  <script src="../../../js/components/premium-report/premium-report.js"></script>
+
+</body>
+</html>

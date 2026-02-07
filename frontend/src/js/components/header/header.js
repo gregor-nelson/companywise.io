@@ -156,8 +156,9 @@ function generateHeaderHTML() {
           .join('')}
 
         <div class="w-px h-5 mx-2 bg-neutral-200"></div>
+        <div id="header-credit-badge" class="flex items-center"></div>
         <a href="/login" data-nav-item data-label="Log in" class="px-3 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors rounded-lg hover:bg-neutral-50">Log in</a>
-        <a href="/signup" data-nav-item data-label="Get started" class="ml-1 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-blue-500/25">
+        <a href="#" data-nav-item data-label="Get started" class="ml-1 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-blue-500/25">
           Get started
         </a>
       </nav>
@@ -624,6 +625,14 @@ function showError(actionId, message) {
    ============================================ */
 
 function handleNavigation(href, label) {
+  // "Get started" → open purchase dialog instead of dead /signup
+  if (label === 'Get started') {
+    if (window.CompanyWisePurchase) {
+      window.CompanyWisePurchase.open();
+    }
+    return;
+  }
+
   // Anchor links — smooth scroll
   if (href.startsWith('#')) {
     const target = document.querySelector(href);
@@ -822,5 +831,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('header-container');
   if (container && !container.hasChildNodes()) {
     initHeader({ container });
+  }
+
+  // Mount credit badge in desktop nav
+  const badgeContainer = document.getElementById('header-credit-badge');
+  if (badgeContainer && window.CompanyWiseCreditBadge) {
+    window.CompanyWiseCreditBadge.create(badgeContainer);
   }
 });

@@ -651,3 +651,87 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================
+   Premium Gating — Locked Sections
+   ============================================ */
+
+/* ---- Locked Section Container ---- */
+.report-locked-section {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---- Blur Effect on Content ---- */
+.report-locked-blur {
+  filter: blur(5px);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ---- Lock Overlay ---- */
+.report-locked-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  border-radius: inherit;
+}
+
+/* ---- Premium Badge (in section title) ---- */
+.report-premium-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 100px;
+  background: linear-gradient(to bottom right, #eff6ff, rgba(219, 234, 254, 0.5));
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--blue-500, #3b82f6);
+}
+
+.report-premium-badge i {
+  font-size: 0.625rem;
+  color: var(--blue-500, #3b82f6);
+}
+
+/* ---- Unlock Button ---- */
+.report-unlock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.625rem;
+  border: none;
+  background: var(--blue-500, #3b82f6);
+  color: #fff;
+  font-family: var(--font, 'Jost', sans-serif);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.report-unlock-btn:hover {
+  background: var(--blue-600, #2563eb);
+  transform: translateY(-1px);
+}
+
+.report-unlock-btn:active {
+  transform: scale(0.97);
+}
+
+/* ---- Footer Unlock Button ---- */
+.report-unlock-btn--footer {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.75rem;
+  box-shadow: none;
+}
