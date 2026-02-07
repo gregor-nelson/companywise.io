@@ -1,6 +1,36 @@
 # CompanyWise CSS Design System
 
-All visual tokens are defined in `frontend/src/styles/main.css` inside a single `:root` block. Component CSS files reference these tokens exclusively via `var(--token)`. No hardcoded hex, rgb, rgba, named colours, or font-family strings appear in component files.
+## Styling Philosophy
+
+**Tailwind is the default styling system.** All layout, typography, colour, spacing, and interactive states should be expressed as Tailwind utility classes directly in HTML/JS templates. Vanilla CSS is reserved only for features that genuinely cannot be expressed as utility classes — state-based multi-property transitions, class-toggled animations, keyframe definitions, and global rules that target elements outside component templates (e.g. `body.modal-open`).
+
+Tailwind is loaded via CDN (`https://cdn.tailwindcss.com`) with a minimal config extending `fontFamily` only. Components use Tailwind's default colour palette (neutral, blue, emerald, amber, red, slate) directly — not custom theme extensions.
+
+### When to use Tailwind (default)
+
+- Layout: `flex`, `grid`, `gap-*`, `p-*`, `m-*`, responsive variants (`sm:`, `md:`)
+- Typography: `text-sm`, `font-medium`, `tracking-wide`, `leading-relaxed`
+- Colour: `text-neutral-800`, `bg-blue-600`, `border-emerald-200/50`
+- Gradients: `bg-gradient-to-br from-blue-50 to-blue-100/50`
+- Effects: `shadow-sm`, `rounded-xl`, `backdrop-blur-sm`, `animate-pulse`
+- Interactivity: `hover:-translate-y-0.5`, `hover:shadow-md`, `transition-all`
+- Arbitrary values when needed: `text-[11px]`, `z-[1000]`, `w-[55%]`
+
+### When to use vanilla CSS
+
+- **State-toggled transitions**: e.g. overlay fade `opacity 0→1` driven by adding/removing a class in JS
+- **Multi-property coupled transitions**: e.g. `opacity + visibility + transform` that must animate together
+- **Custom easing**: e.g. `cubic-bezier(0.34, 1.56, 0.64, 1)` on a class toggle
+- **Global body rules**: e.g. `body.modal-open { overflow: hidden }`
+- **Complex keyframes**: when Tailwind's built-in animations (`animate-pulse`, `animate-spin`) aren't sufficient
+
+When vanilla CSS is used, it should reference design tokens via `var(--token)` for any colour values. Structural values (sizes, radii, z-index) stay raw.
+
+---
+
+## Design Tokens (Legacy Reference)
+
+Design tokens are defined in `frontend/src/styles/main.css` inside a single `:root` block. These tokens are used by vanilla CSS that predates the Tailwind migration and by any new vanilla CSS where Tailwind can't reach. New components should prefer Tailwind utility classes over `var(--token)` references.
 
 ---
 

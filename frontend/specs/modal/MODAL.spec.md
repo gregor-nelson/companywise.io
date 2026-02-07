@@ -20,9 +20,9 @@ The modal is self-contained — it owns its own data fetching, transformation, a
 modal/
   api.js            ← Fetch wrappers (window.CompanyWiseModalAPI)
   transformer.js    ← Raw facts → report-ready object (window.CompanyWiseTransformer)
-  modal.js          ← Rendering + UX mechanics (window.CompanyWiseModal)
+  modal.js          ← Rendering + UX mechanics (window.CompanyWiseModal) — all visual styling via Tailwind
   styles/
-    modal.css       ← All modal styles including skeleton, signals, error states
+    modal.css       ← Minimal CSS: overlay transitions, slide-up animation, scroll lock only
 ```
 
 ### Script Loading Order (home.html)
@@ -271,37 +271,56 @@ The modal has three body states, managed by `renderShell(report, state, errorMes
 | Open animation | 300ms fade + slide via `.active` class + CSS `cubic-bezier(0.34, 1.56, 0.64, 1)` |
 | Scroll lock | `body.modal-open { overflow: hidden }` |
 | ESC key close | Global `keydown` listener checks `this.isOpen` |
-| Backdrop click close | Click listener on `.report-modal-backdrop` |
-| Premium gating | `.report-locked-section` + `.report-locked-blur` (5px filter) + `.report-locked-overlay` |
+| Backdrop click close | Click listener on `#report-modal-backdrop` |
+| Premium gating | Tailwind `blur-sm select-none pointer-events-none` on content + absolute overlay with unlock button |
 | Wallet integration | `creditWalletChanged` event re-renders with updated `hasPremiumAccess` |
-| Purchase dialog | `.report-unlock-btn[data-unlock]` and `#report-footer-upgrade` trigger `window.CompanyWisePurchase.open()` |
+| Purchase dialog | `[data-unlock]` buttons and `#report-footer-upgrade` trigger `window.CompanyWisePurchase.open()` |
 | XSS prevention | `escapeHtml()` utility on all user-derived strings |
 | Cleanup on close | `setTimeout(() => { container.innerHTML = '' }, 300)` after animation |
 
 ---
 
-## 5. CSS Additions
+## 5. Styling Approach
 
-Added to `modal.css` after existing premium gating styles:
+### Philosophy
 
-### Skeleton Loading
+Tailwind is the default styling system. Vanilla CSS is reserved only for features that genuinely cannot be expressed as utility classes (state-based multi-property transitions, class-toggled animations).
 
-- `@keyframes report-skel-pulse` — opacity pulse 0.4 → 0.15 → 0.4 over 1.5s
-- `.report-skel` — base class with `var(--black-a06)` background
-- Size variants: `--title`, `--text`, `--heading`, `--label`, `--value`, `--value-lg`
+### modal.css — Minimal (39 lines)
 
-### Health Signals
+Only three concerns remain in CSS:
 
-- `.report-signals-list` — flex wrap container
-- `.report-signal-item` — pill with icon + text, 100px border-radius
-- `.report-signal-item--pass` — green background/border/text using `--green-a06`, `--green-a20`, `--risk-low`
-- `.report-signal-item--fail` — red background/border/text using `--red-a06`, `--red-a20`, `--risk-high`
+| Rule | Why CSS |
+|------|---------|
+| `.report-modal-overlay` / `.active` | Opacity + visibility transition triggered by JS class toggle — requires the paired hidden/visible states |
+| `.report-modal-container` / `.active` parent | Slide-up `translateY(20px → 0)` with custom cubic-bezier easing, keyed to the parent's `.active` class |
+| `body.modal-open` | Global scroll lock — needs to target `<body>` which isn't in the template |
 
-### Other
+Everything else is Tailwind utility classes inline in `modal.js` templates.
 
-- `.report-financial-value--negative` — red text (`--risk-high`) for negative financial values
-- `.report-error` — centered error state with icon + message
-- `.report-overview-value--dormant` — amber text (`--risk-medium`) for dormant status
+### Design System Alignment (Motorwise)
+
+The modal adopts the same visual patterns used in the sister Motorwise app:
+
+| Pattern | Tailwind Classes |
+|---------|-----------------|
+| Section cards | `bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5` |
+| Section header icon boxes | `w-8 h-8 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shadow-sm` |
+| Grid stat items | `bg-white rounded-xl p-3 border border-neutral-100/50 transition-all hover:-translate-y-0.5 hover:shadow-md` |
+| Labels | `text-[11px] font-medium text-neutral-400 uppercase tracking-wide` |
+| Values | `text-sm font-medium text-neutral-800` |
+| Financial values (large) | `text-lg font-semibold text-neutral-900` |
+| Negative financial values | `text-red-600` |
+| Dormant status | `text-amber-600` |
+| Health signal pills (pass) | `bg-gradient-to-br from-emerald-50 to-emerald-100/50 text-emerald-600 border-emerald-200/50 rounded-full` |
+| Health signal pills (fail) | `bg-gradient-to-br from-red-50 to-red-100/50 text-red-600 border-red-200/50 rounded-full` |
+| Verdict section | `bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-200/50` |
+| Premium badge | `bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/50 text-[10px] font-bold uppercase tracking-wider text-blue-500 rounded-full` |
+| Unlock buttons | `bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-600/25 hover:bg-blue-700 hover:-translate-y-0.5` |
+| Skeleton loading | `bg-neutral-200 rounded animate-pulse` (Tailwind's native pulse, no custom keyframes) |
+| Close button | `bg-neutral-100 border border-neutral-200/50 rounded-lg hover:text-neutral-900 transition-colors` |
+| Backdrop | `bg-black/50 backdrop-blur-sm` |
+| Empty state placeholders | Centered text with `text-neutral-400`, icon with `opacity-50` |
 
 ---
 
@@ -320,7 +339,7 @@ Unchanged. `window.CompanyWiseWallet.hasAccess(companyNumber)` for premium gatin
 
 ### Modal → Purchase Dialog
 
-Unchanged. `.report-unlock-btn` and `#report-footer-upgrade` trigger `window.CompanyWisePurchase.open()`.
+`[data-unlock]` buttons and `#report-footer-upgrade` trigger `window.CompanyWisePurchase.open()`. Unlock buttons are now selected by data attribute rather than CSS class.
 
 ---
 

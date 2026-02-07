@@ -138,7 +138,7 @@ function generateHeaderHTML() {
         aria-label="CompanyWise — Will this company pay your invoice?"
       >
         <h2 class="text-xl font-medium text-neutral-900 leading-tight tracking-tight m-0 font-jost">
-          company<span class="text-blue-500 relative inline-block">w<span class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-80"></span></span>ise
+          company<span class="text-blue-600 relative inline-block">w<span class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-80"></span></span>ise
         </h2>
         <p class="text-xs text-neutral-600 mt-0.5 font-jost">Check first. Invoice with confidence</p>
       </a>
@@ -285,14 +285,14 @@ function generateActionCardHTML(action, index) {
     <div>
       <div
         data-action-card="${action.id}"
-        class="action-card nav-card rounded-2xl bg-white shadow-lg border border-neutral-100 border-l-4 border-l-blue-400 overflow-hidden"
+        class="action-card nav-card rounded-2xl bg-white shadow-lg border border-neutral-100 border-l-4 border-l-blue-500 overflow-hidden"
       >
         <button
           type="button"
           data-action-toggle="${action.id}"
           class="action-toggle w-full flex items-center gap-4 p-4 text-left hover:bg-neutral-50 active:bg-neutral-100"
         >
-          <div class="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 shadow-md">
+          <div class="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
             <i class="ph ${action.icon} text-lg text-white"></i>
           </div>
           <div class="flex-1 min-w-0">
@@ -308,7 +308,7 @@ function generateActionCardHTML(action, index) {
           <div class="action-input-inner">
             <div class="px-4 pb-4 pt-1">
               <form data-action-form="${action.id}" class="flex gap-0 bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
-                <div class="flex items-center justify-center px-3 bg-blue-500 text-white">
+                <div class="flex items-center justify-center px-3 bg-blue-600 text-white">
                   <i class="ph-bold ph-buildings text-lg"></i>
                 </div>
                 <input
@@ -320,11 +320,11 @@ function generateActionCardHTML(action, index) {
                   class="flex-1 px-3 py-3.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none min-w-0"
                   aria-label="Company name or Companies House number"
                 />
-                <button type="submit" class="px-4 py-3.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium whitespace-nowrap transition-colors">
+                <button type="submit" class="px-4 py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap transition-colors">
                   ${action.submitText}
                 </button>
               </form>
-              <div data-action-error="${action.id}" class="hidden mt-2 text-xs text-red-500 flex items-center gap-1.5">
+              <div data-action-error="${action.id}" class="hidden mt-2 text-xs text-red-600 flex items-center gap-1.5">
                 <i class="ph ph-warning-circle text-sm"></i>
                 <span></span>
               </div>
@@ -408,7 +408,7 @@ function bindEvents() {
     const dotCount = 2;
     for (let i = 0; i < dotCount; i++) {
       const dot = document.createElement('div');
-      dot.className = `w-1.5 h-1.5 rounded-full ${i === 0 ? 'bg-blue-500' : 'bg-neutral-300'}`;
+      dot.className = `w-1.5 h-1.5 rounded-full ${i === 0 ? 'bg-blue-600' : 'bg-neutral-300'}`;
       dotsContainer.appendChild(dot);
     }
     const dots = dotsContainer.children;
@@ -417,7 +417,7 @@ function bindEvents() {
       throttle(() => {
         const page = Math.round(scroller.scrollLeft / scroller.offsetWidth);
         for (let i = 0; i < dots.length; i++) {
-          dots[i].className = `w-1.5 h-1.5 rounded-full ${i === page ? 'bg-blue-500' : 'bg-neutral-300'}`;
+          dots[i].className = `w-1.5 h-1.5 rounded-full ${i === page ? 'bg-blue-600' : 'bg-neutral-300'}`;
         }
       }, 50),
       { passive: true }

@@ -52,7 +52,7 @@ function generateFooterHTML() {
       <!-- Blur accent -->
       <div
         class="absolute -bottom-8 -left-8 w-40 h-40 rounded-full blur-3xl pointer-events-none z-0 opacity-15"
-        style="background: linear-gradient(135deg, #3b82f630, #10b98120);"
+        style="background: linear-gradient(135deg, #2563eb30, #05966920);"
       ></div>
 
       <!-- Main Content -->
@@ -66,7 +66,7 @@ function generateFooterHTML() {
             <div class="mb-4 md:mb-0">
               <a href="/" class="flex flex-col justify-center transition-transform duration-200 hover:scale-105 rounded inline-block">
                 <span class="text-xl font-medium text-neutral-900 leading-tight tracking-tight">
-                  company<span class="text-blue-500 relative inline-block">w<span class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-80"></span></span>ise
+                  company<span class="text-blue-600 relative inline-block">w<span class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-80"></span></span>ise
                 </span>
                 <span class="text-xs text-neutral-600 mt-0.5">Check first. Invoice with confidence</span>
               </a>
@@ -107,11 +107,11 @@ function generateFooterHTML() {
             <div class="space-y-3 md:space-y-4">
               <p class="text-xs text-neutral-600 leading-relaxed">
                 Company data provided by
-                <a href="https://www.gov.uk/government/organisations/companies-house" class="text-blue-500 hover:text-blue-600 transition-colors underline underline-offset-2" target="_blank" rel="noopener noreferrer">Companies House</a>
+                <a href="https://www.gov.uk/government/organisations/companies-house" class="text-blue-600 hover:text-blue-700 transition-colors underline underline-offset-2" target="_blank" rel="noopener noreferrer">Companies House</a>
               </p>
               <p class="text-xs text-neutral-600 leading-relaxed">
                 All content is available under the
-                <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="text-blue-500 hover:text-blue-600 transition-colors underline underline-offset-2" target="_blank" rel="noopener noreferrer">Open Government Licence v3.0</a>, except where otherwise stated. Crown Copyright.
+                <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="text-blue-600 hover:text-blue-700 transition-colors underline underline-offset-2" target="_blank" rel="noopener noreferrer">Open Government Licence v3.0</a>, except where otherwise stated. Crown Copyright.
               </p>
               <p class="text-xs text-neutral-500 font-medium">
                 &copy; ${year} CompanyWise

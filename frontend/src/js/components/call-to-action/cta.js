@@ -1,7 +1,6 @@
 /* ============================================
    COMPANYWISE — cta.js
    Self-initializing CTA section component
-   Chevron background design (Motorwise pattern)
    ============================================ */
 
 (function() {
@@ -25,50 +24,7 @@
 
     render() {
       this.container.innerHTML = `
-        <!-- SVG Filter for Chevron Rounding -->
-        <svg width="0" height="0" style="position: absolute; pointer-events: none;">
-          <defs>
-            <filter id="chevron-rounding-cta">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
-              <feColorMatrix
-                in="blur"
-                type="matrix"
-                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
-                result="goo"
-              />
-              <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-            </filter>
-          </defs>
-        </svg>
-
         <section id="cta" class="cta-section">
-          <!-- Background Chevrons - Mobile (single chevron) -->
-          <div class="cta-chevron-mobile">
-            <div
-              class="cta-chevron-shape"
-              style="clip-path: polygon(0% 0%, 100% 0%, 100% calc(100% - 48px), 50% 100%, 0% calc(100% - 48px)); filter: url(#chevron-rounding-cta);"
-            ></div>
-          </div>
-
-          <!-- Background Chevrons - Desktop (3 stacked, mirrored/right-aligned) -->
-          <div class="cta-chevron-desktop" style="filter: url(#chevron-rounding-cta);">
-            <!-- Tertiary chevron (12vw) -->
-            <div
-              class="cta-chevron cta-chevron--tertiary cta-chevron-animate"
-              style="clip-path: polygon(60px 0%, 100% 0%, 100% 100%, 60px 100%, 0% 50%);"
-            ></div>
-            <!-- Secondary chevron (18vw) -->
-            <div
-              class="cta-chevron cta-chevron--secondary cta-chevron-animate"
-              style="clip-path: polygon(80px 0%, 100% 0%, 100% 100%, 80px 100%, 0% 50%);"
-            ></div>
-            <!-- Primary chevron (55vw) -->
-            <div
-              class="cta-chevron cta-chevron--primary cta-chevron-animate"
-              style="clip-path: polygon(80px 0%, 100% 0%, 100% 100%, 80px 100%, 0% 50%); border-radius: 0 24px 24px 0;"
-            ></div>
-          </div>
-
           <!-- Blur Accents -->
           <div class="cta-blur-accent cta-blur-accent--left"></div>
           <div class="cta-blur-accent cta-blur-accent--right"></div>
@@ -280,7 +236,6 @@
         blurAccents: [...this.container.querySelectorAll('.cta-blur-accent')],
         fadeElements: [...this.container.querySelectorAll('.fade-in-up')],
         statBars: [...this.container.querySelectorAll('.cta-stat-bar')],
-        chevrons: [...this.container.querySelectorAll('.cta-chevron-animate')],
       };
     }
 
@@ -313,14 +268,6 @@
       });
     }
 
-    animateChevrons() {
-      this.elements.chevrons.forEach((chevron, index) => {
-        setTimeout(() => {
-          chevron.classList.add('is-visible');
-        }, index * 100);
-      });
-    }
-
     // -------------------------------------------------------------------------
     // Main Animation Trigger
     // -------------------------------------------------------------------------
@@ -330,7 +277,6 @@
       this.hasAnimated = true;
 
       // Sequence animations
-      this.animateChevrons();
       this.animateBlurAccents();
 
       setTimeout(() => {
