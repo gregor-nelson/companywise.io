@@ -1,49 +1,138 @@
 /* ============================================
    COMPANYWISE — main.css
    Design system: Overpass, light theme
-   Colour palette: GOV.UK Design System
+   Colour palette: design tokens
    ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;600;700;800&display=swap');
 
 /* --- Design Tokens --- */
 :root {
-  --bg-body: #f3f2f1;
-  --bg-white: #ffffff;
-  --bg-slate: #f3f2f1;
-  --bg-blue-tint: #d2e2f1;
-  --border-light: #b1b4b6;
-  --border-card: #b1b4b6;
+  /* ── Primary (brand accent) ── */
+  --primary-600: #003078;
+  --primary-500: #1d70b8;
+  --primary-100: #d2e2f1;
+  --primary-50:  #d2e2f1;
 
-  --blue-500: #1d70b8;
-  --blue-600: #003078;
-  --blue-50: #d2e2f1;
-  --blue-100: #d2e2f1;
+  /* ── Success / Green ── */
+  --green-primary: #00703c;
 
+  /* ── Yellow (search button) ── */
+  --yellow-500: #ffdd00;
+  --yellow-600: #d4b600;
+
+  /* ── Backgrounds ── */
+  --bg-body:   #f3f2f1;
+  --bg-white:  #ffffff;
+  --bg-slate:  #f3f2f1;
+  --bg-subtle: #f8fafc;
+
+  /* ── Text ── */
   --text-900: #0b0c0c;
   --text-800: #0b0c0c;
   --text-700: #505a5f;
+  --text-600: #505a5f;
   --text-500: #505a5f;
   --text-400: #b1b4b6;
 
-  --risk-low: #00703c;
-  --risk-low-bg: linear-gradient(to bottom right, #e7f4ed, rgba(0, 112, 60, 0.08));
-  --risk-low-border: rgba(0, 112, 60, 0.2);
+  /* ── Borders ── */
+  --border-light: #b1b4b6;
+  --border-card:  #b1b4b6;
 
-  --risk-medium: #f47738;
-  --risk-medium-bg: linear-gradient(to bottom right, #fef3ec, rgba(244, 119, 56, 0.08));
+  /* ── Risk (multi-variant, semantic) ── */
+  --risk-low:           #00703c;
+  --risk-low-bg:        linear-gradient(to bottom right, #e7f4ed, rgba(0, 112, 60, 0.08));
+  --risk-low-border:    rgba(0, 112, 60, 0.2);
+  --risk-medium:        #f47738;
+  --risk-medium-bg:     linear-gradient(to bottom right, #fef3ec, rgba(244, 119, 56, 0.08));
   --risk-medium-border: rgba(244, 119, 56, 0.25);
+  --risk-high:          #d4351c;
+  --risk-high-bg:       linear-gradient(to bottom right, #fbeae7, rgba(212, 53, 28, 0.08));
+  --risk-high-border:   rgba(212, 53, 28, 0.2);
 
-  --risk-high: #d4351c;
-  --risk-high-bg: linear-gradient(to bottom right, #fbeae7, rgba(212, 53, 28, 0.08));
-  --risk-high-border: rgba(212, 53, 28, 0.2);
+  /* ── Primary alpha scale ── */
+  --primary-a03: rgba(29, 112, 184, 0.03);
+  --primary-a06: rgba(29, 112, 184, 0.06);
+  --primary-a10: rgba(29, 112, 184, 0.10);
+  --primary-a12: rgba(29, 112, 184, 0.12);
+  --primary-a15: rgba(29, 112, 184, 0.15);
+  --primary-a25: rgba(29, 112, 184, 0.25);
+  --primary-a30: rgba(29, 112, 184, 0.30);
+  --primary-a45: rgba(29, 112, 184, 0.45);
 
-  --green-glow: rgba(0, 112, 60, 0.12);
-  --green-primary: #00703c;
+  /* ── Green alpha scale ── */
+  --green-a03: rgba(0, 112, 60, 0.03);
+  --green-a06: rgba(0, 112, 60, 0.06);
+  --green-a08: rgba(0, 112, 60, 0.08);
+  --green-a10: rgba(0, 112, 60, 0.10);
+  --green-a12: rgba(0, 112, 60, 0.12);
+  --green-a15: rgba(0, 112, 60, 0.15);
+  --green-a19: rgba(0, 112, 60, 0.19);
+  --green-a20: rgba(0, 112, 60, 0.20);
 
-  --font: 'Overpass', system-ui, sans-serif;
+  /* ── Amber alpha scale ── */
+  --amber-a06: rgba(244, 119, 56, 0.06);
+  --amber-a08: rgba(244, 119, 56, 0.08);
+  --amber-a10: rgba(244, 119, 56, 0.10);
+  --amber-a15: rgba(244, 119, 56, 0.15);
+  --amber-a20: rgba(244, 119, 56, 0.20);
+  --amber-a25: rgba(244, 119, 56, 0.25);
+  --amber-a30: rgba(244, 119, 56, 0.30);
+
+  /* ── Red alpha scale ── */
+  --red-a06: rgba(212, 53, 28, 0.06);
+  --red-a08: rgba(212, 53, 28, 0.08);
+  --red-a10: rgba(212, 53, 28, 0.10);
+  --red-a15: rgba(212, 53, 28, 0.15);
+  --red-a20: rgba(212, 53, 28, 0.20);
+  --red-a30: rgba(212, 53, 28, 0.30);
+
+  /* ── Black overlay alpha scale ── */
+  --black-a03: rgba(0, 0, 0, 0.03);
+  --black-a04: rgba(0, 0, 0, 0.04);
+  --black-a05: rgba(0, 0, 0, 0.05);
+  --black-a06: rgba(0, 0, 0, 0.06);
+  --black-a08: rgba(0, 0, 0, 0.08);
+  --black-a10: rgba(0, 0, 0, 0.10);
+  --black-a12: rgba(0, 0, 0, 0.12);
+  --black-a15: rgba(0, 0, 0, 0.15);
+  --black-a20: rgba(0, 0, 0, 0.20);
+  --black-a25: rgba(0, 0, 0, 0.25);
+  --black-a50: rgba(0, 0, 0, 0.50);
+  --black-a55: rgba(0, 0, 0, 0.55);
+
+  /* ── Ink (text-derived: rgb(11,12,12)) ── */
+  --ink-a03: rgba(11, 12, 12, 0.03);
+  --ink-a04: rgba(11, 12, 12, 0.04);
+  --ink-a05: rgba(11, 12, 12, 0.05);
+  --ink-a06: rgba(11, 12, 12, 0.06);
+  --ink-a08: rgba(11, 12, 12, 0.08);
+  --ink-a12: rgba(11, 12, 12, 0.12);
+  --ink-a15: rgba(11, 12, 12, 0.15);
+  --ink-a20: rgba(11, 12, 12, 0.20);
+
+  /* ── Yellow alpha ── */
+  --yellow-a45: rgba(255, 221, 0, 0.45);
+
+  /* ── Composite gradients ── */
+  --gradient-subtle:       linear-gradient(to bottom right, var(--primary-a06), var(--primary-a03));
+  --gradient-green-subtle: linear-gradient(to bottom right, var(--green-a06), var(--green-a03));
+
+  /* ── Typography ── */
+  --font:      'Overpass', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Consolas', 'Liberation Mono', monospace;
+
+  /* ── Layout & Motion ── */
   --section-gap: clamp(3rem, 6vw, 6rem);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Backwards compat (remove in Phase F after all files migrated) ── */
+  --blue-500: var(--primary-500);
+  --blue-600: var(--primary-600);
+  --blue-50:  var(--primary-50);
+  --blue-100: var(--primary-100);
+  --bg-blue-tint: var(--primary-100);
+  --green-glow: var(--green-a12);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -65,28 +154,29 @@ h1, h2, h3, h4, h5, h6 {
 /* ---- Icon Box ---- */
 .icon-box {
   width: 2.5rem; height: 2.5rem; border-radius: 0.75rem;
-  background: linear-gradient(to bottom right, rgba(29, 112, 184, 0.06), rgba(29, 112, 184, 0.03));
+  background: var(--gradient-subtle);
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 1px 2px rgba(11, 12, 12, 0.05);
-  border: 1px solid rgba(29, 112, 184, 0.15); flex-shrink: 0;
+  box-shadow: 0 1px 2px var(--ink-a05);
+  border: 1px solid var(--primary-a15);
+  flex-shrink: 0;
 }
-.icon-box i { color: var(--blue-500); font-size: 1.125rem; }
+.icon-box i { color: var(--primary-500); font-size: 1.125rem; }
 .icon-box--emerald {
-  background: linear-gradient(to bottom right, rgba(0, 112, 60, 0.06), rgba(0, 112, 60, 0.03));
-  border-color: rgba(0, 112, 60, 0.2);
+  background: var(--gradient-green-subtle);
+  border-color: var(--green-a20);
 }
 .icon-box--emerald i { color: var(--green-primary); }
 
 /* ---- Cards ---- */
 .card {
-  background: white; border-radius: 1rem;
-  border: 1px solid rgba(11, 12, 12, 0.06);
-  box-shadow: 0 1px 3px rgba(11, 12, 12, 0.04);
+  background: var(--bg-white); border-radius: 1rem;
+  border: 1px solid var(--ink-a06);
+  box-shadow: 0 1px 3px var(--ink-a04);
   transition: all 0.2s ease-out;
 }
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 25px -5px rgba(11, 12, 12, 0.08), 0 8px 10px -6px rgba(11, 12, 12, 0.04);
+  box-shadow: 0 20px 25px -5px var(--ink-a08), 0 8px 10px -6px var(--ink-a04);
 }
 
 /* ---- Sections ---- */
@@ -94,9 +184,9 @@ h1, h2, h3, h4, h5, h6 {
 .section-label {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.375rem 0.875rem; font-size: 0.75rem; font-weight: 500;
-  border-radius: 100px; border: 1px solid rgba(29, 112, 184, 0.15);
-  background: linear-gradient(to bottom right, rgba(29, 112, 184, 0.06), rgba(29, 112, 184, 0.03));
-  color: var(--blue-500); margin-bottom: 1rem;
+  border-radius: 100px; border: 1px solid var(--primary-a15);
+  background: var(--gradient-subtle);
+  color: var(--primary-500); margin-bottom: 1rem;
 }
 .section-label i { font-size: 0.875rem; }
 .section-title {
@@ -108,18 +198,18 @@ h1, h2, h3, h4, h5, h6 {
 /* ---- Buttons ---- */
 .btn-primary {
   display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.8125rem 1.5rem; background: var(--blue-500);
-  color: white; font-family: var(--font); font-weight: 500;
+  padding: 0.8125rem 1.5rem; background: var(--primary-500);
+  color: var(--bg-white); font-family: var(--font); font-weight: 500;
   font-size: 0.9375rem; border: none; border-radius: 0.75rem;
   cursor: pointer; transition: all 0.2s ease; text-decoration: none;
 }
 .btn-primary:hover {
-  background: var(--blue-600); transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(29, 112, 184, 0.25);
+  background: var(--primary-600); transform: translateY(-1px);
+  box-shadow: 0 8px 20px var(--primary-a25);
 }
 .btn-secondary {
   display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.8125rem 1.5rem; background: white; color: var(--text-700);
+  padding: 0.8125rem 1.5rem; background: var(--bg-white); color: var(--text-700);
   font-family: var(--font); font-weight: 500; font-size: 0.9375rem;
   border: 1px solid var(--border-light); border-radius: 0.75rem;
   cursor: pointer; transition: all 0.2s ease; text-decoration: none;
@@ -130,7 +220,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ---- Step Cards ---- */
 .step-card { padding: 1.5rem; }
-.step-number { font-size: 2rem; font-weight: 800; color: var(--blue-500); opacity: 0.15; line-height: 1; margin-bottom: 0.75rem; }
+.step-number { font-size: 2rem; font-weight: 800; color: var(--primary-500); opacity: 0.15; line-height: 1; margin-bottom: 0.75rem; }
 .step-card h3 { font-size: 1.125rem; font-weight: 600; margin: 0 0 0.375rem; }
 .step-card p { font-size: 0.875rem; color: var(--text-500); margin: 0; line-height: 1.7; }
 
@@ -142,8 +232,8 @@ h1, h2, h3, h4, h5, h6 {
 /* ---- Pricing ---- */
 .pricing-card { padding: 1.75rem; position: relative; }
 .pricing-card.featured {
-  border-color: var(--blue-500);
-  box-shadow: 0 0 0 1px var(--blue-500), 0 8px 32px rgba(29, 112, 184, 0.1);
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 1px var(--primary-500), 0 8px 32px var(--primary-a10);
 }
 .pack-name { font-size: 1rem; font-weight: 600; color: var(--text-900); margin-bottom: 0.125rem; }
 .pack-credits { font-size: 0.8125rem; color: var(--text-400); margin-bottom: 1rem; }
@@ -152,13 +242,13 @@ h1, h2, h3, h4, h5, h6 {
 .per-check { font-size: 0.75rem; color: var(--text-400); margin-top: 0.25rem; }
 .popular-badge {
   position: absolute; top: -0.625rem; right: 1.25rem;
-  background: var(--blue-500); color: white;
+  background: var(--primary-500); color: var(--bg-white);
   font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;
   letter-spacing: 0.04em; padding: 0.25rem 0.625rem; border-radius: 100px;
 }
 
 /* ---- Comparison Table ---- */
-.comparison-table { background: white; border: 1px solid var(--border-card); border-radius: 1rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
+.comparison-table { background: var(--bg-white); border: 1px solid var(--border-card); border-radius: 1rem; overflow: hidden; box-shadow: 0 1px 3px var(--black-a04); }
 .comparison-table th, .comparison-table td { padding: 0.875rem 1rem; font-size: 0.875rem; }
 .comparison-table thead tr { border-bottom: 1px solid var(--bg-slate); }
 .comparison-table tbody tr { border-bottom: 1px solid var(--bg-slate); }
@@ -181,10 +271,10 @@ h1, h2, h3, h4, h5, h6 {
 /* ---- Trust Ticker ---- */
 .trust-ticker { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; justify-content: center; }
 .trust-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; color: var(--text-400); font-weight: 500; }
-.trust-item i { color: var(--blue-500); font-size: 0.8125rem; }
+.trust-item i { color: var(--primary-500); font-size: 0.8125rem; }
 
 /* ---- Footer ---- */
-.footer { border-top: 1px solid var(--bg-slate); padding: 2rem 0; background: white; }
+.footer { border-top: 1px solid var(--bg-slate); padding: 2rem 0; background: var(--bg-white); }
 
 /* ---- Divider ---- */
 .section-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border-light) 20%, var(--border-light) 80%, transparent); margin: 0; border: none; }
