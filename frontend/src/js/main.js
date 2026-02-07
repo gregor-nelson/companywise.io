@@ -87,9 +87,9 @@ const CounterAnimation = {
 
 // ---- Init Everything ----
 document.addEventListener('DOMContentLoaded', () => {
-  // Init header
+  // Init header (skip if header.js already self-initialised)
   const headerContainer = document.getElementById('header-container');
-  if (headerContainer && window.CompanyWiseHeader) {
+  if (headerContainer && !headerContainer.hasChildNodes() && window.CompanyWiseHeader) {
     window.CompanyWiseHeader.initHeader({ container: headerContainer });
   }
 

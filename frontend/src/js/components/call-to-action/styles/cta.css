@@ -271,8 +271,8 @@
 }
 
 .cta-card-badge--emerald {
-  background: #ecfdf5;
-  color: #059669;
+  background: rgba(0, 112, 60, 0.08);
+  color: var(--green-primary);
 }
 
 /* Stats Container */
@@ -299,7 +299,7 @@
 .cta-stat-bar-bg {
   flex: 1;
   height: 0.5rem;
-  background: #f5f5f5;
+  background: var(--bg-slate);
   border-radius: 100px;
   overflow: hidden;
 }
@@ -316,11 +316,11 @@
 }
 
 .cta-stat-bar--emerald {
-  background: #059669;
+  background: var(--green-primary);
 }
 
 .cta-stat-bar--amber {
-  background: #d97706;
+  background: var(--risk-medium);
 }
 
 .cta-stat-value {
@@ -348,7 +348,7 @@
 
 .cta-footer-item i {
   font-size: 0.75rem;
-  color: #059669;
+  color: var(--green-primary);
 }
 
 .cta-footer-item span {
@@ -410,13 +410,13 @@
 }
 
 .cta-float-icon--emerald i {
-  color: #059669;
+  color: var(--green-primary);
 }
 
 .cta-float-title {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #059669;
+  color: var(--green-primary);
   margin: 0;
 }
 
@@ -446,7 +446,7 @@
 
 .cta-ring-bg {
   fill: none;
-  stroke: #e5e5e5;
+  stroke: var(--border-light);
   stroke-width: 3;
 }
 
@@ -457,7 +457,7 @@
 }
 
 .cta-ring-fill--emerald {
-  stroke: #059669;
+  stroke: var(--green-primary);
 }
 
 .cta-ring-score {
@@ -467,7 +467,7 @@
   transform: translate(-50%, -50%);
   font-size: 0.625rem;
   font-weight: 700;
-  color: #059669;
+  color: var(--green-primary);
 }
 
 .cta-verdict-text {
@@ -682,7 +682,7 @@
 
 .cta-trust-item i {
   font-size: 0.875rem;
-  color: #059669;
+  color: var(--green-primary);
 }
 
 .cta-trust-item span {
@@ -693,7 +693,7 @@
 .cta-trust-divider {
   width: 1px;
   height: 1rem;
-  background: #e5e5e5;
+  background: var(--border-light);
   display: none;
 }
 
@@ -790,7 +790,7 @@
 }
 
 .cta-avatar--2 i {
-  color: #059669;
+  color: var(--green-primary);
 }
 
 .cta-avatar--3 {
@@ -799,7 +799,7 @@
 }
 
 .cta-avatar--3 i {
-  color: #d97706;
+  color: var(--risk-medium);
 }
 
 .cta-proof-text {

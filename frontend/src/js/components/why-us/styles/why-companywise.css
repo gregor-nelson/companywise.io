@@ -260,15 +260,15 @@
 }
 
 .why-check--yes i {
-  color: #059669;
+  color: var(--risk-low);
 }
 
 .why-check--no i {
-  color: #ef4444;
+  color: var(--risk-high);
 }
 
 .why-check--partial i {
-  color: #f59e0b;
+  color: var(--risk-medium);
 }
 
 /* ---- Highlights Grid ---- */
@@ -333,7 +333,7 @@
 }
 
 .why-highlight-icon--emerald i {
-  color: #059669;
+  color: var(--green-primary);
 }
 
 .why-highlight-icon--blue {
@@ -351,7 +351,7 @@
 }
 
 .why-highlight-icon--amber i {
-  color: #d97706;
+  color: var(--risk-medium);
 }
 
 /* ---- Highlight Content ---- */

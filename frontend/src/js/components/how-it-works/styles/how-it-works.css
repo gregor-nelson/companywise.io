@@ -220,7 +220,7 @@
 }
 
 .hiw-step-icon--amber i {
-  color: #d97706;
+  color: var(--risk-medium);
 }
 
 .hiw-step-icon--emerald .hiw-step-icon-bg {
@@ -229,7 +229,7 @@
 }
 
 .hiw-step-icon--emerald i {
-  color: #059669;
+  color: var(--green-primary);
 }
 
 /* ---- Step Content ---- */
@@ -370,33 +370,33 @@
 }
 
 .hiw-signal--green {
-  background: #dcfce7;
+  background: rgba(0, 112, 60, 0.1);
 }
 
 .hiw-signal--green i {
-  color: #16a34a;
+  color: var(--risk-low);
 }
 
 .hiw-signal--amber {
-  background: #fef3c7;
+  background: rgba(244, 119, 56, 0.1);
 }
 
 .hiw-signal--amber i {
-  color: #d97706;
+  color: var(--risk-medium);
 }
 
 .hiw-signal--red {
-  background: #fee2e2;
+  background: rgba(212, 53, 28, 0.1);
 }
 
 .hiw-signal--red i {
-  color: #dc2626;
+  color: var(--risk-high);
 }
 
 .hiw-progress-bar {
   margin-top: 0.625rem;
   height: 4px;
-  background: #e5e7eb;
+  background: var(--border-light);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -434,21 +434,21 @@
 }
 
 .hiw-verdict-badge--low {
-  background: linear-gradient(to bottom right, #ecfdf5, rgba(209, 250, 229, 0.7));
-  color: #059669;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: var(--risk-low-bg);
+  color: var(--risk-low);
+  border: 1px solid var(--risk-low-border);
 }
 
 .hiw-verdict-badge--medium {
-  background: linear-gradient(to bottom right, #fffbeb, rgba(254, 243, 199, 0.7));
-  color: #d97706;
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: var(--risk-medium-bg);
+  color: var(--risk-medium);
+  border: 1px solid var(--risk-medium-border);
 }
 
 .hiw-verdict-badge--high {
-  background: linear-gradient(to bottom right, #fef2f2, rgba(254, 226, 226, 0.7));
-  color: #dc2626;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: var(--risk-high-bg);
+  color: var(--risk-high);
+  border: 1px solid var(--risk-high-border);
 }
 
 .hiw-verdict-rec {
@@ -479,7 +479,7 @@
     transform: translateY(-50%);
     width: 1.5rem;
     height: 1.25rem;
-    color: #d1d5db;
+    color: var(--border-light);
     z-index: 10;
   }
 

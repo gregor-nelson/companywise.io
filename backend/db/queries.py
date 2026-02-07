@@ -58,7 +58,7 @@ def get_filings_for_company(company_number: str) -> list[dict]:
         cursor = conn.execute(
             """
             SELECT id, company_number, batch_id, source_file, source_type,
-                   balance_sheet_date, period_start_date, period_end_date, loaded_at
+                   balance_sheet_date, period_start_date, period_end_date, loaded_at, file_hash
             FROM filings
             WHERE company_number = ?
             ORDER BY balance_sheet_date DESC
@@ -87,7 +87,7 @@ def get_latest_filing(company_number: str) -> dict | None:
         cursor = conn.execute(
             """
             SELECT id, company_number, batch_id, source_file, source_type,
-                   balance_sheet_date, period_start_date, period_end_date, loaded_at
+                   balance_sheet_date, period_start_date, period_end_date, loaded_at, file_hash
             FROM filings
             WHERE company_number = ?
             ORDER BY balance_sheet_date DESC
@@ -247,7 +247,7 @@ def get_filing_with_facts(filing_id: int) -> dict | None:
         cursor = conn.execute(
             """
             SELECT id, company_number, batch_id, source_file, source_type,
-                   balance_sheet_date, period_start_date, period_end_date, loaded_at
+                   balance_sheet_date, period_start_date, period_end_date, loaded_at, file_hash
             FROM filings
             WHERE id = ?
             """,
@@ -348,7 +348,7 @@ def get_filing_by_source(source_file: str) -> dict | None:
         cursor = conn.execute(
             """
             SELECT id, company_number, batch_id, source_file, source_type,
-                   balance_sheet_date, period_start_date, period_end_date, loaded_at
+                   balance_sheet_date, period_start_date, period_end_date, loaded_at, file_hash
             FROM filings
             WHERE source_file = ?
             """,
@@ -419,6 +419,73 @@ def get_facts_by_concept(concept: str, limit: int = 1000) -> list[dict]:
             LIMIT ?
             """,
             (concept, limit)
+        )
+        return [dict(row) for row in cursor.fetchall()]
+    finally:
+        conn.close()
+
+
+def get_batch(batch_id: int) -> dict | None:
+    """
+    Get a batch by ID.
+
+    Args:
+        batch_id: Database ID of the batch
+
+    Returns:
+        Dict with id, filename, source_url, downloaded_at, file_count, processed_at
+        or None if not found
+    """
+    conn = get_connection(read_only=True)
+    try:
+        cursor = conn.execute(
+            "SELECT id, filename, source_url, downloaded_at, file_count, processed_at FROM batches WHERE id = ?",
+            (batch_id,)
+        )
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def get_all_concepts(limit: int = 100, offset: int = 0) -> list[dict]:
+    """
+    Get concepts with pagination, ordered alphabetically.
+
+    Args:
+        limit: Maximum results to return
+        offset: Number of rows to skip
+
+    Returns:
+        List of concept dicts with id, concept_raw, concept, namespace
+    """
+    conn = get_connection(read_only=True)
+    try:
+        cursor = conn.execute(
+            "SELECT id, concept_raw, concept, namespace FROM concepts ORDER BY concept LIMIT ? OFFSET ?",
+            (limit, offset)
+        )
+        return [dict(row) for row in cursor.fetchall()]
+    finally:
+        conn.close()
+
+
+def search_concepts(name_pattern: str, limit: int = 50) -> list[dict]:
+    """
+    Search concepts by name pattern.
+
+    Args:
+        name_pattern: SQL LIKE pattern (e.g., "%Equity%")
+        limit: Maximum results to return
+
+    Returns:
+        List of concept dicts matching the pattern
+    """
+    conn = get_connection(read_only=True)
+    try:
+        cursor = conn.execute(
+            "SELECT id, concept_raw, concept, namespace FROM concepts WHERE concept LIKE ? ORDER BY concept LIMIT ?",
+            (name_pattern, limit)
         )
         return [dict(row) for row in cursor.fetchall()]
     finally:

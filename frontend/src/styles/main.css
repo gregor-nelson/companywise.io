@@ -1,47 +1,47 @@
 /* ============================================
    COMPANYWISE — main.css
-   Design system: Jost, blue primary, light theme
-   Aligned with Motorwise design language
+   Design system: Overpass, light theme
+   Colour palette: GOV.UK Design System
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;600;700;800&display=swap');
 
 /* --- Design Tokens --- */
 :root {
-  --bg-body: #fafafa;
+  --bg-body: #f3f2f1;
   --bg-white: #ffffff;
-  --bg-slate: #f8fafc;
-  --bg-blue-tint: #eff6ff;
-  --border-light: rgba(0, 0, 0, 0.05);
-  --border-card: rgba(0, 0, 0, 0.06);
+  --bg-slate: #f3f2f1;
+  --bg-blue-tint: #d2e2f1;
+  --border-light: #b1b4b6;
+  --border-card: #b1b4b6;
 
-  --blue-500: #3b82f6;
-  --blue-600: #2563eb;
-  --blue-50: #eff6ff;
-  --blue-100: #dbeafe;
+  --blue-500: #1d70b8;
+  --blue-600: #003078;
+  --blue-50: #d2e2f1;
+  --blue-100: #d2e2f1;
 
-  --text-900: #171717;
-  --text-800: #262626;
-  --text-700: #404040;
-  --text-500: #737373;
-  --text-400: #a3a3a3;
+  --text-900: #0b0c0c;
+  --text-800: #0b0c0c;
+  --text-700: #505a5f;
+  --text-500: #505a5f;
+  --text-400: #b1b4b6;
 
-  --risk-low: #059669;
-  --risk-low-bg: linear-gradient(to bottom right, #ecfdf5, rgba(209, 250, 229, 0.5));
-  --risk-low-border: rgba(16, 185, 129, 0.2);
+  --risk-low: #00703c;
+  --risk-low-bg: linear-gradient(to bottom right, #e7f4ed, rgba(0, 112, 60, 0.08));
+  --risk-low-border: rgba(0, 112, 60, 0.2);
 
-  --risk-medium: #d97706;
-  --risk-medium-bg: linear-gradient(to bottom right, #fffbeb, rgba(254, 243, 199, 0.5));
-  --risk-medium-border: rgba(245, 158, 11, 0.25);
+  --risk-medium: #f47738;
+  --risk-medium-bg: linear-gradient(to bottom right, #fef3ec, rgba(244, 119, 56, 0.08));
+  --risk-medium-border: rgba(244, 119, 56, 0.25);
 
-  --risk-high: #dc2626;
-  --risk-high-bg: linear-gradient(to bottom right, #fef2f2, rgba(254, 226, 226, 0.5));
-  --risk-high-border: rgba(239, 68, 68, 0.2);
+  --risk-high: #d4351c;
+  --risk-high-bg: linear-gradient(to bottom right, #fbeae7, rgba(212, 53, 28, 0.08));
+  --risk-high-border: rgba(212, 53, 28, 0.2);
 
-  --green-glow: rgba(16, 185, 129, 0.12);
-  --green-primary: #059669;
+  --green-glow: rgba(0, 112, 60, 0.12);
+  --green-primary: #00703c;
 
-  --font: 'Jost', system-ui, sans-serif;
+  --font: 'Overpass', system-ui, sans-serif;
   --section-gap: clamp(3rem, 6vw, 6rem);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -65,28 +65,28 @@ h1, h2, h3, h4, h5, h6 {
 /* ---- Icon Box ---- */
 .icon-box {
   width: 2.5rem; height: 2.5rem; border-radius: 0.75rem;
-  background: linear-gradient(to bottom right, #eff6ff, rgba(219, 234, 254, 0.5));
+  background: linear-gradient(to bottom right, rgba(29, 112, 184, 0.06), rgba(29, 112, 184, 0.03));
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(191, 219, 254, 0.5); flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(11, 12, 12, 0.05);
+  border: 1px solid rgba(29, 112, 184, 0.15); flex-shrink: 0;
 }
 .icon-box i { color: var(--blue-500); font-size: 1.125rem; }
 .icon-box--emerald {
-  background: linear-gradient(to bottom right, #ecfdf5, rgba(209, 250, 229, 0.5));
-  border-color: rgba(16, 185, 129, 0.2);
+  background: linear-gradient(to bottom right, rgba(0, 112, 60, 0.06), rgba(0, 112, 60, 0.03));
+  border-color: rgba(0, 112, 60, 0.2);
 }
-.icon-box--emerald i { color: #059669; }
+.icon-box--emerald i { color: var(--green-primary); }
 
 /* ---- Cards ---- */
 .card {
   background: white; border-radius: 1rem;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(11, 12, 12, 0.06);
+  box-shadow: 0 1px 3px rgba(11, 12, 12, 0.04);
   transition: all 0.2s ease-out;
 }
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(11, 12, 12, 0.08), 0 8px 10px -6px rgba(11, 12, 12, 0.04);
 }
 
 /* ---- Sections ---- */
@@ -94,8 +94,8 @@ h1, h2, h3, h4, h5, h6 {
 .section-label {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.375rem 0.875rem; font-size: 0.75rem; font-weight: 500;
-  border-radius: 100px; border: 1px solid rgba(59, 130, 246, 0.15);
-  background: linear-gradient(to bottom right, #eff6ff, rgba(219, 234, 254, 0.5));
+  border-radius: 100px; border: 1px solid rgba(29, 112, 184, 0.15);
+  background: linear-gradient(to bottom right, rgba(29, 112, 184, 0.06), rgba(29, 112, 184, 0.03));
   color: var(--blue-500); margin-bottom: 1rem;
 }
 .section-label i { font-size: 0.875rem; }
@@ -115,17 +115,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 .btn-primary:hover {
   background: var(--blue-600); transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 8px 20px rgba(29, 112, 184, 0.25);
 }
 .btn-secondary {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.8125rem 1.5rem; background: white; color: var(--text-700);
   font-family: var(--font); font-weight: 500; font-size: 0.9375rem;
-  border: 1px solid #e5e7eb; border-radius: 0.75rem;
+  border: 1px solid var(--border-light); border-radius: 0.75rem;
   cursor: pointer; transition: all 0.2s ease; text-decoration: none;
 }
 .btn-secondary:hover {
-  background: var(--bg-slate); border-color: #d1d5db; transform: translateY(-1px);
+  background: var(--bg-slate); border-color: var(--text-400); transform: translateY(-1px);
 }
 
 /* ---- Step Cards ---- */
@@ -143,7 +143,7 @@ h1, h2, h3, h4, h5, h6 {
 .pricing-card { padding: 1.75rem; position: relative; }
 .pricing-card.featured {
   border-color: var(--blue-500);
-  box-shadow: 0 0 0 1px var(--blue-500), 0 8px 32px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 1px var(--blue-500), 0 8px 32px rgba(29, 112, 184, 0.1);
 }
 .pack-name { font-size: 1rem; font-weight: 600; color: var(--text-900); margin-bottom: 0.125rem; }
 .pack-credits { font-size: 0.8125rem; color: var(--text-400); margin-bottom: 1rem; }
@@ -160,12 +160,12 @@ h1, h2, h3, h4, h5, h6 {
 /* ---- Comparison Table ---- */
 .comparison-table { background: white; border: 1px solid var(--border-card); border-radius: 1rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
 .comparison-table th, .comparison-table td { padding: 0.875rem 1rem; font-size: 0.875rem; }
-.comparison-table thead tr { border-bottom: 1px solid #f5f5f5; }
-.comparison-table tbody tr { border-bottom: 1px solid #f5f5f5; }
+.comparison-table thead tr { border-bottom: 1px solid var(--bg-slate); }
+.comparison-table tbody tr { border-bottom: 1px solid var(--bg-slate); }
 .comparison-table tbody tr:last-child { border-bottom: none; }
 
 /* ---- FAQ ---- */
-.faq-item { border-bottom: 1px solid #f0f0f0; }
+.faq-item { border-bottom: 1px solid var(--bg-slate); }
 .faq-question {
   width: 100%; background: none; border: none; padding: 1.125rem 0;
   text-align: left; font-family: var(--font); font-size: 0.9375rem;
@@ -184,10 +184,10 @@ h1, h2, h3, h4, h5, h6 {
 .trust-item i { color: var(--blue-500); font-size: 0.8125rem; }
 
 /* ---- Footer ---- */
-.footer { border-top: 1px solid #f0f0f0; padding: 2rem 0; background: white; }
+.footer { border-top: 1px solid var(--bg-slate); padding: 2rem 0; background: white; }
 
 /* ---- Divider ---- */
-.section-divider { height: 1px; background: linear-gradient(90deg, transparent, #e5e7eb 20%, #e5e7eb 80%, transparent); margin: 0; border: none; }
+.section-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border-light) 20%, var(--border-light) 80%, transparent); margin: 0; border: none; }
 
 /* ---- Scroll Animations ---- */
 .fade-up { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
