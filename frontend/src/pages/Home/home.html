@@ -20,6 +20,7 @@
 
   <!-- Custom Styles -->
   <link rel="stylesheet" href="../../styles/main.css">
+  <link rel="stylesheet" href="../../styles/tokens.css">
   <link rel="stylesheet" href="../../js/components/header/styles/header.css">
   <link rel="stylesheet" href="../../js/components/footer/styles/footer.css">
   <link rel="stylesheet" href="../../js/components/hero/styles/hero.css">
@@ -49,7 +50,7 @@
     </defs>
   </svg>
 
-  <!-- Tailwind Config -->
+  <!-- Tailwind Config (kept for sub-component migration) -->
   <script>
     tailwind.config = {
       theme: {
@@ -64,87 +65,62 @@
   </script>
 </head>
 
-<body class="min-h-screen font-sans">
+<body>
 
-  <!-- ====== HEADER (injected by header.js) ====== -->
   <div id="header-container"></div>
 
-
-  <!-- ====== HERO (injected by hero.js) ====== -->
   <div id="hero-container"></div>
-
 
   <hr class="section-divider">
 
-
   <!-- ====== STATS ====== -->
-  <section class="section py-12 md:py-16">
-    <div class="max-w-5xl mx-auto px-5">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-        <div class="text-center fade-up">
-          <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums" data-count="5300000" data-suffix="+">0</div>
-          <p class="text-xs text-neutral-400 mt-0.5">UK companies indexed</p>
+  <section class="section stats">
+    <div class="stats__inner">
+      <div class="stats__grid stagger">
+        <div class="stats__item fade-up">
+          <div class="stats__value" data-count="5300000" data-suffix="+">0</div>
+          <p class="stats__label">UK companies indexed</p>
         </div>
-        <div class="text-center fade-up">
-          <div class="text-2xl sm:text-3xl font-bold text-blue-600">Free</div>
-          <p class="text-xs text-neutral-400 mt-0.5">No account needed</p>
+        <div class="stats__item fade-up">
+          <div class="stats__value stats__value--brand">Free</div>
+          <p class="stats__label">No account needed</p>
         </div>
-        <div class="text-center fade-up">
-          <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums" data-count="12" data-suffix=" flags">0</div>
-          <p class="text-xs text-neutral-400 mt-0.5">Risk signals checked</p>
+        <div class="stats__item fade-up">
+          <div class="stats__value" data-count="12" data-suffix=" flags">0</div>
+          <p class="stats__label">Risk signals checked</p>
         </div>
-        <div class="text-center fade-up">
-          <div class="text-2xl sm:text-3xl font-bold text-emerald-600 tabular-nums" data-count="3" data-suffix="s">0</div>
-          <p class="text-xs text-neutral-400 mt-0.5">Average check time</p>
+        <div class="stats__item fade-up">
+          <div class="stats__value stats__value--success" data-count="3" data-suffix="s">0</div>
+          <p class="stats__label">Average check time</p>
         </div>
       </div>
     </div>
   </section>
 
-
   <hr class="section-divider">
 
-
-  <!-- ====== HOW IT WORKS (injected by how-it-works.js) ====== -->
   <div data-component="how-it-works"></div>
 
-
   <hr class="section-divider">
 
-
-  <!-- ====== WHAT WE CHECK (injected by what-we-check.js) ====== -->
   <div data-component="what-we-check"></div>
 
-
   <hr class="section-divider">
 
-
-  <!-- ====== PRICING (injected by pricing.js) ====== -->
   <div data-component="pricing"></div>
 
-
   <hr class="section-divider">
 
-
-  <!-- ====== WHY COMPANYWISE (injected by why-companywise.js) ====== -->
   <div data-component="why-companywise"></div>
 
-
   <hr class="section-divider">
 
-
-  <!-- ====== FAQ (injected by faq.js) ====== -->
   <div data-component="faq"></div>
 
-
   <hr class="section-divider">
 
-
-  <!-- ====== CTA (injected by cta.js) ====== -->
   <div data-component="cta"></div>
 
-
-  <!-- ====== FOOTER (injected by footer.js) ====== -->
   <div id="footer-container"></div>
 
   <!-- Scripts: header + footer + hero first, then page modules -->
