@@ -1,165 +1,310 @@
-# Hero Component — CSS Token Migration Handover
+# CSS Token Alignment — Design Reference
 
-## Phase 1: Colour migration — DONE
-
-All hardcoded hex values, old `var(--bg-*)`, `var(--text-N00)`, `var(--ink-*)`, `var(--risk-*)`, and `var(--border-light)` tokens have been replaced with the semantic colour tokens from `tokens.css`. No colour work remains.
-
----
-
-## Phase 2: Constants migration (exact-match pass) — DONE
-
-All hardcoded values in `hero.css` that had an **exact token match** in `tokens.css` have been migrated. This covered:
-
-| Category | Examples of what was tokenised |
-|---|---|
-| Spacing | `padding`, `margin`, `gap`, `width`, `height`, `top`, `left` — e.g. `4rem` → `var(--space-16)` |
-| Font size | `1rem` → `var(--text-base)`, `0.875rem` → `var(--text-sm)`, `0.75rem` → `var(--text-xs)`, `1.25rem` → `var(--text-xl)` |
-| Font weight | `500` → `var(--font-medium)`, `600` → `var(--font-semibold)` |
-| Line height | `1.5` → `var(--leading-normal)` |
-| Border radius | `1rem` → `var(--rounded-2xl)`, `0.75rem` → `var(--rounded-xl)`, `0.5rem` → `var(--rounded-lg)`, `0.375rem` → `var(--rounded-md)`, `0.25rem` → `var(--rounded)`, `24px` → `var(--rounded-3xl)`, `100px` / `9999px` → `var(--rounded-full)` |
-| Border width | `1px solid` → `var(--border-1) solid`, `2px solid` → `var(--border-2) solid` |
-| Z-index | `0` → `var(--z-0)`, `10` → `var(--z-10)`, `50` → `var(--z-50)` |
-| Opacity | `0` → `var(--opacity-0)`, `0.4` → `var(--opacity-40)`, `1` → `var(--opacity-100)` |
-| Blur | `blur(24px)` → `blur(var(--blur-xl))` |
-| Max-width | `80rem` → `var(--max-w-7xl)`, `32rem` → `var(--max-w-lg)` |
-| Transition duration | `0.2s` → `var(--duration-200)`, `0.5s` → `var(--duration-500)` |
-| Transition easing | `ease` → `var(--ease-in-out)`, `ease-out` → `var(--ease-out)` |
-
-Values with no exact token match were intentionally left hardcoded. Phase 3 below catalogues every one of them.
+> **Goal:** Every component CSS file uses global tokens from `tokens.css` so that changing a single token value updates the entire app. This makes theme-swapping and style consolidation trivial.
+>
+> **Reference implementation:** `hero.css` — fully migrated, use as the pattern for all other components.
 
 ---
 
-## Phase 3: Gap-fill migration — TODO
+## Architecture
 
-The values below remain hardcoded in `hero.css` because `tokens.css` has no exact match. To finish the migration:
-
-1. **Add the missing tokens to `tokens.css`** (suggestions in each table).
-2. **Then find-and-replace in `hero.css`** using the new tokens.
-
-### 3a. Font sizes (6 orphan values, ~22 occurrences)
-
-These sit between the existing Tailwind `--text-*` stops. They come from the miniature card UI where type is deliberately smaller than the standard scale.
-
-| Hardcoded | px | Occurrences | Suggested token | Notes |
-|---|---|---|---|---|
-| `0.5625rem` | 9px | 5 | `--text-2xs` | Meta labels, signal pills, trend arrows, teaser text |
-| `0.625rem` | 10px | 6 | `--text-3xs` | Demo label, badge, flags title, flag items, recommendation, activity pill |
-| `0.6875rem` | 11px | 5 | `--text-card-sm` or leave as `0.6875rem` | Meta value, unified btn, signal icon, flag icon, company meta |
-| `0.8125rem` | 13px | 2 | `--text-card-base` or leave as `0.8125rem` | Company number, unified btn icon |
-| `0.9375rem` | 15px | 3 | `--text-card-lg` or leave as `0.9375rem` | Search input, company name (×2) |
-| `1.75rem` | 28px | 1 | — (use `var(--space-7)` as a size) | Check-types vehicle icons |
-
-> **Decision needed:** The bottom three (11 / 13 / 15 px) are half-steps between existing Tailwind stops. Adding named tokens avoids magic numbers but inflates the scale. An alternative is to leave them hardcoded and accept them as one-off card-detail sizes.
-
-### 3b. Spacing (5 orphan values, ~7 occurrences)
-
-| Hardcoded | px | Occurrences | Suggested token | Where used |
-|---|---|---|---|---|
-| `0.1875rem` | 3px | 2 | `--space-0-75` | Vertical padding in badge & signal pills |
-| `0.3125rem` | 5px | 2 | `--space-1-25` | Flags-count horizontal padding, flags-list gap |
-| `1.375rem` | 22px | 1 | `--space-5-5` | Skeleton signal height |
-| `4.5rem` | 72px | 1 | `--space-18` | Skeleton badge width |
-| `5.5rem` | 88px | 1 | `--space-22` | Skeleton signal width |
-
-Also left as-is (intentionally, not candidates for new tokens):
-
-| Value | Reason |
-|---|---|
-| `480px` (min-height) | One-off illustration sizing, not a spacing scale value |
-| `-2.5rem` (bottom) | Negative offset — use `calc(-1 * var(--space-10))` once you're happy with the pattern |
-
-### 3c. Letter spacing (4 orphan values, ~6 occurrences)
-
-The existing `--tracking-*` tokens use named stops (`-0.05em`, `-0.025em`, `0`, `0.025em`, `0.05em`, `0.1em`). These values fall between them.
-
-| Hardcoded | Occurrences | Suggested token | Notes |
-|---|---|---|---|
-| `-0.02em` | 1 | `--tracking-snug` or leave | Headline — very close to `--tracking-tight` (-0.025em) |
-| `0.01em` | 1 | leave | Trend arrows — negligible, one-off |
-| `0.02em` | 1 | leave | Signal pills — close to `--tracking-wide` (0.025em) |
-| `0.03em` | 3 | `--tracking-caps` | Badge, meta-label, snapshot-label — all uppercase contexts |
-
-> **Decision needed:** If you adopt `--tracking-tight` for `-0.02em` and `--tracking-wide` for `0.02em / 0.03em` (accepting the ≤0.005em rounding), Phase 3c collapses to zero new tokens. Otherwise add `--tracking-caps: 0.03em`.
-
-### 3d. Line height (4 orphan values, 4 occurrences)
-
-| Hardcoded | Occurrences | Nearest token | Gap |
-|---|---|---|---|
-| `1.1` | 1 | `--leading-none` (1) | +0.1 — headline display |
-| `1.2` | 1 | `--leading-tight` (1.25) | −0.05 — snapshot value |
-| `1.4` | 1 | `--leading-snug` (1.375) | +0.025 — flag items |
-| `1.6` | 1 | `--leading-relaxed` (1.625) | −0.025 — subheadline |
-
-> **Recommendation:** These are all very close to existing tokens. Consider rounding to the nearest named stop and visually verifying. If the 0.025–0.05 difference matters, add e.g. `--leading-display: 1.1`.
-
-### 3e. Transition durations (4 orphan values, 5 occurrences)
-
-| Hardcoded | ms | Occurrences | Suggested token | Where used |
-|---|---|---|---|---|
-| `0.12s` | 120ms | 1 | `--duration-125` | Dropdown item hover |
-| `0.25s` | 250ms | 1 | `--duration-250` | Card-inner crossfade |
-| `0.4s` | 400ms | 2 | `--duration-400` | Checklist items, back-card fade |
-| `0.6s` | 600ms | 1 | — (animation, skip) | Spinner `@keyframes` — leave as-is per rules |
-
-> **Recommendation:** Adding `--duration-250` and `--duration-400` covers 3 of the 4 cases and aligns with Tailwind v4's expanded duration scale. `120ms` is niche enough to leave hardcoded.
-
-### 3f. Opacity (1 orphan value)
-
-| Hardcoded | Occurrences | Notes |
-|---|---|---|
-| `0.015` | 1 | Grid pattern texture — intentionally ultra-faint, no token needed |
-
----
-
-## Summary: suggested new tokens for `tokens.css`
-
-If you want full coverage, add these to `tokens.css` before the next hero.css pass:
-
-```css
-/* Font size — sub-xs card scale */
---text-2xs:       0.5625rem;  /* 9px  */
---text-3xs:       0.625rem;   /* 10px */
-
-/* Spacing — fractional fills */
---space-0-75:     0.1875rem;  /* 3px  */
---space-1-25:     0.3125rem;  /* 5px  */
---space-5-5:      1.375rem;   /* 22px */
---space-18:       4.5rem;     /* 72px */
---space-22:       5.5rem;     /* 88px */
-
-/* Letter spacing */
---tracking-caps:  0.03em;
-
-/* Line height */
---leading-display: 1.1;
-
-/* Duration — Tailwind v4 gap fills */
---duration-125:   125ms;
---duration-250:   250ms;
---duration-400:   400ms;
+```
+tokens.css          ← single source of truth (primitives + semantics)
+  ↓
+component.css       ← consumes tokens only, zero hardcoded values where avoidable
 ```
 
-After adding those, a second pass on `hero.css` can tokenise ~35 more values and leave only ~10 truly one-off hardcoded values (the 0.6875 / 0.8125 / 0.9375rem font sizes, `-2.5rem` offset, `480px` min-height, and the `0.015` opacity).
-
----
-
-## Rules (unchanged from Phase 2 — keep for reference)
-
-1. Only use tokens that exist. Don't round to neighbours without visual sign-off.
-2. Don't change colour, layout structure, selectors, class names, or animations (`@keyframes`, `animation`, `clip-path`, `transform`, `filter: url(#…)`).
-3. Don't touch `hero.js` — only `hero.css` changes.
-4. `tokens.css` is writable in Phase 3 (read-only restriction lifted).
-5. Leave: `clamp()`, `calc()`, viewport units, percentages, `currentColor`, `background-size`, `background-position`.
-6. Shorthand expansion is fine for partial tokenisation.
-7. `border-radius: 100px` → `var(--rounded-full)`.
-8. `border-radius: 50%` → leave as-is.
-9. Tokenise transition `duration` and `easing` inline where tokens exist.
-10. Only tokenise `box-shadow` values without `color-mix()`.
+Change a token → every component updates. That's the contract.
 
 ### Files
 
 | File | Role |
 |---|---|
-| `frontend/src/styles/tokens.css` | Token definitions (**writable** in Phase 3) |
-| `frontend/src/js/components/hero/styles/hero.css` | Target file to migrate |
-| `frontend/src/js/components/hero/hero.js` | Reference only (do not modify) |
+| `frontend/src/styles/tokens.css` | Token definitions — **do not modify per-component** |
+| `frontend/src/styles/main.css` | Global layout styles |
+| `frontend/src/js/components/hero/styles/hero.css` | Reference implementation (fully migrated) |
+
+### Components to migrate
+
+| Component | CSS file |
+|---|---|
+| Header | `header/styles/header.css` |
+| How It Works | `how-it-works/styles/how-it-works.css` |
+| What We Check | `what-we-check/styles/what-we-check.css` |
+| Pricing | `pricing/styles/pricing.css` |
+| Why Us | `why-us/styles/why-companywise.css` |
+| FAQ | `faq/styles/faq.css` |
+| Call to Action | `call-to-action/styles/cta.css` |
+| Footer | `footer/styles/footer.css` |
+| Premium Report | `premium-report/styles/premium-report.css` |
+| Upgrade Prompt | `upgrade-prompt/styles/upgrade-prompt.css` |
+| Credit Badge | `credit-badge/styles/credit-badge.css` |
+| Purchase Dialog | `purchase-dialog/styles/purchase-dialog.css` |
+| Account Modal | `account-modal/styles/account-modal.css` |
+| Modal | `modal/styles/modal.css` |
+
+---
+
+## Token Quick-Reference
+
+Use this lookup when migrating values. Snap to the **nearest** token — don't invent new ones.
+
+### Colour (semantic — use these, not primitives)
+
+| Token | Purpose |
+|---|---|
+| `--brand`, `--brand-hover`, `--brand-bg` | Primary brand colour + states |
+| `--cta`, `--cta-hover`, `--cta-disabled` | Call-to-action button |
+| `--success`, `--success-bg` | Positive / green |
+| `--warning`, `--warning-bg` | Caution / amber |
+| `--danger`, `--danger-bg` | Error / red |
+| `--text`, `--text-strong`, `--text-secondary`, `--text-muted`, `--text-faint` | Text hierarchy |
+| `--surface`, `--page`, `--muted`, `--border` | Surfaces + borders |
+
+### Spacing (`--space-*`)
+
+| Token | Value | | Token | Value |
+|---|---|---|---|---|
+| `--space-px` | 1px | | `--space-8` | 2rem (32px) |
+| `--space-0-5` | 0.125rem (2px) | | `--space-10` | 2.5rem (40px) |
+| `--space-1` | 0.25rem (4px) | | `--space-12` | 3rem (48px) |
+| `--space-1-5` | 0.375rem (6px) | | `--space-14` | 3.5rem (56px) |
+| `--space-2` | 0.5rem (8px) | | `--space-16` | 4rem (64px) |
+| `--space-2-5` | 0.625rem (10px) | | `--space-20` | 5rem (80px) |
+| `--space-3` | 0.75rem (12px) | | `--space-24` | 6rem (96px) |
+| `--space-3-5` | 0.875rem (14px) | | `--space-32` | 8rem (128px) |
+| `--space-4` | 1rem (16px) | | `--space-48` | 12rem (192px) |
+| `--space-5` | 1.25rem (20px) | | `--space-64` | 16rem (256px) |
+| `--space-6` | 1.5rem (24px) | | `--space-80` | 20rem (320px) |
+| `--space-7` | 1.75rem (28px) | | `--space-96` | 24rem (384px) |
+
+### Typography
+
+| Category | Tokens |
+|---|---|
+| Font size | `--text-xs` (12px) · `--text-sm` (14px) · `--text-base` (16px) · `--text-lg` (18px) · `--text-xl` (20px) · `--text-2xl` (24px) · `--text-3xl` (30px) · `--text-4xl` (36px) · `--text-5xl`+ |
+| Font weight | `--font-light` (300) · `--font-normal` (400) · `--font-medium` (500) · `--font-semibold` (600) · `--font-bold` (700) · `--font-extrabold` (800) |
+| Line height | `--leading-none` (1) · `--leading-tight` (1.25) · `--leading-snug` (1.375) · `--leading-normal` (1.5) · `--leading-relaxed` (1.625) · `--leading-loose` (2) |
+| Letter spacing | `--tracking-tighter` · `--tracking-tight` · `--tracking-normal` · `--tracking-wide` · `--tracking-wider` · `--tracking-widest` |
+| Font family | `--font` · `--font-mono` |
+
+### Border radius
+
+| Token | Value | | Token | Value |
+|---|---|---|---|---|
+| `--rounded-sm` | 2px | | `--rounded-xl` | 12px |
+| `--rounded` | 4px | | `--rounded-2xl` | 16px |
+| `--rounded-md` | 6px | | `--rounded-3xl` | 24px |
+| `--rounded-lg` | 8px | | `--rounded-full` | 9999px |
+
+### Border width
+
+`--border-0` (0) · `--border-1` (1px) · `--border-2` (2px) · `--border-4` (4px) · `--border-8` (8px)
+
+### Box shadow
+
+`--shadow-2xs` · `--shadow-xs` · `--shadow-sm` · `--shadow-md` · `--shadow-lg` · `--shadow-xl` · `--shadow-2xl` · `--shadow-none`
+
+### Opacity
+
+Full scale from `--opacity-0` (0) to `--opacity-100` (1) in steps of 5.
+
+### Blur
+
+`--blur-none` (0) · `--blur-xs` (4px) · `--blur-sm` (8px) · `--blur-md` (12px) · `--blur-lg` (16px) · `--blur-xl` (24px) · `--blur-2xl` (40px) · `--blur-3xl` (64px)
+
+### Z-index
+
+`--z-0` · `--z-10` · `--z-20` · `--z-30` · `--z-40` · `--z-50`
+
+### Motion
+
+| Category | Tokens |
+|---|---|
+| Duration | `--duration-75` · `--duration-100` · `--duration-150` · `--duration-200` · `--duration-300` · `--duration-500` · `--duration-700` · `--duration-1000` |
+| Easing | `--ease-linear` · `--ease-in` · `--ease-out` · `--ease-in-out` · `--ease-out-expo` |
+
+### Max-width
+
+`--max-w-3xs` (256px) · `--max-w-xs` (320px) · `--max-w-sm` (384px) · `--max-w-md` (448px) · `--max-w-lg` (512px) · `--max-w-xl` (576px) · `--max-w-2xl` (672px) · `--max-w-3xl` (768px) · `--max-w-4xl` (896px) · `--max-w-5xl` (1024px) · `--max-w-6xl` (1152px) · `--max-w-7xl` (1280px)
+
+---
+
+## Migration Rules
+
+### What to tokenise — be aggressive
+
+Use tokens for **everything** that has a match. Snap to the nearest stop; don't leave hardcoded values just because they're "close enough". The goal is maximum token coverage.
+
+| Property | Action |
+|---|---|
+| `padding`, `margin`, `gap`, `width`, `height`, `top`, `left`, `right`, `bottom` | → `--space-*` |
+| `font-size` | → `--text-*` |
+| `font-weight` | → `--font-*` |
+| `font-family` | → `--font` or `--font-mono` |
+| `line-height` | → `--leading-*` |
+| `letter-spacing` | → `--tracking-*` |
+| `border-radius` | → `--rounded-*` |
+| `border-width` | → `--border-*` |
+| `z-index` | → `--z-*` |
+| `opacity` | → `--opacity-*` (nearest step of 5) |
+| `filter: blur(…)` | → `blur(var(--blur-*))` |
+| `max-width` | → `--max-w-*` |
+| `box-shadow` (without `color-mix`) | → `--shadow-*` |
+| `transition-duration`, `animation-duration` | → `--duration-*` |
+| `transition-timing-function`, `animation-timing-function` | → `--ease-*` |
+| All colours (hex, rgb, hsl, named) | → semantic tokens (`--brand`, `--text`, `--surface`, etc.) |
+| Old/legacy token vars (`--bg-*`, `--ink-*`, `--risk-*`, etc.) | → current semantic tokens |
+| Negative offsets (e.g. `-2.5rem`) | → `calc(-1 * var(--space-*))` |
+| Values inside `calc()` that are standalone (e.g. `calc(100% + 6px)`) | → `calc(100% + var(--space-1-5))` — tokenise the constant part |
+
+### Snapping — nearest wins
+
+When a hardcoded value falls between two token stops:
+
+1. Pick the nearest token
+2. If equidistant, round to the smaller value for spacing/sizing, larger for timing
+3. Don't add new tokens to `tokens.css` — work with what exists
+
+**Examples from the hero migration:**
+
+| Original | Nearest | Token |
+|---|---|---|
+| `0.8125rem` (13px) | 14px | `var(--text-sm)` |
+| `1.375rem` (22px) | 24px | `var(--space-6)` |
+| `1.1` line-height | 1 | `var(--leading-none)` |
+| `0.015` opacity | 0.05 | `var(--opacity-5)` |
+| `0.6s` animation | 500ms | `var(--duration-500)` |
+| `-0.02em` tracking | -0.025em | `var(--tracking-tight)` |
+
+### What to leave hardcoded
+
+These genuinely cannot be tokenised:
+
+| Category | Why | Examples |
+|---|---|---|
+| `@media` breakpoints | CSS forbids `var()` in media queries | `@media (min-width: 768px)` |
+| `clip-path` values | Structural geometry — changing breaks shapes | `polygon(… 80px …)` |
+| Viewport / fluid units | Responsive by nature | `85vh`, `55vw` |
+| `clamp()` expressions | Fluid sizing, leave whole expression | `clamp(2.25rem, 5vw, 3.5rem)` |
+| `calc()` structure | Leave the formula, but tokenise constants inside | `calc(100% - 3.75rem)` |
+| `transform` rotation/scale factors | Visual tuning, no token scale | `rotate(2deg)`, `scale(1.02)` |
+| `@keyframes` internals | Animation specifics | `rotate(360deg)`, `background-position: 200%` |
+| Custom `cubic-bezier()` | No token equivalent | `cubic-bezier(0.34, 1.56, 0.64, 1)` |
+| `color-mix()` expressions | Dynamic blending, leave intact | `color-mix(in srgb, var(--brand) 15%, transparent)` |
+| `box-shadow` with `color-mix` colours | Custom shadow colours, can't use `--shadow-*` | `0 20px 40px color-mix(…)` |
+| `background-size`, `background-position` | Layout-specific | `24px 24px` |
+| `border-radius: 50%` | Circle — not `--rounded-full` (different intent) | `border-radius: 50%` |
+| One-off sizing with no nearby token | No token within reasonable range | `480px` (30rem — nothing close) |
+| Percentages for widths/positions | Proportional, not fixed | `width: 75%` |
+
+---
+
+## Migration Workflow (per component)
+
+### Step 1 — Audit
+
+Scan the component CSS for all hardcoded values:
+- Hex colours, `rgb()`, `hsl()`, named colours
+- Pixel/rem/em values for spacing, sizing, typography
+- Numeric `font-weight`, `line-height`, `letter-spacing`, `opacity`, `z-index`
+- Raw `border-radius`, `border-width` values
+- Hardcoded `box-shadow` values
+- Transition/animation `duration` and `easing` values
+- Any old/legacy custom property names
+
+### Step 2 — Replace exact matches
+
+Swap every value that has a direct token equivalent. This is the bulk of the work.
+
+```css
+/* BEFORE */
+padding: 1rem 1.5rem;
+font-size: 0.875rem;
+font-weight: 600;
+border-radius: 0.5rem;
+border: 1px solid #e5e5e5;
+color: #171717;
+z-index: 10;
+opacity: 0;
+transition: all 0.2s ease;
+
+/* AFTER */
+padding: var(--space-4) var(--space-6);
+font-size: var(--text-sm);
+font-weight: var(--font-semibold);
+border-radius: var(--rounded-lg);
+border: var(--border-1) solid var(--border);
+color: var(--text);
+z-index: var(--z-10);
+opacity: var(--opacity-0);
+transition: all var(--duration-200) var(--ease-in-out);
+```
+
+### Step 3 — Snap remaining values
+
+For values without an exact match, snap to nearest:
+
+```css
+/* BEFORE — 13px has no exact token */
+font-size: 0.8125rem;
+
+/* AFTER — snap to 14px */
+font-size: var(--text-sm);
+```
+
+### Step 4 — Tokenise inside calc/transforms
+
+Don't skip values just because they're inside `calc()` or `translate*()`:
+
+```css
+/* BEFORE */
+top: calc(100% + 6px);
+bottom: -2.5rem;
+transform: translateX(-20px);
+
+/* AFTER */
+top: calc(100% + var(--space-1-5));
+bottom: calc(-1 * var(--space-10));
+transform: translateX(calc(-1 * var(--space-5)));
+```
+
+### Step 5 — Verify
+
+- No visual regressions (especially snapped values)
+- No broken layouts from spacing changes
+- Hover/focus/active states still work
+- Animations still feel right
+- Only values from the "leave hardcoded" list remain as literals
+
+---
+
+## hero.css — Final Token Coverage
+
+After full migration, `hero.css` has **27 remaining hardcoded values**, all from the "leave hardcoded" categories above:
+
+- 10 × `@media` breakpoints (CSS limitation)
+- 4 × `clip-path` geometry
+- 5 × viewport/fluid units
+- 3 × `calc()` internals
+- 3 × `box-shadow` with `color-mix`
+- 3 × `transform` rotation/scale
+- 2 × `background-image`/`background-size`
+- 1 × gradient stops
+- 1 × one-off sizing (`480px`)
+- 1 × focus ring spread (`3px`, between `--border-2` and `--border-4`)
+
+Everything else — spacing, colour, typography, radius, borders, z-index, opacity, blur, shadows, motion — uses tokens.
+
+---
+
+## Why This Matters
+
+With full token alignment across all components:
+
+- **Theme swap** — change `--brand` from blue to purple and the entire app updates
+- **Spacing rhythm** — adjust the scale in one place, every component stays consistent
+- **Typography** — change `--text-base` from 16px to 18px, all body text updates
+- **Dark mode** — override semantic colour tokens in a `[data-theme="dark"]` selector
+- **White-label** — ship the same app with different brand tokens per client
+- **Design QA** — every value traces back to a named token, no magic numbers to audit
