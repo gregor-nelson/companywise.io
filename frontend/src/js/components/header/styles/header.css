@@ -17,8 +17,8 @@
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 #header-root.header-scrolled {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px var(--black-a04);
+  border-color: var(--black-a06);
 }
 
 /* ============================================
@@ -131,8 +131,8 @@
 }
 
 .hamburger-btn.drawer-open {
-  background-color: rgb(239 246 255);
-  color: rgb(37 99 235);
+  background-color: var(--primary-50);
+  color: var(--primary-500);
 }
 
 /* ============================================
@@ -145,10 +145,10 @@
   margin-top: 0.5rem;
   min-width: 12rem;
   padding: 0.5rem 0;
-  background: white;
+  background: var(--bg-white);
   border-radius: 0.75rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 40px var(--black-a12);
+  border: 1px solid var(--black-a05);
   opacity: 0;
   transform: scale(0.95);
   transform-origin: top right;
@@ -169,11 +169,11 @@
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: rgb(64 64 64);
+  color: var(--text-700);
 }
 
 [data-dropdown-toggle]:hover {
-  color: rgb(37 99 235);
+  color: var(--primary-500);
 }
 
 [data-dropdown-toggle] .dropdown-chevron {
@@ -191,22 +191,22 @@
   gap: 0.75rem;
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
-  color: rgb(64 64 64);
+  color: var(--text-700);
   text-decoration: none;
 }
 
 [data-dropdown-item]:hover {
-  background-color: rgb(249 250 251);
-  color: rgb(37 99 235);
+  background-color: var(--bg-slate);
+  color: var(--primary-500);
 }
 
 [data-dropdown-item] i {
   font-size: 1rem;
-  color: rgb(115 115 115);
+  color: var(--text-500);
 }
 
 [data-dropdown-item]:hover i {
-  color: rgb(37 99 235);
+  color: var(--primary-500);
 }
 
 /* ============================================
