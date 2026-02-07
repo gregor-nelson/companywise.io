@@ -25,7 +25,7 @@
 .report-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--black-a50);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -46,7 +46,7 @@
 
 /* ---- Content Card ---- */
 .report-modal-content {
-  background: white;
+  background: var(--bg-white);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -60,7 +60,7 @@
   align-items: flex-start;
   gap: 1rem;
   padding: 1.25rem 2rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-light);
   flex-shrink: 0;
 }
 
@@ -145,7 +145,7 @@
   align-items: center;
   justify-content: center;
   background: var(--bg-slate);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--black-a06);
   border-radius: 0.5rem;
   cursor: pointer;
   color: var(--text-500);
@@ -153,7 +153,7 @@
 }
 
 .report-modal-close:hover {
-  background: #f0f0f0;
+  background: var(--bg-slate);
   color: var(--text-900);
 }
 
@@ -184,7 +184,7 @@
 /* ---- Sections ---- */
 .report-section {
   background: var(--bg-slate);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--black-a04);
   border-radius: 0.75rem;
   padding: 1rem 1.25rem;
 }
@@ -201,7 +201,7 @@
 }
 
 .report-section-title i {
-  color: var(--blue-500);
+  color: var(--primary-500);
   font-size: 1rem;
 }
 
@@ -213,12 +213,13 @@
 
 /* ---- Section: Highlight (Recommendation) ---- */
 .report-section--highlight {
-  background: linear-gradient(to bottom right, #eff6ff, rgba(219, 234, 254, 0.5));
-  border-color: rgba(59, 130, 246, 0.15);
+  /* derived from --blue-500 */
+  background: var(--gradient-subtle);
+  border-color: var(--primary-a15); /* derived from --blue-500 */
 }
 
 .report-section--highlight .report-section-title i {
-  color: var(--blue-500);
+  color: var(--primary-500);
 }
 
 /* ---- Overview Grid ---- */
@@ -235,8 +236,8 @@
 }
 
 .report-overview-item {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: var(--bg-white);
+  border: 1px solid var(--black-a04);
   border-radius: 0.5rem;
   padding: 0.625rem 0.75rem;
 }
@@ -268,8 +269,8 @@
   align-items: flex-start;
   gap: 0.625rem;
   padding: 0.625rem 0.75rem;
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: var(--bg-white);
+  border: 1px solid var(--black-a04);
   border-radius: 0.5rem;
 }
 
@@ -311,20 +312,22 @@
 }
 
 .report-filing-item {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: var(--bg-white);
+  border: 1px solid var(--black-a04);
   border-radius: 0.5rem;
   padding: 0.625rem 0.75rem;
 }
 
 .report-filing-item--warning {
-  border-color: rgba(245, 158, 11, 0.3);
-  background: #fffbeb;
+  border-color: var(--amber-a30); /* derived from --risk-medium */
+  /* derived from --risk-medium */
+  background: var(--amber-a06);
 }
 
 .report-filing-item--danger {
-  border-color: rgba(239, 68, 68, 0.3);
-  background: #fef2f2;
+  border-color: var(--red-a30); /* derived from --risk-high */
+  /* derived from --risk-high */
+  background: var(--red-a06);
 }
 
 .report-filing-label {
@@ -362,15 +365,16 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.625rem 0.75rem;
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: var(--bg-white);
+  border: 1px solid var(--black-a04);
   border-radius: 0.5rem;
 }
 
 .report-director-avatar {
   width: 2rem;
   height: 2rem;
-  background: linear-gradient(to bottom right, #eff6ff, rgba(219, 234, 254, 0.5));
+  /* derived from --blue-500 */
+  background: var(--gradient-subtle);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -379,7 +383,7 @@
 }
 
 .report-director-avatar i {
-  color: var(--blue-500);
+  color: var(--primary-500);
   font-size: 0.875rem;
 }
 
@@ -424,7 +428,7 @@
 /* ---- Footer ---- */
 .report-modal-footer {
   padding: 0.875rem 2rem;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--border-light);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -507,8 +511,8 @@ body.modal-open {
 }
 
 .report-financial-item {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: var(--bg-white);
+  border: 1px solid var(--black-a04);
   border-radius: 0.5rem;
   padding: 0.75rem;
   text-align: center;
@@ -546,8 +550,8 @@ body.modal-open {
 
 /* ---- Balance Sheet Summary ---- */
 .report-balance-summary {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: var(--bg-white);
+  border: 1px solid var(--black-a04);
   border-radius: 0.5rem;
   padding: 0.75rem;
   margin-bottom: 0.75rem;
@@ -561,13 +565,13 @@ body.modal-open {
 }
 
 .report-balance-row:not(:last-child) {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid var(--black-a04);
 }
 
 .report-balance-row--highlight {
   margin-top: 0.375rem;
   padding-top: 0.5rem;
-  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+  border-top: 1px dashed var(--black-a08);
 }
 
 .report-balance-label {
@@ -602,8 +606,8 @@ body.modal-open {
 }
 
 .report-balance-detail-item {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: var(--bg-white);
+  border: 1px solid var(--black-a04);
   border-radius: 0.5rem;
   padding: 0.5rem 0.75rem;
   display: flex;
@@ -688,18 +692,19 @@ body.modal-open {
   margin-left: auto;
   padding: 0.1875rem 0.5rem;
   border-radius: 100px;
-  background: linear-gradient(to bottom right, #eff6ff, rgba(219, 234, 254, 0.5));
-  border: 1px solid rgba(59, 130, 246, 0.15);
+  /* derived from --blue-500 */
+  background: var(--gradient-subtle);
+  border: 1px solid var(--primary-a15); /* derived from --blue-500 */
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--blue-500, #3b82f6);
+  color: var(--primary-500);
 }
 
 .report-premium-badge i {
   font-size: 0.625rem;
-  color: var(--blue-500, #3b82f6);
+  color: var(--primary-500);
 }
 
 /* ---- Unlock Button ---- */
@@ -710,18 +715,18 @@ body.modal-open {
   padding: 0.5rem 1rem;
   border-radius: 0.625rem;
   border: none;
-  background: var(--blue-500, #3b82f6);
-  color: #fff;
-  font-family: var(--font, 'Jost', sans-serif);
+  background: var(--primary-500);
+  color: var(--bg-white);
+  font-family: var(--font);
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 8px var(--primary-a25); /* derived from --blue-500 */
 }
 
 .report-unlock-btn:hover {
-  background: var(--blue-600, #2563eb);
+  background: var(--primary-600);
   transform: translateY(-1px);
 }
 

@@ -1,7 +1,7 @@
 /* ============================================
    COMPANYWISE — hero.css
    Hero section styles
-   Colour palette: GOV.UK Design System
+   Colour palette: design tokens
    ============================================ */
 
 /* ---- Hero Section ---- */
@@ -47,7 +47,8 @@
 .hero-chevron {
   flex-shrink: 0;
   flex-grow: 0;
-  background: linear-gradient(to bottom right, rgba(29, 112, 184, 0.06), rgba(29, 112, 184, 0.03));
+  /* derived from --blue-500 */
+  background: var(--gradient-subtle);
 }
 
 .hero-chevron-primary {
@@ -75,7 +76,8 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: linear-gradient(to bottom right, rgba(29, 112, 184, 0.06), rgba(29, 112, 184, 0.03));
+  /* derived from --blue-500 */
+  background: var(--gradient-subtle);
   clip-path: polygon(0% 0%, 100% 0%, 100% calc(100% - 48px), 50% 100%, 0% calc(100% - 48px));
   filter: url(#chevron-round);
 }
@@ -106,7 +108,8 @@
   right: -5rem;
   width: 16rem;
   height: 16rem;
-  background: linear-gradient(135deg, rgba(29, 112, 184, 0.25), rgba(29, 112, 184, 0.06));
+  /* derived from --blue-500 */
+  background: linear-gradient(135deg, var(--primary-a25), var(--primary-a06));
 }
 
 .hero-blur-accent--bottom {
@@ -114,7 +117,8 @@
   left: -4rem;
   width: 12rem;
   height: 12rem;
-  background: linear-gradient(135deg, rgba(0, 112, 60, 0.19), rgba(29, 112, 184, 0.12));
+  /* derived from --green-primary, --blue-500 */
+  background: linear-gradient(135deg, var(--green-a19), var(--primary-a12));
   transition-delay: 200ms;
 }
 
@@ -199,17 +203,17 @@
 .hero-search-form {
   display: flex;
   gap: 0;
-  background: white;
+  background: var(--bg-white);
   border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px var(--black-a10), 0 2px 4px -2px var(--black-a10);
   overflow: hidden;
   border: 2px solid transparent;
   transition: all 0.2s ease;
 }
 
 .hero-search-form:focus-within {
-  border-color: var(--blue-500);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(29, 112, 184, 0.15);
+  border-color: var(--primary-500);
+  box-shadow: 0 4px 6px -1px var(--black-a10), 0 2px 4px -2px var(--black-a10), 0 0 0 3px var(--primary-a15); /* derived from --blue-500 */
 }
 
 .hero-search-prefix {
@@ -217,8 +221,8 @@
   align-items: center;
   justify-content: center;
   padding: 0 0.75rem;
-  background: var(--blue-500);
-  color: white;
+  background: var(--primary-500);
+  color: var(--bg-white);
 }
 
 @media (min-width: 768px) {
@@ -259,7 +263,7 @@
 
 .hero-search-btn {
   padding: 0.875rem 1rem;
-  background: #ffdd00;
+  background: var(--yellow-500);
   color: var(--text-900);
   font-family: var(--font);
   font-weight: 500;
@@ -281,19 +285,19 @@
 }
 
 .hero-search-btn:hover:not(:disabled) {
-  background: #d4b600;
+  background: var(--yellow-600);
   transform: scale(1.02);
 }
 
 .hero-search-btn:disabled {
-  background: rgba(255, 221, 0, 0.45);
+  background: var(--yellow-a45); /* derived from --yellow-500 */
   cursor: not-allowed;
 }
 
 .hero-search-spinner {
   width: 1rem;
   height: 1rem;
-  border: 2px solid rgba(11, 12, 12, 0.2);
+  border: 2px solid var(--ink-a20); /* derived from --text-900 */
   border-top-color: var(--text-900);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -328,11 +332,11 @@
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: white;
+  background: var(--bg-white);
   border: 1px solid var(--border-light);
   border-radius: 0.75rem;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(11, 12, 12, 0.12);
+  box-shadow: 0 20px 40px var(--ink-a12); /* derived from --text-900 */
   z-index: 50;
   display: none;
 }
@@ -473,7 +477,8 @@
   top: 1rem;
   width: calc(100% - 3.75rem);
   height: calc(100% - 3rem);
-  background: linear-gradient(to bottom right, rgba(29, 112, 184, 0.06), rgba(29, 112, 184, 0.03));
+  /* derived from --blue-500 */
+  background: var(--gradient-subtle);
   border-radius: 1rem;
   transform: rotate(2deg);
   opacity: 0;
@@ -492,7 +497,8 @@
   transform: translateX(-50%);
   width: 16rem;
   height: 1.5rem;
-  background: linear-gradient(to bottom right, rgba(29, 112, 184, 0.06), rgba(29, 112, 184, 0.03));
+  /* derived from --blue-500 */
+  background: var(--gradient-subtle);
   border-radius: 9999px;
   filter: blur(24px);
   opacity: 0.4;
@@ -501,10 +507,10 @@
 /* ---- Unified Card ---- */
 .hero-unified-card {
   position: relative;
-  background: white;
+  background: var(--bg-white);
   border-radius: 1rem;
-  box-shadow: 0 25px 50px -12px rgba(11, 12, 12, 0.15);
-  border: 1px solid rgba(11, 12, 12, 0.06);
+  box-shadow: 0 25px 50px -12px var(--ink-a15); /* derived from --text-900 */
+  border: 1px solid var(--ink-a06); /* derived from --text-900 */
   padding: 1.25rem;
   z-index: 10;
   opacity: 0;
@@ -535,12 +541,13 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.25rem 0.625rem;
-  background: linear-gradient(to bottom right, rgba(29, 112, 184, 0.06), rgba(29, 112, 184, 0.03));
-  border: 1px solid rgba(29, 112, 184, 0.15);
+  /* derived from --blue-500 */
+  background: var(--gradient-subtle);
+  border: 1px solid var(--primary-a15); /* derived from --blue-500 */
   border-radius: 100px;
   font-size: 0.625rem;
   font-weight: 500;
-  color: var(--blue-500);
+  color: var(--primary-500);
   margin-bottom: 0.75rem;
 }
 
@@ -613,7 +620,7 @@
 
 .hero-unified-meta-item {
   background: var(--bg-slate);
-  border: 1px solid rgba(11, 12, 12, 0.03);
+  border: 1px solid var(--ink-a03); /* derived from --text-900 */
   border-radius: 0.375rem;
   padding: 0.375rem 0.5rem;
   flex: 1;
@@ -734,18 +741,18 @@
 }
 
 .hero-unified-btn--primary {
-  background: var(--blue-500);
-  color: white;
+  background: var(--primary-500);
+  color: var(--bg-white);
 }
 
 .hero-unified-btn--primary:hover {
-  background: var(--blue-600);
+  background: var(--primary-600);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(29, 112, 184, 0.25);
+  box-shadow: 0 4px 12px var(--primary-a25); /* derived from --blue-500 */
 }
 
 .hero-unified-btn--secondary {
-  background: white;
+  background: var(--bg-white);
   color: var(--text-700);
   border: 1px solid var(--border-light);
 }
@@ -766,7 +773,7 @@
 }
 
 .hero-skel {
-  background: linear-gradient(90deg, #f3f2f1 25%, #e6e5e3 50%, #f3f2f1 75%);
+  background: linear-gradient(90deg, var(--bg-slate) 25%, var(--border-light) 50%, var(--bg-slate) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 0.25rem;
@@ -805,4 +812,175 @@
   height: 2rem;
   flex: 1;
   border-radius: 0.5rem;
+}
+
+.hero-skel--pill {
+  height: 1.25rem;
+  border-radius: 100px;
+}
+
+.hero-skel--text-lg {
+  height: 0.875rem;
+  width: 70%;
+  margin-top: 0.25rem;
+}
+
+.hero-skel--signal {
+  height: 1.375rem;
+  width: 5.5rem;
+  border-radius: 100px;
+}
+
+/* ============================================
+   Result Card — Enriched Sections
+   ============================================ */
+
+/* Activity pill */
+.hero-result-activity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  background: var(--gradient-subtle);
+  border: 1px solid var(--primary-a12);
+  border-radius: 100px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--primary-500);
+  margin-bottom: 0.75rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-result-activity i {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ---- Financial Snapshot Grid ---- */
+.hero-result-snapshot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.375rem;
+  margin-bottom: 0.75rem;
+}
+
+.hero-snapshot-tile {
+  background: var(--bg-slate);
+  border: 1px solid var(--ink-a03);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.hero-snapshot-label {
+  font-size: 0.5625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-400);
+}
+
+.hero-snapshot-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-900);
+  line-height: 1.2;
+}
+
+.hero-snapshot-value--negative {
+  color: var(--risk-high);
+}
+
+/* Trend arrows */
+.hero-trend {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.hero-trend--good {
+  color: var(--risk-low);
+}
+
+.hero-trend--bad {
+  color: var(--risk-high);
+}
+
+/* ---- Health Signal Pills ---- */
+.hero-result-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 0.75rem;
+}
+
+.hero-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 100px;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.hero-signal i {
+  font-size: 0.6875rem;
+}
+
+.hero-signal--good {
+  background: var(--risk-low-bg);
+  color: var(--risk-low);
+  border: 1px solid var(--risk-low-border);
+}
+
+.hero-signal--warning {
+  background: var(--risk-medium-bg);
+  color: var(--risk-medium);
+  border: 1px solid var(--risk-medium-border);
+}
+
+.hero-signal--danger {
+  background: var(--risk-high-bg);
+  color: var(--risk-high);
+  border: 1px solid var(--risk-high-border);
+}
+
+/* ---- Report Teasers ---- */
+.hero-result-teasers {
+  background: var(--bg-slate);
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.hero-result-teaser {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  font-size: 0.5625rem;
+  color: var(--text-500);
+  line-height: 1.5;
+}
+
+.hero-result-teaser i {
+  color: var(--text-400);
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  margin-top: 0.0625rem;
+}
+
+.hero-result-teaser strong {
+  font-weight: 600;
+  color: var(--text-700);
 }
