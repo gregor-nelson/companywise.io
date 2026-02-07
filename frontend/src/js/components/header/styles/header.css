@@ -1,0 +1,219 @@
+/* ============================================
+   COMPANYWISE — header.css
+   Header styles (adapted from Motorwise)
+   ============================================ */
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+  }
+}
+
+/* ============================================
+   HEADER SCROLL STATE
+   ============================================ */
+#header-root {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+#header-root.header-scrolled {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================
+   DRAWER
+   ============================================ */
+#nav-drawer {
+  transition: transform 200ms ease-out;
+  will-change: transform;
+  contain: layout style paint;
+}
+
+#nav-backdrop {
+  transition: opacity 200ms ease-out;
+  will-change: opacity;
+}
+
+.drawer-inner {
+  max-height: 85vh;
+  max-height: 85dvh;
+}
+
+.drawer-content {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.drawer-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   ACCORDION
+   ============================================ */
+.action-input-section {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 150ms ease-out;
+  will-change: grid-template-rows;
+}
+
+.action-input-section.expanded {
+  grid-template-rows: 1fr;
+}
+
+.action-input-section > .action-input-inner {
+  overflow: hidden;
+}
+
+.action-chevron {
+  transition: transform 150ms ease-out;
+}
+
+.action-card.is-expanded .action-chevron {
+  transform: rotate(180deg);
+}
+
+/* ============================================
+   TOOLS HORIZONTAL SCROLL
+   ============================================ */
+.tools-scroll-container {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tools-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   INTERACTIVE STATES
+   ============================================ */
+.action-toggle,
+.nav-card,
+[data-nav-link],
+[data-dropdown-toggle],
+[data-dropdown-item] {
+  transition: background-color 100ms ease, color 100ms ease;
+}
+
+.nav-card-utility {
+  transition: transform 100ms ease, box-shadow 100ms ease;
+}
+
+.nav-card-utility:hover {
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   HAMBURGER
+   ============================================ */
+.hamburger-lines {
+  position: relative;
+}
+
+.hamburger-line {
+  transition: transform 150ms ease, opacity 100ms ease;
+  transform-origin: center;
+}
+
+.drawer-open .hamburger-line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.drawer-open .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.drawer-open .hamburger-line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.hamburger-btn.drawer-open {
+  background-color: rgb(239 246 255);
+  color: rgb(37 99 235);
+}
+
+/* ============================================
+   DESKTOP DROPDOWNS
+   ============================================ */
+[data-dropdown-menu] {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  min-width: 12rem;
+  padding: 0.5rem 0;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  transform: scale(0.95);
+  transform-origin: top right;
+  pointer-events: none;
+  transition: opacity 100ms ease, transform 100ms ease;
+}
+
+[data-dropdown].is-open [data-dropdown-menu] {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+[data-dropdown-toggle] {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(64 64 64);
+}
+
+[data-dropdown-toggle]:hover {
+  color: rgb(37 99 235);
+}
+
+[data-dropdown-toggle] .dropdown-chevron {
+  font-size: 0.75rem;
+  transition: transform 100ms ease;
+}
+
+[data-dropdown].is-open [data-dropdown-toggle] .dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+[data-dropdown-item] {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  color: rgb(64 64 64);
+  text-decoration: none;
+}
+
+[data-dropdown-item]:hover {
+  background-color: rgb(249 250 251);
+  color: rgb(37 99 235);
+}
+
+[data-dropdown-item] i {
+  font-size: 1rem;
+  color: rgb(115 115 115);
+}
+
+[data-dropdown-item]:hover i {
+  color: rgb(37 99 235);
+}
+
+/* ============================================
+   SAFE AREA
+   ============================================ */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .drawer-inner {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

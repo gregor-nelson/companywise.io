@@ -1,0 +1,396 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<!-- prem -->
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+<title>Companies House</title>
+    <!-- FILE_START::style-links.tmpl -->
+<link href="https://resources.companieshouse.gov.uk/css/reset.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://resources.companieshouse.gov.uk/css/text.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://resources.companieshouse.gov.uk/css/960.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://resources.companieshouse.gov.uk/css/style-e90.css" rel="stylesheet" type="text/css" media="screen" />
+
+<style type="text/css">
+h2 {border: 0px; margin: 10px 0;}
+</style>
+<!--[if IE]>
+<style type="text/css">
+form input[type="password"] {
+    padding-right:14px;
+}
+.ui-datepicker-trigger {position:relative; top:-20px;}
+.pseudoLink {
+    margin-right:-20px;
+    margin-left:-20px;
+}
+.positive:link, .positive:visited, input.positive, .disabled:link, .disabled:visited, input.disabled, a.important:link, a.important:visited {border:none;}
+.positive:active, a.important:active {
+    position:inherit;
+    top:0;
+}
+
+
+
+</style>
+<![endif]-->
+<!--[if lt IE 9]>
+<style type="text/css">
+.header img {margin-bottom:-3px;}
+ul.greenTick {margin-left:0;}
+ul.greenTick li {padding-left:9px; list-style-image: url(/images/greenTick16px.png);}
+</style>
+<![endif]-->
+<!--[if lt IE 8]>
+<style type="text/css">
+.header img {margin-bottom:-3px;}
+p.companySubheader {padding-bottom:0;}
+img.fieldStatus {position: relative; top: -15px;}
+</style>
+<![endif]-->
+<!--[if lt IE 7]>
+<script language="JavaScript">
+function correctPNG() // correctly handle PNG transparency in Win IE 5.5 & 6.
+{
+   var arVersion = navigator.appVersion.split("MSIE")
+   var version = parseFloat(arVersion[1])
+   if ((version >= 5.5) && (document.body.filters))
+   {
+      for(var i=0; i<document.images.length; i++)
+      {
+         var img = document.images[i]
+         var imgName = img.src.toUpperCase()
+         if (imgName.substring(imgName.length-3, imgName.length) == "PNG")
+         {
+            var imgID = (img.id) ? "id='" + img.id + "' " : ""
+            var imgClass = (img.className) ? "class='" + img.className + "' " : ""
+            var imgTitle = (img.title) ? "title='" + img.title + "' " : "title='" + img.alt + "' "
+            var imgStyle = "display:inline-block;" + img.style.cssText
+            if (img.align == "left") imgStyle = "float:left;" + imgStyle
+            if (img.align == "right") imgStyle = "float:right;" + imgStyle
+            if (img.parentElement.href) imgStyle = "cursor:hand;" + imgStyle
+            var strNewHTML = "<span " + imgID + imgClass + imgTitle
+            + " style=\"" + "width:" + img.width + "px; height:" + img.height + "px;" + imgStyle + ";"
+            + "filter:progid:DXImageTransform.Microsoft.AlphaImageLoader"
+            + "(src=\'" + img.src + "\', sizingMethod='scale');\"></span>"
+            img.outerHTML = strNewHTML
+            i = i-1
+         }
+      }
+   }
+}
+window.attachEvent("onload", correctPNG);
+</script>
+<![endif]-->
+
+<!-- FILE_END::style-links.tmpl -->
+</head>
+
+<body>
+    <div id="container">
+        <div class="headerLogo">
+            <div class="container_16">
+                <a href="http://www.companieshouse.gov.uk/"><img src="https://resources.companieshouse.gov.uk/images/ch_gds_logo_white.png" alt="" /></a>
+            </div><!--End of class="headerLogo"-->
+        </div>
+
+        <div class="container_16" id="mainContent">
+
+            <h1>Free Accounts Data Product</h1>
+            <h2>Historic Monthly Files</h2>
+
+            <div class="grid_8 alpha">
+                <h2>What is it? </h2>
+                <p>The Accounts Data Product is a free downloadable ZIP file, which contains the individual data files (instance documents) of company accounts filed electronically.</p>
+
+                <p>Historic Accounts data for previous years</font> can be downloaded from the monthly files provided here, whilst the last 12 months accounts data is available from the <a href="en_monthlyaccountsdata.html">monthly files.</a></p>
+
+                <p>The individual data files within the ZIP file will be in one of two formats, either:</p>
+                <ul>
+                     <li>inline XBRL format (.html file extension) or;</li>
+                     <li>XBRL format (.xml file extension).</li>
+                </ul>
+
+                <p><strong>Each data file is provided free of charge and is not supported. Due to its size, each file can take several minutes to download.</strong></p>
+
+                <h2>Additional Information</h2>
+                <p>Data is only available for electronically filed accounts, which currently stands at about 75% of the 2.2 million accounts we expect to be filed each year.</p>
+                <p>You can view the data using Notepad, or a similar text based program.  A rendered image of the accounts can be viewed when opened via a web browser.  To view the data within your browser, use right-click and "View Source".</p>
+                <p>Both iXBRL and XBRL are difficult to manipulate without specialised software.  Below are examples of the data format.<p>
+                <ul>
+                        <li><p><a href="https://resources.companieshouse.gov.uk/toolsToHelp/pdf/inlineXBRLsample.pdf">Sample of iXBRL</a></p></li>
+                        <li><p><a href="https://resources.companieshouse.gov.uk/toolsToHelp/pdf/XBRLsample.pdf">Sample of XBRL</a></p></li>
+                </ul>
+
+                <p> The taxonomies referenced by the accounts data in the monthly files may have changed over the year. For more information on referenced taxonomies,validation and formatting, please read our <a href="https://resources.companieshouse.gov.uk/infoAndGuide/faq/accountsDataProduct.shtml">Free Accounts Data Product FAQs</a>.</p>
+            </div>
+
+            <div class="grid_7 push_1 omega">
+	    <h2>Historic Monthly Download:</h2>
+
+	    <h3>2008:</h3>
+	    <ul>
+            <li><a href="archive/Accounts_Monthly_Data-JanuaryToDecember2008.zip">Accounts_Monthly_Data-JanToDec2008.zip (602Mb)</a></li>
+            </ul>
+	    <h3>2009:</h3>
+	    <ul>
+            <li><a href="archive/Accounts_Monthly_Data-JanuaryToDecember2009.zip">Accounts_Monthly_Data-JanToDec2009.zip (602Mb)</a></li>
+            </ul>
+	    <h3>2010:</h3>
+	    <ul>
+            <li><a href="archive/Accounts_Monthly_Data-January2010.zip">Accounts_Monthly_Data-January2010.zip (130Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-February2010.zip">Accounts_Monthly_Data-February2010.zip (67Mb) </a></li>
+            <li><a href="archive/Accounts_Monthly_Data-March2010.zip">Accounts_Monthly_Data-March2010.zip (72Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-April2010.zip">Accounts_Monthly_Data-April2010.zip (61Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-May2010.zip">Accounts_Monthly_Data-May2010.zip (69Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-June2010.zip">Accounts_Monthly_Data-June2010.zip (76Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-July2010.zip">Accounts_Monthly_Data-July2010.zip (79Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-August2010.zip">Accounts_Monthly_Data-August2010.zip (70Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-September2010.zip">Accounts_Monthly_Data-September2010.zip (116Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-October2010.zip">Accounts_Monthly_Data-October2010.zip (83Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-November2010.zip">Accounts_Monthly_Data-November2010.zip (91Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-December2010.zip">Accounts_Monthly_Data-December2010.zip (197Mb)</a></li>
+            </ul>
+	    <h3>2011:</h3>
+	    <ul>
+            <li><a href="archive/Accounts_Monthly_Data-January2011.zip">Accounts_Monthly_Data-January2011.zip (105Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-February2011.zip">Accounts_Monthly_Data-February2011.zip (98Mb) </a></li>
+            <li><a href="archive/Accounts_Monthly_Data-March2011.zip">Accounts_Monthly_Data-March2011.zip (145Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-April2011.zip">Accounts_Monthly_Data-April2011.zip (119Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-May2011.zip">Accounts_Monthly_Data-May2011.zip (142Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-June2011.zip">Accounts_Monthly_Data-June2011.zip (161Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-July2011.zip">Accounts_Monthly_Data-July2011.zip (160Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-August2011.zip">Accounts_Monthly_Data-August2011.zip (160Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-September2011.zip">Accounts_Monthly_Data-September2011.zip (224Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-October2011.zip">Accounts_Monthly_Data-October2011.zip (169Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-November2011.zip">Accounts_Monthly_Data-November2011.zip (190Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-December2011.zip">Accounts_Monthly_Data-December2011.zip (421Mb)</a></li>
+            </ul>
+	    <h3>2012:</h3>
+	    <ul>
+            <li><a href="archive/Accounts_Monthly_Data-January2012.zip">Accounts_Monthly_Data-January2012.zip (210Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-February2012.zip">Accounts_Monthly_Data-February2012.zip (179Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-March2012.zip">Accounts_Monthly_Data-March2012.zip (216Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-April2012.zip">Accounts_Monthly_Data-April2012.zip (196Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-May2012.zip">Accounts_Monthly_Data-May2012.zip (215Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-June2012.zip">Accounts_Monthly_Data-June2012.zip (221Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-July2012.zip">Accounts_Monthly_Data-July2012.zip (234Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-August2012.zip">Accounts_Monthly_Data-August2012.zip (244Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-September2012.zip">Accounts_Monthly_Data-September2012.zip (328Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-October2012.zip">Accounts_Monthly_Data-October2012.zip (274Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-November2012.zip">Accounts_Monthly_Data-November2012.zip (327Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-December2012.zip">Accounts_Monthly_Data-December2012.zip (679Mb)</a></li>
+            </ul>
+	    <h3>2013:</h3>
+	    <ul>
+            <li><a href="archive/Accounts_Monthly_Data-January2013.zip">Accounts_Monthly_Data-January2013.zip (405Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-February2013.zip">Accounts_Monthly_Data-February2013.zip (413Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-March2013.zip">Accounts_Monthly_Data-March2013.zip (523Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-April2013.zip">Accounts_Monthly_Data-April2013.zip (507Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-May2013.zip">Accounts_Monthly_Data-May2013.zip (533Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-June2013.zip">Accounts_Monthly_Data-June2013.zip (567Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-July2013.zip">Accounts_Monthly_Data-July2013.zip (619Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-August2013.zip">Accounts_Monthly_Data-August2013.zip (544Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-September2013.zip">Accounts_Monthly_Data-September2013.zip (813Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-October2013.zip">Accounts_Monthly_Data-October2013.zip (652Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-November2013.zip">Accounts_Monthly_Data-November2013.zip (654Mb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-December2013.zip">Accounts_Monthly_Data-December2013.zip (1254Mb)</a></li>
+            </ul>
+	    <h3>2014:</h3>
+	    <ul>
+	    <li><a href="archive/Accounts_Monthly_Data-January2014.zip">Accounts_Monthly_Data-January2014.zip (681Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-February2014.zip">Accounts_Monthly_Data-February2014.zip (557Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-March2014.zip">Accounts_Monthly_Data-March2014.zip (687Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-April2014.zip">Accounts_Monthly_Data-April2014.zip (608Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-May2014.zip">Accounts_Monthly_Data-May2014.zip (627Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-June2014.zip">Accounts_Monthly_Data-June2014.zip (723Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-July2014.zip">Accounts_Monthly_Data-July2014.zip (729Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-August2014.zip">Accounts_Monthly_Data-August2014.zip (646Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-September2014.zip">Accounts_Monthly_Data-September2014.zip (990Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-October2014.zip">Accounts_Monthly_Data-October2014.zip (762Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-November2014.zip">Accounts_Monthly_Data-November2014.zip (751Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-December2014.zip">Accounts_Monthly_Data-December2014.zip (1501Mb)</a></li>
+	    </ul>
+	    <h3>2015:</h3>
+	    <ul>
+	    <li><a href="archive/Accounts_Monthly_Data-January2015.zip">Accounts_Monthly_Data-January2015.zip (766Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-February2015.zip">Accounts_Monthly_Data-February2015.zip (658Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-March2015.zip">Accounts_Monthly_Data-March2015.zip (827Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-April2015.zip">Accounts_Monthly_Data-April2015.zip (718Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-May2015.zip">Accounts_Monthly_Data-May2015.zip (735Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-June2015.zip">Accounts_Monthly_Data-June2015.zip (890Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-July2015.zip">Accounts_Monthly_Data-July2015.zip (874Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-August2015.zip">Accounts_Monthly_Data-August2015.zip (776Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-September2015.zip">Accounts_Monthly_Data-September2015.zip (1172Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-October2015.zip">Accounts_Monthly_Data-October2015.zip (904Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-November2015.zip">Accounts_Monthly_Data-November2015.zip (960Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-December2015.zip">Accounts_Monthly_Data-December2015.zip (1639Mb)</a></li>
+	    </ul>
+	    <h3>2016:</h3>
+	    <ul>
+	    <li><a href="archive/Accounts_Monthly_Data-January2016.zip">Accounts_Monthly_Data-January2016.zip (802Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-February2016.zip">Accounts_Monthly_Data-February2016.zip (849Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-March2016.zip">Accounts_Monthly_Data-March2016.zip (960Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-April2016.zip">Accounts_Monthly_Data-April2016.zip (837Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-May2016.zip">Accounts_Monthly_Data-May2016.zip (866Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-June2016.zip">Accounts_Monthly_Data-June2016.zip (965Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-July2016.zip">Accounts_Monthly_Data-July2016.zip (912Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-August2016.zip">Accounts_Monthly_Data-August2016.zip (880Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-September2016.zip">Accounts_Monthly_Data-September2016.zip (1275Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-October2016.zip">Accounts_Monthly_Data-October2016.zip (947Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-November2016.zip">Accounts_Monthly_Data-November2016.zip (1124Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-December2016.zip">Accounts_Monthly_Data-December2016.zip (1989Mb)</a></li>
+	    </ul>
+	    <h3>2017:</h3>
+	    <ul>
+	    <li><a href="archive/Accounts_Monthly_Data-January2017.zip">Accounts_Monthly_Data-January2017.zip (1058Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-February2017.zip">Accounts_Monthly_Data-February2017.zip (868Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-March2017.zip">Accounts_Monthly_Data-March2017.zip (1101Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-April2017.zip">Accounts_Monthly_Data-April2017.zip (893Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-May2017.zip">Accounts_Monthly_Data-May2017.zip (1047Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-June2017.zip">Accounts_Monthly_Data-June2017.zip (1188Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-July2017.zip">Accounts_Monthly_Data-July2017.zip (1127Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-August2017.zip">Accounts_Monthly_Data-August2017.zip (1102Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-September2017.zip">Accounts_Monthly_Data-September2017.zip (1669Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-October2017.zip">Accounts_Monthly_Data-October2017.zip (1298Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-November2017.zip">Accounts_Monthly_Data-November2017.zip (1419Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-December2017.zip">Accounts_Monthly_Data-December2017.zip (2616Mb)</a></li>
+	    </ul>
+	    <h3>2018:</h3>
+	    <ul>
+	    <li><a href="archive/Accounts_Monthly_Data-January2018.zip">Accounts_Monthly_Data-January2018.zip (1469Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-February2018.zip">Accounts_Monthly_Data-February2018.zip (1159Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-March2018.zip">Accounts_Monthly_Data-March2018.zip (1417Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-April2018.zip">Accounts_Monthly_Data-April2018.zip (1274Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-May2018.zip">Accounts_Monthly_Data-May2018.zip (1343Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-June2018.zip">Accounts_Monthly_Data-June2018.zip (1501Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-July2018.zip">Accounts_Monthly_Data-July2018.zip (1462Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-August2018.zip">Accounts_Monthly_Data-August2018.zip (1369Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-September2018.zip">Accounts_Monthly_Data-September2018.zip (1973Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-October2018.zip">Accounts_Monthly_Data-October2018.zip (1683Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-November2018.zip">Accounts_Monthly_Data-November2018.zip (1616Mb)</a></li>
+	    <li><a href="archive/Accounts_Monthly_Data-December2018.zip">Accounts_Monthly_Data-December2018.zip (2965Mb)</a></li>
+	    </ul>
+	    <h3>2019:</h3>
+	    <ul>
+            <li><a href="archive/Accounts_Monthly_Data-January2019.zip">Accounts_Monthly_Data-January2019.zip (1.6Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-February2019.zip">Accounts_Monthly_Data-February2019.zip (1.2Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-March2019.zip">Accounts_Monthly_Data-March2019.zip (1.5Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-April2019.zip">Accounts_Monthly_Data-April2019.zip (1.3Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-May2019.zip">Accounts_Monthly_Data-May2019.zip (1.4Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-June2019.zip">Accounts_Monthly_Data-June2019.zip (1.6Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-July2019.zip">Accounts_Monthly_Data-July2019.zip (1.6Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-August2019.zip">Accounts_Monthly_Data-August2019.zip (1.4Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-September2019.zip">Accounts_Monthly_Data-September2019.zip (2.1Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-October2019.zip">Accounts_Monthly_Data-October2019.zip (1.7Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-November2019.zip">Accounts_Monthly_Data-November2019.zip (1.8Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-December2019.zip">Accounts_Monthly_Data-December2019.zip (3.1Gb)</a></li>
+	    </ul>
+	    <h3>2020:</h3>
+	    <ul>
+            <li><a href="archive/Accounts_Monthly_Data-January2020.zip">Accounts_Monthly_Data-January2020.zip (1.7Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-February2020.zip">Accounts_Monthly_Data-February2020.zip (1.4Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-March2020.zip">Accounts_Monthly_Data-March2020.zip (1.5Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-April2020.zip">Accounts_Monthly_Data-April2020.zip (1.3Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-May2020.zip">Accounts_Monthly_Data-May2020.zip (1.4Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-June2020.zip">Accounts_Monthly_Data-June2020.zip (1.7Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-July2020.zip">Accounts_Monthly_Data-July2020.zip (1.5Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-August2020.zip">Accounts_Monthly_Data-August2020.zip (1.3Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-September2020.zip">Accounts_Monthly_Data-September2020.zip (1.8Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-October2020.zip">Accounts_Monthly_Data-October2020.zip (1.8Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-November2020.zip">Accounts_Monthly_Data-November2020.zip (1.9Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-December2020.zip">Accounts_Monthly_Data-December2020.zip (2.8Gb)</a></li>
+	    </ul>
+	    <h3>2021:</h3>
+	    <ul>
+            <li><a href="archive/Accounts_Monthly_Data-January2021.zip">Accounts_Monthly_Data-January2021.zip (2.0Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-February2021.zip">Accounts_Monthly_Data-February2021.zip (1.7Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-March2021.zip">Accounts_Monthly_Data-March2021.zip (2.5Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-April2021.zip">Accounts_Monthly_Data-April2021.zip (2.2Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-May2021.zip">Accounts_Monthly_Data-May2021.zip (2.1Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-June2021.zip">Accounts_Monthly_Data-June2021.zip (2.4Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-July2021.zip">Accounts_Monthly_Data-July2021.zip (1.9Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-August2021.zip">Accounts_Monthly_Data-August2021.zip (1.7Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-September2021.zip">Accounts_Monthly_Data-September2021.zip (2.6Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-October2021.zip">Accounts_Monthly_Data-October2021.zip (1.9Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-November2021.zip">Accounts_Monthly_Data-November2021.zip (2.1Gb)</a></li>
+            <li><a href="archive/Accounts_Monthly_Data-December2021.zip">Accounts_Monthly_Data-December2021.zip (3.6Gb)</a></li>
+	    </ul>
+	    <h3>2022:</h3>
+<ul>
+
+<li><a href="archive/Accounts_Monthly_Data-January2022.zip">Accounts_Monthly_Data-January2022.zip      (1.9Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-February2022.zip">Accounts_Monthly_Data-February2022.zip    (1.7Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-March2022.zip">Accounts_Monthly_Data-March2022.zip          (2.3Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-April2022.zip">Accounts_Monthly_Data-April2022.zip          (1.7Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-May2022.zip">Accounts_Monthly_Data-May2022.zip              (1.9Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-June2022.zip">Accounts_Monthly_Data-June2022.zip            (2.1Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-July2022.zip">Accounts_Monthly_Data-July2022.zip            (1.9Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-August2022.zip">Accounts_Monthly_Data-August2022.zip        (1.9Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-September2022.zip">Accounts_Monthly_Data-September2022.zip  (2.8Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-October2022.zip">Accounts_Monthly_Data-October2022.zip      (2.1Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-November2022.zip">Accounts_Monthly_Data-November2022.zip    (2.2Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-December2022.zip">Accounts_Monthly_Data-December2022.zip    (1.3Gb)</a></li>
+
+	    </ul>
+	    <h3>2023:</h3>
+<ul>
+<li><a href="archive/Accounts_Monthly_Data-January2023.zip">Accounts_Monthly_Data-January2023.zip     (2.1Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-February2023.zip">Accounts_Monthly_Data-February2023.zip    (1.7Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-March2023.zip">Accounts_Monthly_Data-March2023.zip       (2.5Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-April2023.zip">Accounts_Monthly_Data-April2023.zip       (1.8Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-May2023.zip">Accounts_Monthly_Data-May2023.zip         (2.0Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-June2023.zip">Accounts_Monthly_Data-June2023.zip        (2.3Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-July2023.zip">Accounts_Monthly_Data-July2023.zip        (2.2Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-August2023.zip">Accounts_Monthly_Data-August2023.zip      (2.1Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-September2023.zip">Accounts_Monthly_Data-September2023.zip   (2.5Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-October2023.zip">Accounts_Monthly_Data-October2023.zip     (2.3Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-November2023.zip">Accounts_Monthly_Data-November2023.zip    (2.4Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-December2023.zip">Accounts_Monthly_Data-December2023.zip    (4.1Gb)</a></li>
+	    </ul>
+<h3>2024:</h3>
+<ul>
+<li><a href="archive/Accounts_Monthly_Data-January2024.zip">Accounts_Monthly_Data-January2024.zip     (2.2Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-February2024.zip">Accounts_Monthly_Data-February2024.zip    (2.0Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-March2024.zip">Accounts_Monthly_Data-March2024.zip       (2.4Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-April2024.zip">Accounts_Monthly_Data-April2024.zip       (1.9Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-May2024.zip">Accounts_Monthly_Data-May2024.zip         (1.9Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-June2024.zip">Accounts_Monthly_Data-June2024.zip        (2.1Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-July2024.zip">Accounts_Monthly_Data-July2024.zip        (2.3Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-August2024.zip">Accounts_Monthly_Data-August2024.zip      (1.9Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-September2024.zip">Accounts_Monthly_Data-September2024.zip   (3.0Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-October2024.zip">Accounts_Monthly_Data-October2024.zip     (2.1Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-November2024.zip">Accounts_Monthly_Data-November2024.zip    (2.2Gb)</a></li>
+<li><a href="archive/Accounts_Monthly_Data-December2024.zip">Accounts_Monthly_Data-December2024.zip    (4.0Gb)</a></li>
+        </ul>
+                <strong>Last Updated:</strong> 13/03/2025
+            </div>
+        </div>  <!--End of div class="container_16" id="mainContent"-->
+
+        <div id="footer">
+            <div class="container_16">
+                <span class="email">
+                Email <a href="mailto:enquiries@companieshouse.gov.uk"  class="smallFont"><!-- DS:W0011637 -->enquiries@companieshouse.gov.uk<!-- DE:W0011637 --></a></span>
+
+                <span class="telephone">Telephone +44 (0)303 1234 500 <em>8:30am to 6pm (UK time) Monday to Friday</em></span>
+            </div>
+        </div>
+    </div>   <!--End of div id="container"-->
+    
+<!-- Piwik -->
+    <script type="text/javascript">
+        var pkBaseURL = (("https:" == document.location.protocol) ? "https://stats.companieshouse.gov.uk/piwik/" : "http://stats.companieshouse.gov.uk/piwik/");
+        document.write(unescape("<script src='" + pkBaseURL + "piwik.js' type='text/javascript'></script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 9);
+            piwikTracker.trackPageView();
+            piwikTracker.enableLinkTracking();
+        } 
+        catch( err ) {}
+    </script>
+    <noscript><p><img src="http://stats.companieshouse.gov.uk/piwik/piwik.php?idsite=9" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Code -->
+</body>
+</html>

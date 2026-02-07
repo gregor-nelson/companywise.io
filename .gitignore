@@ -1,0 +1,26 @@
+# Data
+scripts/data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Logs
+logs/
+
+# Environment
+.env
+
+# Node
+node_modules/
+dist/
+
+# Database
+database/companies_house.db
+
+# IDE
+.vscode/
+.idea/

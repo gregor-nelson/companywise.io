@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(dir:*)",
+      "Bash(ls:*)",
+      "Bash(findstr:*)",
+      "Bash(unzip:*)",
+      "Bash(timeout 120 tail:*)",
+      "Bash(tree:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(powershell:*)"
+    ]
+  }
+}

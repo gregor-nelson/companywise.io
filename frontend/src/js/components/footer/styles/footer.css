@@ -1,0 +1,20 @@
+/* ============================================
+   COMPANYWISE — footer.css
+   Footer-specific styles
+   ============================================ */
+
+.cw-footer {
+  /* No explicit background — inherits body bg so -z-10 chevrons remain visible */
+}
+
+.cw-footer a {
+  text-decoration: none;
+}
+
+/* Subtle depth on the floating pill */
+.cw-footer .rounded-2xl.bg-white {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}

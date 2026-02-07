@@ -1,0 +1,374 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+<title>Companies House</title>
+    <!-- FILE_START::style-links.tmpl -->
+<link href="https://resources.companieshouse.gov.uk/css/reset.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://resources.companieshouse.gov.uk/css/text.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://resources.companieshouse.gov.uk/css/960.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://resources.companieshouse.gov.uk/css/style-e90.css" rel="stylesheet" type="text/css" media="screen" />
+
+<style type="text/css">
+h2 {border: 0px; margin: 10px 0;}
+</style>
+<!--[if IE]>
+<style type="text/css">
+form input[type="password"] {
+    padding-right:14px;
+}
+.ui-datepicker-trigger {position:relative; top:-20px;}
+.pseudoLink {
+    margin-right:-20px;
+    margin-left:-20px;
+}
+.positive:link, .positive:visited, input.positive, .disabled:link, .disabled:visited, input.disabled, a.important:link, a.important:visited {border:none;}
+.positive:active, a.important:active {
+    position:inherit;
+    top:0;
+}
+
+
+
+</style>
+<![endif]-->
+<!--[if lt IE 9]>
+<style type="text/css">
+.header img {margin-bottom:-3px;}
+ul.greenTick {margin-left:0;}
+ul.greenTick li {padding-left:9px; list-style-image: url(/images/greenTick16px.png);}
+</style>
+<![endif]-->
+<!--[if lt IE 8]>
+<style type="text/css">
+.header img {margin-bottom:-3px;}
+p.companySubheader {padding-bottom:0;}
+img.fieldStatus {position: relative; top: -15px;}
+</style>
+<![endif]-->
+<!--[if lt IE 7]>
+<script language="JavaScript">
+function correctPNG() // correctly handle PNG transparency in Win IE 5.5 & 6.
+{
+   var arVersion = navigator.appVersion.split("MSIE")
+   var version = parseFloat(arVersion[1])
+   if ((version >= 5.5) && (document.body.filters))
+   {
+      for(var i=0; i<document.images.length; i++)
+      {
+         var img = document.images[i]
+         var imgName = img.src.toUpperCase()
+         if (imgName.substring(imgName.length-3, imgName.length) == "PNG")
+         {
+            var imgID = (img.id) ? "id='" + img.id + "' " : ""
+            var imgClass = (img.className) ? "class='" + img.className + "' " : ""
+            var imgTitle = (img.title) ? "title='" + img.title + "' " : "title='" + img.alt + "' "
+            var imgStyle = "display:inline-block;" + img.style.cssText
+            if (img.align == "left") imgStyle = "float:left;" + imgStyle
+            if (img.align == "right") imgStyle = "float:right;" + imgStyle
+            if (img.parentElement.href) imgStyle = "cursor:hand;" + imgStyle
+            var strNewHTML = "<span " + imgID + imgClass + imgTitle
+            + " style=\"" + "width:" + img.width + "px; height:" + img.height + "px;" + imgStyle + ";"
+            + "filter:progid:DXImageTransform.Microsoft.AlphaImageLoader"
+            + "(src=\'" + img.src + "\', sizingMethod='scale');\"></span>"
+            img.outerHTML = strNewHTML
+            i = i-1
+         }
+      }
+   }
+}
+window.attachEvent("onload", correctPNG);
+</script>
+<![endif]-->
+
+<!-- FILE_END::style-links.tmpl -->
+</head>
+
+<body>
+    <div id="container">
+        <div class="headerLogo">
+            <div class="container_16">
+                <a href="http://www.companieshouse.gov.uk/"><img src="https://resources.companieshouse.gov.uk/images/ch_gds_logo_white.png" alt="" /></a>
+            </div><!--End of class="headerLogo"-->
+        </div>
+
+        <div class="container_16" id="mainContent">
+
+            <h1>Free Accounts Data Product</h1>
+             <h2>Daily Files</h2>
+
+            <div class="grid_8 alpha">
+                <h2>What is it? </h2>
+                <p>The Accounts Data Product is a free downloadable ZIP file, which contains the individual data files (instance documents) of company accounts filed electronically.</p>
+
+<p> The most recent accounts data can be downloaded from the daily files provided here, whilst historic accounts data is available from the <a href="en_monthlyaccountsdata.html">previous year's monthly files.</a></p>
+
+                <p>The individual data files within the ZIP file will be in one of three formats:</p>
+                <ul>
+                     <li>inline XBRL format (.html file extension),</li>
+                     <li>XBRL format (.xml file extension), or</li>
+		     <li>a ZIP file of iXBRL (.zip file extension).</li>
+                </ul>
+
+                <p><strong>Each data file is provided free of charge and is not supported. Due to its size, each file can take several minutes to download.</strong></p>
+
+                <h2>When will it be updated?</h2>
+                <p>A new daily file will be added each morning over a 5-day period (Tuesday-Saturday). Each file will only contain the accounts data registered on the previous day, with the exception of Tuesday's file which will contain data registered on the previous Saturday, Sunday and Monday.</p>
+                
+                <h2>How long is each file available to download?</h2>
+		<p>Each daily file added will only be available to download for 60 calendar days, after which time it will be removed and the data will only be available via the <a href="en_monthlyaccountsdata.html">previous year's monthly files.</a></p>	
+
+			<h2>What information is in the file name?</h2>
+                <p>The daily ZIP file name identifies the date (YYYY-MM-DD) the file was created <br>e.g. AccountsBulkData_2013-12-31.zip.</P>
+	<p> The individual filenames will identify the company number (e.g. 01234567) and balance sheet date (e.g. 31/12/2012). The file type indicates if it is iXBRL (html), XBRL (xml) or a ZIP (zip). <br>e.g. Prod223_0123_01234567_20121231</p>
+                <p>Prod223_0123 are internal run processes.</p>
+                
+
+                <h2>Additional Information</h2>
+                <p>Data is only available for electronically filed accounts, which currently stands at about 75% of the 2.2 million accounts we expect to be filed each year.</p>
+                <p>You can view the data using Notepad, or a similar text based program. ZIP files must be expanded to extract and view the iXBRL. A rendered image of the accounts can be viewed when opened via a web browser.  To view the data within your browser, use right-click and "View Source".</p>
+ <p>Historic accounts data is provided in the <a href="en_monthlyaccountsdata.html">previous year's monthly files.</a></p>
+            </div>
+
+            <div class="grid_7 push_1 omega">
+                <h2>Daily Download:</h2>
+                <ul>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-02-04.zip">Accounts_Bulk_Data-2026-02-04.zip  (50Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-02-03.zip">Accounts_Bulk_Data-2026-02-03.zip  (166Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-31.zip">Accounts_Bulk_Data-2026-01-31.zip  (233Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-30.zip">Accounts_Bulk_Data-2026-01-30.zip  (168Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-29.zip">Accounts_Bulk_Data-2026-01-29.zip  (130Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-28.zip">Accounts_Bulk_Data-2026-01-28.zip  (120Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-27.zip">Accounts_Bulk_Data-2026-01-27.zip  (153Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-24.zip">Accounts_Bulk_Data-2026-01-24.zip  (79Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-23.zip">Accounts_Bulk_Data-2026-01-23.zip  (88Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-22.zip">Accounts_Bulk_Data-2026-01-22.zip  (88Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-21.zip">Accounts_Bulk_Data-2026-01-21.zip  (75Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-20.zip">Accounts_Bulk_Data-2026-01-20.zip  (110Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-17.zip">Accounts_Bulk_Data-2026-01-17.zip  (66Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-16.zip">Accounts_Bulk_Data-2026-01-16.zip  (69Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-15.zip">Accounts_Bulk_Data-2026-01-15.zip  (65Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-14.zip">Accounts_Bulk_Data-2026-01-14.zip  (60Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-13.zip">Accounts_Bulk_Data-2026-01-13.zip  (87Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-10.zip">Accounts_Bulk_Data-2026-01-10.zip  (53Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-09.zip">Accounts_Bulk_Data-2026-01-09.zip  (55Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-08.zip">Accounts_Bulk_Data-2026-01-08.zip  (54Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-07.zip">Accounts_Bulk_Data-2026-01-07.zip  (59Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-06.zip">Accounts_Bulk_Data-2026-01-06.zip  (93Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-03.zip">Accounts_Bulk_Data-2026-01-03.zip  (36Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-02.zip">Accounts_Bulk_Data-2026-01-02.zip  (12Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2026-01-01.zip">Accounts_Bulk_Data-2026-01-01.zip  (255Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-31.zip">Accounts_Bulk_Data-2025-12-31.zip  (226Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-30.zip">Accounts_Bulk_Data-2025-12-30.zip  (255Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-27.zip">Accounts_Bulk_Data-2025-12-27.zip  (24Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-26.zip">Accounts_Bulk_Data-2025-12-26.zip  (11Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-25.zip">Accounts_Bulk_Data-2025-12-25.zip  (174Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-24.zip">Accounts_Bulk_Data-2025-12-24.zip  (384Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-23.zip">Accounts_Bulk_Data-2025-12-23.zip  (467Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-20.zip">Accounts_Bulk_Data-2025-12-20.zip  (301Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-19.zip">Accounts_Bulk_Data-2025-12-19.zip  (291Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-18.zip">Accounts_Bulk_Data-2025-12-18.zip  (215Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-17.zip">Accounts_Bulk_Data-2025-12-17.zip  (190Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-16.zip">Accounts_Bulk_Data-2025-12-16.zip  (226Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-13.zip">Accounts_Bulk_Data-2025-12-13.zip  (127Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-12.zip">Accounts_Bulk_Data-2025-12-12.zip  (144Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-11.zip">Accounts_Bulk_Data-2025-12-11.zip  (126Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-10.zip">Accounts_Bulk_Data-2025-12-10.zip  (127Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-09.zip">Accounts_Bulk_Data-2025-12-09.zip  (148Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-06.zip">Accounts_Bulk_Data-2025-12-06.zip  (91Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-05.zip">Accounts_Bulk_Data-2025-12-05.zip  (93Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-04.zip">Accounts_Bulk_Data-2025-12-04.zip  (93Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-03.zip">Accounts_Bulk_Data-2025-12-03.zip  (91Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-12-02.zip">Accounts_Bulk_Data-2025-12-02.zip  (214Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-29.zip">Accounts_Bulk_Data-2025-11-29.zip  (217Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-28.zip">Accounts_Bulk_Data-2025-11-28.zip  (163Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-27.zip">Accounts_Bulk_Data-2025-11-27.zip  (130Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-26.zip">Accounts_Bulk_Data-2025-11-26.zip  (127Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-25.zip">Accounts_Bulk_Data-2025-11-25.zip  (143Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-22.zip">Accounts_Bulk_Data-2025-11-22.zip  (78Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-21.zip">Accounts_Bulk_Data-2025-11-21.zip  (86Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-20.zip">Accounts_Bulk_Data-2025-11-20.zip  (85Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-19.zip">Accounts_Bulk_Data-2025-11-19.zip  (93Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-18.zip">Accounts_Bulk_Data-2025-11-18.zip  (130Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-15.zip">Accounts_Bulk_Data-2025-11-15.zip  (87Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-14.zip">Accounts_Bulk_Data-2025-11-14.zip  (81Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-13.zip">Accounts_Bulk_Data-2025-11-13.zip  (82Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-12.zip">Accounts_Bulk_Data-2025-11-12.zip  (79Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-11.zip">Accounts_Bulk_Data-2025-11-11.zip  (107Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-08.zip">Accounts_Bulk_Data-2025-11-08.zip  (60Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-07.zip">Accounts_Bulk_Data-2025-11-07.zip  (67Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-06.zip">Accounts_Bulk_Data-2025-11-06.zip  (65Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-05.zip">Accounts_Bulk_Data-2025-11-05.zip  (70Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2025-11-04.zip">Accounts_Bulk_Data-2025-11-04.zip  (99Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-06-04.zip">Accounts_Bulk_Data-2024-06-04.zip  (78Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-06-01.zip">Accounts_Bulk_Data-2024-06-01.zip  (228Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-05-31.zip">Accounts_Bulk_Data-2024-05-31.zip  (181Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-05-30.zip">Accounts_Bulk_Data-2024-05-30.zip  (129Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-05-29.zip">Accounts_Bulk_Data-2024-05-29.zip  (117Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-05-28.zip">Accounts_Bulk_Data-2024-05-28.zip  (55Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-05-25.zip">Accounts_Bulk_Data-2024-05-25.zip  (85Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-05-22.zip">Accounts_Bulk_Data-2024-05-22.zip  (80Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-05-01.zip">Accounts_Bulk_Data-2024-05-01.zip  (287Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-04-30.zip">Accounts_Bulk_Data-2024-04-30.zip  (220Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-03-15.zip">Accounts_Bulk_Data-2024-03-15.zip  (77Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-03-01.zip">Accounts_Bulk_Data-2024-03-01.zip  (286Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-01-03.zip">Accounts_Bulk_Data-2024-01-03.zip  (291Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2024-01-02.zip">Accounts_Bulk_Data-2024-01-02.zip  (213Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-30.zip">Accounts_Bulk_Data-2023-12-30.zip  (166Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-29.zip">Accounts_Bulk_Data-2023-12-29.zip  (123Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-28.zip">Accounts_Bulk_Data-2023-12-28.zip  (26Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-27.zip">Accounts_Bulk_Data-2023-12-27.zip  (80Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-26.zip">Accounts_Bulk_Data-2023-12-26.zip  (378Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-23.zip">Accounts_Bulk_Data-2023-12-23.zip  (239Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-22.zip">Accounts_Bulk_Data-2023-12-22.zip  (436Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-21.zip">Accounts_Bulk_Data-2023-12-21.zip  (646Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-20.zip">Accounts_Bulk_Data-2023-12-20.zip  (320Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-19.zip">Accounts_Bulk_Data-2023-12-19.zip  (160Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-16.zip">Accounts_Bulk_Data-2023-12-16.zip  (171Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-15.zip">Accounts_Bulk_Data-2023-12-15.zip  (157Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-14.zip">Accounts_Bulk_Data-2023-12-14.zip  (153Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-13.zip">Accounts_Bulk_Data-2023-12-13.zip  (175Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-12.zip">Accounts_Bulk_Data-2023-12-12.zip  (98Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-09.zip">Accounts_Bulk_Data-2023-12-09.zip  (108Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-08.zip">Accounts_Bulk_Data-2023-12-08.zip  (110Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-07.zip">Accounts_Bulk_Data-2023-12-07.zip  (113Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-06.zip">Accounts_Bulk_Data-2023-12-06.zip  (109Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-02.zip">Accounts_Bulk_Data-2023-12-02.zip  (83Mb)</a></li>
+                
+                    <li><a href="Accounts_Bulk_Data-2023-12-01.zip">Accounts_Bulk_Data-2023-12-01.zip  (283Mb)</a></li>
+                
+                </ul>
+                <strong>Last Updated:</strong> 04/02/2026
+            </div>
+        </div>  <!--End of div class="container_16" id="mainContent"-->
+
+        <div id="footer">
+            <div class="container_16">
+                <span class="email">
+                Email <a href="mailto:enquiries@companieshouse.gov.uk"  class="smallFont"><!-- DS:W0011637 -->enquiries@companieshouse.gov.uk<!-- DE:W0011637 --></a></span>
+
+                <span class="telephone">Telephone +44 (0)303 1234 500 <em>8:30am to 6pm (UK time) Monday to Friday</em></span>
+            </div>
+        </div>
+    </div>   <!--End of div id="container"-->
+<!--    
+<!-- Piwik -->
+    <script type="text/javascript">
+        var pkBaseURL = (("https:" == document.location.protocol) ? "https://stats.companieshouse.gov.uk/piwik/" : "http://stats.companieshouse.gov.uk/piwik/");
+        document.write(unescape("<script src='" + pkBaseURL + "piwik.js' type='text/javascript'></script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 9);
+            piwikTracker.trackPageView();
+            piwikTracker.enableLinkTracking();
+        } 
+        catch( err ) {}
+    </script>
+    <noscript><p><img src="http://stats.companieshouse.gov.uk/piwik/piwik.php?idsite=9" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Code -->
+-->
+</body>
+</html>

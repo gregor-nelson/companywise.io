@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CompanyWise — Will this company pay your invoice?</title>
+  <meta name="description" content="Free company credit checks for UK freelancers. Enter a company name, get a plain-English risk verdict. No jargon, no subscriptions, no bait-and-switch.">
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Phosphor Icons -->
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="../../styles/main.css">
+  <link rel="stylesheet" href="../../js/components/header/styles/header.css">
+  <link rel="stylesheet" href="../../js/components/footer/styles/footer.css">
+  <link rel="stylesheet" href="../../js/components/hero/styles/hero.css">
+  <link rel="stylesheet" href="../../js/components/how-it-works/styles/how-it-works.css">
+  <link rel="stylesheet" href="../../js/components/what-we-check/styles/what-we-check.css">
+  <link rel="stylesheet" href="../../js/components/what-we-check/styles/components/financial.css">
+  <link rel="stylesheet" href="../../js/components/pricing/styles/pricing.css">
+  <link rel="stylesheet" href="../../js/components/why-us/styles/why-companywise.css">
+  <link rel="stylesheet" href="../../js/components/faq/styles/faq.css">
+  <link rel="stylesheet" href="../../js/components/call-to-action/styles/cta.css">
+  <link rel="stylesheet" href="../../js/components/modal/styles/modal.css">
+
+  <!-- SVG Filter for Chevron Rounding -->
+  <svg width="0" height="0" style="position:absolute;pointer-events:none;">
+    <defs>
+      <filter id="chevron-round">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+        <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo"/>
+        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Jost', 'system-ui', 'sans-serif'],
+            jost: ['Jost', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="min-h-screen font-sans">
+
+  <!-- ====== HEADER (injected by header.js) ====== -->
+  <div id="header-container"></div>
+
+
+  <!-- ====== HERO (injected by hero.js) ====== -->
+  <div id="hero-container"></div>
+
+
+  <hr class="section-divider">
+
+
+  <!-- ====== STATS ====== -->
+  <section class="section py-12 md:py-16">
+    <div class="max-w-5xl mx-auto px-5">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+        <div class="text-center fade-up">
+          <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums" data-count="5300000" data-suffix="+">0</div>
+          <p class="text-xs text-neutral-400 mt-0.5">UK companies indexed</p>
+        </div>
+        <div class="text-center fade-up">
+          <div class="text-2xl sm:text-3xl font-bold text-blue-500">Free</div>
+          <p class="text-xs text-neutral-400 mt-0.5">No account needed</p>
+        </div>
+        <div class="text-center fade-up">
+          <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums" data-count="12" data-suffix=" flags">0</div>
+          <p class="text-xs text-neutral-400 mt-0.5">Risk signals checked</p>
+        </div>
+        <div class="text-center fade-up">
+          <div class="text-2xl sm:text-3xl font-bold text-emerald-500 tabular-nums" data-count="3" data-suffix="s">0</div>
+          <p class="text-xs text-neutral-400 mt-0.5">Average check time</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <hr class="section-divider">
+
+
+  <!-- ====== HOW IT WORKS (injected by how-it-works.js) ====== -->
+  <div data-component="how-it-works"></div>
+
+
+  <hr class="section-divider">
+
+
+  <!-- ====== WHAT WE CHECK (injected by what-we-check.js) ====== -->
+  <div data-component="what-we-check"></div>
+
+
+  <hr class="section-divider">
+
+
+  <!-- ====== PRICING (injected by pricing.js) ====== -->
+  <div data-component="pricing"></div>
+
+
+  <hr class="section-divider">
+
+
+  <!-- ====== WHY COMPANYWISE (injected by why-companywise.js) ====== -->
+  <div data-component="why-companywise"></div>
+
+
+  <hr class="section-divider">
+
+
+  <!-- ====== FAQ (injected by faq.js) ====== -->
+  <div data-component="faq"></div>
+
+
+  <hr class="section-divider">
+
+
+  <!-- ====== CTA (injected by cta.js) ====== -->
+  <div data-component="cta"></div>
+
+
+  <!-- ====== FOOTER (injected by footer.js) ====== -->
+  <div id="footer-container"></div>
+
+  <!-- Scripts: header + footer + hero first, then page modules -->
+  <script src="../../js/data/mock-data.js"></script>
+  <script src="../../js/components/header/header.js"></script>
+  <script src="../../js/components/footer/footer.js"></script>
+  <script src="../../js/components/hero/hero.js"></script>
+  <script src="../../js/components/how-it-works/how-it-works.js"></script>
+  <script src="../../js/components/what-we-check/index.js"></script>
+  <script src="../../js/components/what-we-check/components/financial.js"></script>
+  <script src="../../js/components/what-we-check/what-we-check.js"></script>
+  <script src="../../js/components/pricing/pricing.js"></script>
+  <script src="../../js/components/why-us/why-companywise.js"></script>
+  <script src="../../js/components/faq/faq.js"></script>
+  <script src="../../js/components/call-to-action/cta.js"></script>
+  <script src="../../js/components/modal/modal.js"></script>
+  <script src="../../js/main.js"></script>
+
+</body>
+</html>

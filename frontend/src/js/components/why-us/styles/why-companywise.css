@@ -1,0 +1,402 @@
+/* ============================================
+   COMPANYWISE — why-companywise.css
+   Why CompanyWise (comparison) section styles
+   Matching Motorwise design system
+   ============================================ */
+
+/* ---- Section Container ---- */
+.why-section {
+  position: relative;
+  padding: var(--section-gap) 0;
+  overflow: hidden;
+}
+
+/* ---- Background Elements ---- */
+.why-bg-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.015;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.why-blur-accent {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(60px);
+  opacity: 0;
+  transition: opacity 1s ease-out;
+  z-index: 0;
+}
+
+.why-blur-accent.is-visible {
+  opacity: 1;
+}
+
+.why-blur-accent--left {
+  top: 10%;
+  left: -8rem;
+  width: 20rem;
+  height: 20rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(99, 102, 241, 0.06));
+}
+
+.why-blur-accent--right {
+  bottom: 10%;
+  right: -10rem;
+  width: 18rem;
+  height: 18rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.06));
+  transition-delay: 150ms;
+}
+
+/* ---- Container ---- */
+.why-container {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 768px) {
+  .why-container {
+    padding: 0 1.5rem;
+  }
+}
+
+/* ---- Section Header ---- */
+.why-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .why-header {
+    margin-bottom: 3rem;
+  }
+}
+
+.why-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 100px;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  background: linear-gradient(to bottom right, #eff6ff, rgba(219, 234, 254, 0.5));
+  color: var(--blue-500);
+  margin-bottom: 1rem;
+}
+
+.why-label i {
+  font-size: 0.875rem;
+}
+
+.why-title {
+  font-size: clamp(1.625rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  color: var(--text-900);
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.why-subtitle {
+  font-size: 1rem;
+  color: var(--text-500);
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ---- Table Wrapper ---- */
+.why-table-wrapper {
+  margin-bottom: 3rem;
+}
+
+.why-table-container {
+  background: white;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ---- Table ---- */
+.why-table {
+  width: 100%;
+  min-width: 540px;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+/* ---- Table Header ---- */
+.why-th {
+  padding: 1.25rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-400);
+  background: linear-gradient(to bottom, #fafafa, #f5f5f5);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.why-th--feature {
+  text-align: left;
+  width: 40%;
+  padding-left: 1.5rem;
+}
+
+.why-th--highlight {
+  background: linear-gradient(to bottom, #eff6ff, #e5efff);
+  color: var(--blue-600);
+  font-weight: 600;
+}
+
+.why-th-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.why-th-brand-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.5rem;
+  background: var(--blue-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.why-th-brand-icon i {
+  font-size: 0.75rem;
+  color: white;
+}
+
+.why-th--competitor {
+  color: var(--text-400);
+  font-weight: 400;
+}
+
+/* ---- Table Body ---- */
+.why-tr {
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out, background-color 0.2s ease;
+}
+
+.why-tr.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.why-tr:hover {
+  background: rgba(59, 130, 246, 0.02);
+}
+
+.why-tr:not(.why-tr--last) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* Row stagger delays */
+.why-tr:nth-child(1) { transition-delay: 0ms; }
+.why-tr:nth-child(2) { transition-delay: 60ms; }
+.why-tr:nth-child(3) { transition-delay: 120ms; }
+.why-tr:nth-child(4) { transition-delay: 180ms; }
+.why-tr:nth-child(5) { transition-delay: 240ms; }
+
+/* ---- Table Cells ---- */
+.why-td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.why-td--feature {
+  text-align: left;
+  padding-left: 1.5rem;
+}
+
+.why-td--highlight {
+  background: rgba(239, 246, 255, 0.5);
+}
+
+/* ---- Feature Label ---- */
+.why-feature-label {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-800);
+}
+
+.why-feature-label i {
+  font-size: 1rem;
+  color: var(--text-400);
+  flex-shrink: 0;
+}
+
+/* ---- Check Icons ---- */
+.why-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.why-check i {
+  font-size: 1.375rem;
+  transition: transform 0.2s ease;
+}
+
+.why-tr:hover .why-check i {
+  transform: scale(1.1);
+}
+
+.why-check--yes i {
+  color: #059669;
+}
+
+.why-check--no i {
+  color: #ef4444;
+}
+
+.why-check--partial i {
+  color: #f59e0b;
+}
+
+/* ---- Highlights Grid ---- */
+.why-highlights {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .why-highlights {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+/* ---- Highlight Item ---- */
+.why-highlight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 1.25rem;
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease-out;
+}
+
+.why-highlight-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 640px) {
+  .why-highlight-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+/* ---- Highlight Icon ---- */
+.why-highlight-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.why-highlight-icon i {
+  font-size: 1.25rem;
+}
+
+.why-highlight-icon--emerald {
+  background: linear-gradient(to bottom right, #ecfdf5, rgba(209, 250, 229, 0.5));
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.why-highlight-icon--emerald i {
+  color: #059669;
+}
+
+.why-highlight-icon--blue {
+  background: linear-gradient(to bottom right, #eff6ff, rgba(219, 234, 254, 0.5));
+  border: 1px solid rgba(191, 219, 254, 0.5);
+}
+
+.why-highlight-icon--blue i {
+  color: var(--blue-500);
+}
+
+.why-highlight-icon--amber {
+  background: linear-gradient(to bottom right, #fffbeb, rgba(254, 243, 199, 0.5));
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.why-highlight-icon--amber i {
+  color: #d97706;
+}
+
+/* ---- Highlight Content ---- */
+.why-highlight-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.why-highlight-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-900);
+  margin: 0 0 0.25rem;
+}
+
+.why-highlight-desc {
+  font-size: 0.8125rem;
+  color: var(--text-500);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ---- Fade-in Animation ---- */
+.why-section .fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.why-section .fade-in-up.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Header stagger */
+.why-header .fade-in-up:nth-child(1) { transition-delay: 0ms; }
+.why-header .fade-in-up:nth-child(2) { transition-delay: 80ms; }
+.why-header .fade-in-up:nth-child(3) { transition-delay: 160ms; }
+
+/* Table wrapper delay */
+.why-table-wrapper.fade-in-up {
+  transition-delay: 200ms;
+}
+
+/* Highlights stagger */
+.why-highlights .fade-in-up:nth-child(1) { transition-delay: 400ms; }
+.why-highlights .fade-in-up:nth-child(2) { transition-delay: 480ms; }
+.why-highlights .fade-in-up:nth-child(3) { transition-delay: 560ms; }
