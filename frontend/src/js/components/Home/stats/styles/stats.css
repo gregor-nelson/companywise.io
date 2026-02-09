@@ -1,0 +1,100 @@
+/* ============================================
+   COMPANYWISE — stats.css
+   Stats bar styles · Mobile-first
+   Colour palette: design tokens
+   ============================================ */
+
+/* ---- Section ---- */
+.stats-section {
+  position: relative;
+  padding: var(--space-10) 0;
+}
+
+@media (min-width: 768px) {
+  .stats-section {
+    padding: var(--space-14) 0;
+  }
+}
+
+/* ---- Container ---- */
+.stats-container {
+  max-width: var(--max-w-7xl);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .stats-container {
+    padding: 0 var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .stats-container {
+    padding: 0 var(--space-8);
+  }
+}
+
+/* ---- Grid ---- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+/* ---- Item ---- */
+.stats-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-1);
+  opacity: var(--opacity-0);
+  transform: translateY(var(--space-4));
+  transition: opacity var(--duration-500) var(--ease-out),
+              transform var(--duration-500) var(--ease-out-expo);
+}
+
+.stats-item.visible {
+  opacity: var(--opacity-100);
+  transform: translateY(0);
+}
+
+/* ---- Value ---- */
+.stats-value {
+  font-size: clamp(var(--text-2xl), 4vw, var(--text-4xl));
+  font-weight: var(--font-bold);
+  color: var(--text);
+  line-height: var(--leading-none);
+  letter-spacing: var(--tracking-tight);
+}
+
+.stats-value--brand {
+  color: var(--brand);
+}
+
+.stats-value--success {
+  color: var(--success);
+}
+
+/* ---- Label ---- */
+.stats-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0;
+  line-height: var(--leading-normal);
+}
+
+@media (min-width: 768px) {
+  .stats-label {
+    font-size: var(--text-base);
+  }
+}

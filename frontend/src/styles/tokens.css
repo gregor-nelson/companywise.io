@@ -122,6 +122,7 @@
   /* ── Typography ───────────────────────────── */
 
   --font:           'Overpass', system-ui, sans-serif;
+  --font-display:   'Jost', system-ui, sans-serif;
   --font-mono:      'SF Mono', 'Consolas', 'Liberation Mono', monospace;
 
   /* Font size — Tailwind text-{size} scale */

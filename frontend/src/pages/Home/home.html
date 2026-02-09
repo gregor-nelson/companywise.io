@@ -13,6 +13,9 @@
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
+  <!-- Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap">
+
   <!-- Phosphor Icons -->
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
@@ -24,9 +27,13 @@
   <link rel="stylesheet" href="../../js/components/Global/header/styles/header.css">
   <link rel="stylesheet" href="../../js/components/Global/footer/styles/footer.css">
   <link rel="stylesheet" href="../../js/components/Home/hero/styles/hero.css">
+  <link rel="stylesheet" href="../../js/components/Home/stats/styles/stats.css">
   <link rel="stylesheet" href="../../js/components/Home/how-it-works/styles/how-it-works.css">
   <link rel="stylesheet" href="../../js/components/Home/what-we-check/styles/what-we-check.css">
   <link rel="stylesheet" href="../../js/components/Home/what-we-check/styles/components/financial.css">
+  <link rel="stylesheet" href="../../js/components/Home/what-we-check/styles/components/stability.css">
+  <link rel="stylesheet" href="../../js/components/Home/what-we-check/styles/components/directors.css">
+  <link rel="stylesheet" href="../../js/components/Home/what-we-check/styles/components/operations.css">
   <link rel="stylesheet" href="../../js/components/Home/pricing/styles/pricing.css">
   <link rel="stylesheet" href="../../js/components/Home/why-us/styles/why-companywise.css">
   <link rel="stylesheet" href="../../js/components/Home/faq/styles/faq.css">
@@ -39,30 +46,6 @@
   <link rel="stylesheet" href="../../js/components/Handlers/upgrade-prompt/styles/upgrade-prompt.css">
   <link rel="stylesheet" href="../../js/components/Handlers/account-modal/styles/account-modal.css">
 
-  <!-- SVG Filter for Chevron Rounding -->
-  <svg width="0" height="0" style="position:absolute;pointer-events:none;">
-    <defs>
-      <filter id="chevron-round">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
-        <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo"/>
-        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
-      </filter>
-    </defs>
-  </svg>
-
-  <!-- Tailwind Config (kept for sub-component migration) -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Jost', 'system-ui', 'sans-serif'],
-            jost: ['Jost', 'system-ui', 'sans-serif'],
-          },
-        },
-      },
-    };
-  </script>
 </head>
 
 <body>
@@ -73,29 +56,7 @@
 
   <hr class="section-divider">
 
-  <!-- ====== STATS ====== -->
-  <section class="section stats">
-    <div class="stats__inner">
-      <div class="stats__grid stagger">
-        <div class="stats__item fade-up">
-          <div class="stats__value" data-count="5300000" data-suffix="+">0</div>
-          <p class="stats__label">UK companies indexed</p>
-        </div>
-        <div class="stats__item fade-up">
-          <div class="stats__value stats__value--brand">Free</div>
-          <p class="stats__label">No account needed</p>
-        </div>
-        <div class="stats__item fade-up">
-          <div class="stats__value" data-count="12" data-suffix=" flags">0</div>
-          <p class="stats__label">Risk signals checked</p>
-        </div>
-        <div class="stats__item fade-up">
-          <div class="stats__value stats__value--success" data-count="3" data-suffix="s">0</div>
-          <p class="stats__label">Average check time</p>
-        </div>
-      </div>
-    </div>
-  </section>
+  <div data-component="stats"></div>
 
   <hr class="section-divider">
 
@@ -130,9 +91,13 @@
   <script src="../../js/components/Home/hero/api.js"></script>
   <script src="../../js/components/Home/hero/search.js"></script>
   <script src="../../js/components/Home/hero/hero.js"></script>
+  <script src="../../js/components/Home/stats/stats.js"></script>
   <script src="../../js/components/Home/how-it-works/how-it-works.js"></script>
   <script src="../../js/components/Home/what-we-check/index.js"></script>
   <script src="../../js/components/Home/what-we-check/components/financial.js"></script>
+  <script src="../../js/components/Home/what-we-check/components/stability.js"></script>
+  <script src="../../js/components/Home/what-we-check/components/directors.js"></script>
+  <script src="../../js/components/Home/what-we-check/components/operations.js"></script>
   <script src="../../js/components/Home/what-we-check/what-we-check.js"></script>
   <script src="../../js/components/Home/pricing/pricing.js"></script>
   <script src="../../js/components/Home/why-us/why-companywise.js"></script>
