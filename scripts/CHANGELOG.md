@@ -1,6 +1,64 @@
 # Scripts & Loader Changelog
 
+## 2026-02-09 — Batch Loader Reliability & Data Integrity Fixes
+
+An independent audit found 3 critical and 3 high-severity bugs in the error-handling
+paths introduced by the 2026-02-08 performance optimisations. The previous verification
+only tested the happy path; none of these failure scenarios were exercised.
+
+### Critical Fixes
+
+1. **Stuck batch on partial failure** (load_all_batches.py) — `create_batch()` commits a
+   `batches` row (UNIQUE filename) before loading begins. If `load_batch()` then fails,
+   `mark_batch_complete()` never runs. On retry the UNIQUE constraint blocks re-insertion,
+   permanently sticking the batch. Added `cleanup_incomplete_batch()` which removes the
+   incomplete batch row and all associated filings/facts in FK-safe order. Called both
+   before each `load_batch()` (pre-retry) and in the except block (immediate cleanup).
+
+2. **Context dates not ISO-normalized** (bulk_loader.py) — `resolve_context()` stored raw
+   parser dates (e.g. "28 February 2023") into `context_definitions` without normalizing.
+   Filing-level dates were already normalized. The same period expressed in different
+   text formats created duplicate lookup rows, defeating deduplication. Now calls
+   `normalize_date_to_iso()` on all three date fields before both hashing and INSERT.
+
+3. **No cleanup on batch failure** (load_all_batches.py) — When `load_batch()` threw an
+   exception, partially-committed filings and facts stayed in the database with no
+   cleanup. The except block now calls `conn.rollback()` to discard uncommitted chunk
+   data, then `cleanup_incomplete_batch()` to remove previously committed partial data.
+
+### High-Severity Fixes
+
+4. **Indexes lost on crash** (load_all_batches.py) — `recreate_indexes()` was inside the
+   `try` block, not `finally`. A crash between `drop_indexes_for_bulk_load()` and
+   `recreate_indexes()` left all 12 non-unique indexes missing until the next run.
+   Moved `recreate_indexes()` to the `finally` block with its own error handling.
+
+5. **Bare `except: pass` swallowing all errors** (load_all_batches.py, bulk_loader.py) —
+   Three instances of `except: pass` caught `SystemExit`, `KeyboardInterrupt`, and gave
+   zero error visibility. Replaced all with `except Exception as e: logger.warning(...)`.
+
+6. **No connection recovery after failure** (load_all_batches.py) — One connection for the
+   entire run meant a corrupted connection after a batch failure would cascade to all
+   subsequent batches. Added `check_connection_health()` that runs `SELECT 1` after each
+   failure. If unhealthy, the connection is closed and recreated with bulk-load PRAGMAs,
+   and the `ResolutionCache` is rebuilt from the database.
+
+### Files Modified
+
+| File | Fixes |
+|------|-------|
+| `scripts/load_all_batches.py` | #1, #3, #4, #5, #6 |
+| `backend/loader/bulk_loader.py` | #2, #5 |
+| `scripts/CHANGELOG.md` | This entry |
+
+---
+
 ## 2026-02-08 — Bulk Load Performance & Integrity Improvements
+
+> **Note (2026-02-09):** The verification below was found to be incomplete — it only
+> checked the happy path. Error-handling paths had 6 bugs (3 critical, 3 high). See
+> the 2026-02-09 entry above for the fixes. The referenced `VERIFY_CHANGES.md` no
+> longer exists.
 
 ### Bug Fixes
 

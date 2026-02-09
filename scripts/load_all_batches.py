@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import logging
 import signal
+import sqlite3
 import sys
 import time
 from datetime import datetime, timedelta
@@ -98,6 +99,55 @@ def get_pending_batches() -> list[Path]:
     pending = [z for z in all_zips if z.name not in loaded]
 
     return pending
+
+
+def cleanup_incomplete_batch(conn: sqlite3.Connection, filename: str) -> None:
+    """Remove an incomplete batch and all its associated data.
+
+    Queries for a batch row with the given filename where processed_at IS NULL.
+    If found, deletes numeric_facts, text_facts, filings, and the batch row
+    in FK-safe order so the filename can be reused on retry.
+    """
+    row = conn.execute(
+        "SELECT id FROM batches WHERE filename = ? AND processed_at IS NULL",
+        (filename,)
+    ).fetchone()
+
+    if row is None:
+        return
+
+    batch_id = row["id"]
+
+    # Delete facts -> filings -> batch (FK-safe order)
+    conn.execute(
+        "DELETE FROM numeric_facts WHERE filing_id IN "
+        "(SELECT id FROM filings WHERE batch_id = ?)",
+        (batch_id,)
+    )
+    conn.execute(
+        "DELETE FROM text_facts WHERE filing_id IN "
+        "(SELECT id FROM filings WHERE batch_id = ?)",
+        (batch_id,)
+    )
+    filing_count = conn.execute(
+        "DELETE FROM filings WHERE batch_id = ?", (batch_id,)
+    ).rowcount
+    conn.execute("DELETE FROM batches WHERE id = ?", (batch_id,))
+    conn.commit()
+
+    logger.info(
+        f"Cleaned up incomplete batch '{filename}': "
+        f"removed {filing_count} filings and associated facts"
+    )
+
+
+def check_connection_health(conn: sqlite3.Connection) -> bool:
+    """Return True if the connection can execute a trivial query."""
+    try:
+        conn.execute("SELECT 1")
+        return True
+    except Exception:
+        return False
 
 
 def format_duration(seconds: float) -> str:
@@ -206,6 +256,9 @@ def load_all_batches(
             batch_start = time.time()
 
             try:
+                # Fix 1: clean up any incomplete previous attempt for this file
+                cleanup_incomplete_batch(conn, batch_path.name)
+
                 result = load_batch(batch_path, conn=conn, cache=cache)
                 results.append(result)
 
@@ -224,16 +277,41 @@ def load_all_batches(
                 logger.error(f"BATCH FAILED: {batch_path.name} - {e}")
                 failed_batches.append((batch_path.name, str(e)))
 
-        # Recreate indexes after all batches are done
-        logger.info("Recreating indexes...")
-        recreate_indexes(conn)
+                # Fix 3: rollback uncommitted chunk data, then clean up
+                # committed partial data so the batch can be retried
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+                try:
+                    cleanup_incomplete_batch(conn, batch_path.name)
+                except Exception as cleanup_err:
+                    logger.warning(f"Cleanup after failure also failed: {cleanup_err}")
+
+                # Fix 6: if connection is broken, recreate it
+                if not check_connection_health(conn):
+                    logger.warning("Connection unhealthy after failure. Recreating...")
+                    try:
+                        conn.close()
+                    except Exception:
+                        pass
+                    conn = get_connection()
+                    configure_for_bulk_load(conn)
+                    cache = ResolutionCache(conn)
 
     finally:
+        # Fix 4: recreate indexes in finally so they're restored even on crash
+        try:
+            logger.info("Recreating indexes...")
+            recreate_indexes(conn)
+        except Exception as e:
+            logger.error(f"Failed to recreate indexes: {e}")
+        # Fix 5: log errors instead of bare except:pass
         try:
             restore_normal_config(conn)
             conn.commit()
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Error during cleanup: {e}")
         conn.close()
 
     # Calculate totals

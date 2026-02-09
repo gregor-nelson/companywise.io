@@ -194,12 +194,18 @@ class ResolutionCache:
                 self._dim_patterns[pattern_hash] = dimension_pattern_id
 
         # Step 2: Resolve context definition
+        # Normalize dates to ISO so that e.g. "28 February 2023" and
+        # "2023-02-28" hash identically and share one lookup row.
+        instant = normalize_date_to_iso(context.instant_date)
+        start = normalize_date_to_iso(context.start_date)
+        end = normalize_date_to_iso(context.end_date)
+
         # Build canonical string for hashing
         def_parts = "|".join([
             context.period_type or "",
-            context.instant_date or "",
-            context.start_date or "",
-            context.end_date or "",
+            instant or "",
+            start or "",
+            end or "",
             str(dimension_pattern_id) if dimension_pattern_id is not None else "",
         ])
         definition_hash = hashlib.sha256(def_parts.encode()).hexdigest()
@@ -213,9 +219,9 @@ class ResolutionCache:
                VALUES (?, ?, ?, ?, ?, ?)""",
             (
                 context.period_type,
-                context.instant_date,
-                context.start_date,
-                context.end_date,
+                instant,
+                start,
+                end,
                 dimension_pattern_id,
                 definition_hash,
             )
@@ -687,8 +693,8 @@ def load_batch(
             try:
                 restore_normal_config(conn)
                 conn.commit()
-            except:
-                pass
+            except Exception as e:
+                logger.warning(f"Error restoring config on cleanup: {e}")
             conn.close()
 
 
@@ -810,8 +816,8 @@ def load_batch_sequential(
             try:
                 restore_normal_config(conn)
                 conn.commit()
-            except:
-                pass
+            except Exception as e:
+                logger.warning(f"Error restoring config on cleanup: {e}")
             conn.close()
 
 
