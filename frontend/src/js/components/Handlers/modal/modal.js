@@ -126,12 +126,12 @@
 
       this.container.innerHTML = `
         <div class="report-modal-overlay${this.isOpen ? ' active' : ''}" id="report-modal">
-          <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="report-modal-backdrop"></div>
-          <div class="report-modal-container relative w-full h-full z-[1]">
-            <div class="bg-white flex flex-col h-full overflow-hidden">
+          <div class="rm-backdrop" id="report-modal-backdrop"></div>
+          <div class="report-modal-container rm-container">
+            <div class="rm-panel">
               ${headerHtml}
-              <div class="flex-1 overflow-y-auto p-5 sm:p-8 flex flex-col gap-6">
-                <div class="w-full max-w-3xl mx-auto flex flex-col gap-5">
+              <div class="rm-body">
+                <div class="rm-body-inner">
                   ${bodyHtml}
                 </div>
               </div>
@@ -155,15 +155,15 @@
     renderHeader(report) {
       const subtitle = [report.companyNumber, report.jurisdiction].filter(Boolean).map(escapeHtml).join(' \u00B7 ');
       return `
-        <div class="flex justify-between items-start gap-4 px-5 sm:px-8 py-5 border-b border-neutral-200/50 shrink-0">
-          <div class="w-full max-w-3xl mx-auto flex justify-between items-start gap-4">
-            <div class="min-w-0 flex-1">
-              <h2 class="text-lg sm:text-xl font-semibold text-neutral-900 mb-1 leading-tight m-0">${escapeHtml(report.name)}</h2>
-              <p class="text-sm text-neutral-400 m-0">${subtitle}</p>
+        <div class="rm-header">
+          <div class="rm-header-inner">
+            <div class="rm-header-info">
+              <h2 class="rm-title">${escapeHtml(report.name)}</h2>
+              <p class="rm-subtitle">${subtitle}</p>
             </div>
-            <div class="flex items-center gap-3 shrink-0">
-              <button class="w-8 h-8 flex items-center justify-center bg-neutral-100 border border-neutral-200/50 rounded-lg cursor-pointer text-neutral-500 hover:text-neutral-900 transition-colors" id="report-modal-close" aria-label="Close modal">
-                <i class="ph ph-x text-lg"></i>
+            <div class="rm-header-actions">
+              <button class="rm-close-btn" id="report-modal-close" aria-label="Close modal">
+                <i class="ph ph-x"></i>
               </button>
             </div>
           </div>
@@ -173,15 +173,15 @@
 
     renderHeaderSkeleton() {
       return `
-        <div class="flex justify-between items-start gap-4 px-5 sm:px-8 py-5 border-b border-neutral-200/50 shrink-0">
-          <div class="w-full max-w-3xl mx-auto flex justify-between items-start gap-4">
-            <div class="min-w-0 flex-1">
-              <div class="h-5 w-3/5 bg-neutral-200 rounded animate-pulse mb-1.5"></div>
-              <div class="h-3.5 w-2/5 bg-neutral-200 rounded animate-pulse"></div>
+        <div class="rm-header">
+          <div class="rm-header-inner">
+            <div class="rm-header-info">
+              <div class="rm-skel rm-skel--title"></div>
+              <div class="rm-skel rm-skel--subtitle"></div>
             </div>
-            <div class="flex items-center gap-3 shrink-0">
-              <button class="w-8 h-8 flex items-center justify-center bg-neutral-100 border border-neutral-200/50 rounded-lg cursor-pointer text-neutral-500 hover:text-neutral-900 transition-colors" id="report-modal-close" aria-label="Close modal">
-                <i class="ph ph-x text-lg"></i>
+            <div class="rm-header-actions">
+              <button class="rm-close-btn" id="report-modal-close" aria-label="Close modal">
+                <i class="ph ph-x"></i>
               </button>
             </div>
           </div>
@@ -193,30 +193,30 @@
 
     renderSkeleton() {
       return `
-        <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5">
-          <div class="h-3.5 w-1/2 bg-neutral-200 rounded animate-pulse mb-3"></div>
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50"><div class="h-2.5 w-3/5 bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-3.5 w-4/5 bg-neutral-200 rounded animate-pulse"></div></div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50"><div class="h-2.5 w-3/5 bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-3.5 w-4/5 bg-neutral-200 rounded animate-pulse"></div></div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50"><div class="h-2.5 w-3/5 bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-3.5 w-4/5 bg-neutral-200 rounded animate-pulse"></div></div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50"><div class="h-2.5 w-3/5 bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-3.5 w-4/5 bg-neutral-200 rounded animate-pulse"></div></div>
+        <section class="rm-section">
+          <div class="rm-skel rm-skel--section-title rm-skel--section-title-half"></div>
+          <div class="rm-grid">
+            <div class="rm-card"><div class="rm-skel rm-skel--card-label"></div><div class="rm-skel rm-skel--card-value"></div></div>
+            <div class="rm-card"><div class="rm-skel rm-skel--card-label"></div><div class="rm-skel rm-skel--card-value"></div></div>
+            <div class="rm-card"><div class="rm-skel rm-skel--card-label"></div><div class="rm-skel rm-skel--card-value"></div></div>
+            <div class="rm-card"><div class="rm-skel rm-skel--card-label"></div><div class="rm-skel rm-skel--card-value"></div></div>
           </div>
         </section>
-        <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5">
-          <div class="h-3.5 w-2/5 bg-neutral-200 rounded animate-pulse mb-3"></div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50"><div class="h-2.5 w-3/5 bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-3.5 w-4/5 bg-neutral-200 rounded animate-pulse"></div></div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50"><div class="h-2.5 w-3/5 bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-3.5 w-4/5 bg-neutral-200 rounded animate-pulse"></div></div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50"><div class="h-2.5 w-3/5 bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-3.5 w-4/5 bg-neutral-200 rounded animate-pulse"></div></div>
+        <section class="rm-section">
+          <div class="rm-skel rm-skel--section-title rm-skel--section-title-narrow"></div>
+          <div class="rm-grid rm-grid--3">
+            <div class="rm-card"><div class="rm-skel rm-skel--card-label"></div><div class="rm-skel rm-skel--card-value"></div></div>
+            <div class="rm-card"><div class="rm-skel rm-skel--card-label"></div><div class="rm-skel rm-skel--card-value"></div></div>
+            <div class="rm-card"><div class="rm-skel rm-skel--card-label"></div><div class="rm-skel rm-skel--card-value"></div></div>
           </div>
         </section>
-        <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5">
-          <div class="h-3.5 w-[55%] bg-neutral-200 rounded animate-pulse mb-3"></div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 text-center"><div class="h-2.5 w-3/5 mx-auto bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-5 w-4/5 mx-auto bg-neutral-200 rounded animate-pulse"></div></div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 text-center"><div class="h-2.5 w-3/5 mx-auto bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-5 w-4/5 mx-auto bg-neutral-200 rounded animate-pulse"></div></div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 text-center"><div class="h-2.5 w-3/5 mx-auto bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-5 w-4/5 mx-auto bg-neutral-200 rounded animate-pulse"></div></div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 text-center"><div class="h-2.5 w-3/5 mx-auto bg-neutral-200 rounded animate-pulse mb-1.5"></div><div class="h-5 w-4/5 mx-auto bg-neutral-200 rounded animate-pulse"></div></div>
+        <section class="rm-section">
+          <div class="rm-skel rm-skel--section-title rm-skel--section-title-wide"></div>
+          <div class="rm-grid rm-grid--4">
+            <div class="rm-card rm-card--center"><div class="rm-skel rm-skel--card-label-center"></div><div class="rm-skel rm-skel--card-value-center"></div></div>
+            <div class="rm-card rm-card--center"><div class="rm-skel rm-skel--card-label-center"></div><div class="rm-skel rm-skel--card-value-center"></div></div>
+            <div class="rm-card rm-card--center"><div class="rm-skel rm-skel--card-label-center"></div><div class="rm-skel rm-skel--card-value-center"></div></div>
+            <div class="rm-card rm-card--center"><div class="rm-skel rm-skel--card-label-center"></div><div class="rm-skel rm-skel--card-value-center"></div></div>
           </div>
         </section>
       `;
@@ -224,10 +224,10 @@
 
     renderError(message) {
       return `
-        <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5">
-          <div class="text-center py-8 px-4">
-            <i class="ph ph-warning-circle block text-3xl mb-3 text-amber-500"></i>
-            <p class="text-sm text-neutral-600 m-0">${escapeHtml(message)}</p>
+        <section class="rm-section">
+          <div class="rm-error">
+            <i class="ph ph-warning-circle rm-error-icon"></i>
+            <p class="rm-error-text">${escapeHtml(message)}</p>
           </div>
         </section>
       `;
@@ -251,39 +251,39 @@
 
     renderOverview(report) {
       const statusLabel = report.dormant ? 'Dormant' : 'Active';
-      const statusColor = report.dormant ? 'text-amber-600' : 'text-neutral-800';
+      const statusValueClass = report.dormant ? 'rm-card-value rm-card-value--amber' : 'rm-card-value';
 
       return `
-        <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5">
-          <h3 class="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2.5 m-0">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shadow-sm">
-              <i class="ph ph-buildings text-blue-500 text-base"></i>
+        <section class="rm-section">
+          <h3 class="rm-section-title">
+            <div class="rm-section-icon">
+              <i class="ph ph-buildings"></i>
             </div>
             Company Overview
           </h3>
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div class="text-[11px] font-medium text-neutral-400 uppercase tracking-wide mb-0.5">Status</div>
-              <div class="text-sm font-medium ${statusColor}">${statusLabel}</div>
+          <div class="rm-grid">
+            <div class="rm-card">
+              <div class="rm-card-label">Status</div>
+              <div class="${statusValueClass}">${statusLabel}</div>
             </div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div class="text-[11px] font-medium text-neutral-400 uppercase tracking-wide mb-0.5">Company Age</div>
-              <div class="text-sm font-medium text-neutral-800">${report.incorporationAge || 'Not available'}</div>
+            <div class="rm-card">
+              <div class="rm-card-label">Company Age</div>
+              <div class="rm-card-value">${report.incorporationAge || 'Not available'}</div>
             </div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div class="text-[11px] font-medium text-neutral-400 uppercase tracking-wide mb-0.5">Incorporated</div>
-              <div class="text-sm font-medium text-neutral-800">${report.incorporationDate ? new Date(report.incorporationDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not available'}</div>
+            <div class="rm-card">
+              <div class="rm-card-label">Incorporated</div>
+              <div class="rm-card-value">${report.incorporationDate ? new Date(report.incorporationDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not available'}</div>
             </div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div class="text-[11px] font-medium text-neutral-400 uppercase tracking-wide mb-0.5">Business Activity</div>
-              <div class="text-sm font-medium text-neutral-800">${report.activity ? escapeHtml(report.activity) : 'Not available'}</div>
+            <div class="rm-card">
+              <div class="rm-card-label">Business Activity</div>
+              <div class="rm-card-value">${report.activity ? escapeHtml(report.activity) : 'Not available'}</div>
             </div>
           </div>
           ${report.address ? `
-          <div class="grid grid-cols-1 gap-3 mt-3">
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div class="text-[11px] font-medium text-neutral-400 uppercase tracking-wide mb-0.5">Registered Address</div>
-              <div class="text-sm font-medium text-neutral-800">${escapeHtml(report.address)}</div>
+          <div class="rm-grid rm-grid--1">
+            <div class="rm-card">
+              <div class="rm-card-label">Registered Address</div>
+              <div class="rm-card-value">${escapeHtml(report.address)}</div>
             </div>
           </div>
           ` : ''}
@@ -296,16 +296,16 @@
     renderFilingCompliance(report) {
       if (!report.filing) {
         return `
-          <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5">
-            <h3 class="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2.5 m-0">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shadow-sm">
-                <i class="ph ph-calendar-check text-blue-500 text-base"></i>
+          <section class="rm-section">
+            <h3 class="rm-section-title">
+              <div class="rm-section-icon">
+                <i class="ph ph-calendar-check"></i>
               </div>
               Filing Compliance
             </h3>
-            <div class="text-center py-6 text-neutral-400">
-              <i class="ph ph-file-dashed block text-2xl mb-2 opacity-50"></i>
-              <p class="text-sm m-0">No filings on record</p>
+            <div class="rm-empty">
+              <i class="ph ph-file-dashed"></i>
+              <p>No filings on record</p>
             </div>
           </section>
         `;
@@ -313,25 +313,25 @@
 
       const f = report.filing;
       return `
-        <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5">
-          <h3 class="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2.5 m-0">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shadow-sm">
-              <i class="ph ph-calendar-check text-blue-500 text-base"></i>
+        <section class="rm-section">
+          <h3 class="rm-section-title">
+            <div class="rm-section-icon">
+              <i class="ph ph-calendar-check"></i>
             </div>
             Filing Compliance
           </h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div class="text-[11px] font-medium text-neutral-400 uppercase tracking-wide mb-0.5">Latest Accounts</div>
-              <div class="text-sm font-medium text-neutral-800">${f.balanceSheetDateFormatted}</div>
+          <div class="rm-grid rm-grid--3">
+            <div class="rm-card">
+              <div class="rm-card-label">Latest Accounts</div>
+              <div class="rm-card-value">${f.balanceSheetDateFormatted}</div>
             </div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div class="text-[11px] font-medium text-neutral-400 uppercase tracking-wide mb-0.5">Period</div>
-              <div class="text-sm font-medium text-neutral-800">${f.periodMonths ? f.periodMonths + ' months' : '\u2014'}</div>
+            <div class="rm-card">
+              <div class="rm-card-label">Period</div>
+              <div class="rm-card-value">${f.periodMonths ? f.periodMonths + ' months' : '\u2014'}</div>
             </div>
-            <div class="bg-white rounded-xl p-3 border border-neutral-100/50 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div class="text-[11px] font-medium text-neutral-400 uppercase tracking-wide mb-0.5">Filings on Record</div>
-              <div class="text-sm font-medium text-neutral-800">${f.totalFilings}</div>
+            <div class="rm-card">
+              <div class="rm-card-label">Filings on Record</div>
+              <div class="rm-card-value">${f.totalFilings}</div>
             </div>
           </div>
         </section>
@@ -342,16 +342,16 @@
 
     renderFinancials(report) {
       const emptyState = `
-        <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5">
-          <h3 class="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2.5 m-0">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shadow-sm">
-              <i class="ph ph-chart-line-up text-blue-500 text-base"></i>
+        <section class="rm-section">
+          <h3 class="rm-section-title">
+            <div class="rm-section-icon">
+              <i class="ph ph-chart-line-up"></i>
             </div>
             Financial Snapshot
           </h3>
-          <div class="text-center py-6 text-neutral-400">
-            <i class="ph ph-chart-bar block text-2xl mb-2 opacity-50"></i>
-            <p class="text-sm m-0">No financial data available for this company</p>
+          <div class="rm-empty">
+            <i class="ph ph-chart-bar"></i>
+            <p>No financial data available for this company</p>
           </div>
         </section>
       `;
@@ -377,25 +377,25 @@
       if (tiles.length === 0) return emptyState;
 
       const accountsNotice = report.filing
-        ? `<div class="flex items-center gap-1.5 text-xs text-neutral-400 pt-3">
-            <i class="ph ph-info text-sm opacity-70"></i>
+        ? `<div class="rm-accounts-notice">
+            <i class="ph ph-info"></i>
             Based on accounts dated ${report.filing.balanceSheetDateFormatted}
           </div>`
         : '';
 
       return `
-        <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5">
-          <h3 class="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2.5 m-0">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shadow-sm">
-              <i class="ph ph-chart-line-up text-blue-500 text-base"></i>
+        <section class="rm-section">
+          <h3 class="rm-section-title">
+            <div class="rm-section-icon">
+              <i class="ph ph-chart-line-up"></i>
             </div>
             Financial Snapshot
           </h3>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="rm-grid rm-grid--4">
             ${tiles.map(t => `
-              <div class="bg-white rounded-xl p-3 border border-neutral-100/50 text-center transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <div class="text-[11px] font-medium text-neutral-400 uppercase tracking-wide mb-1">${t.label}</div>
-                <div class="text-lg font-semibold leading-tight ${t.negative ? 'text-red-600' : 'text-neutral-900'}">${t.value}</div>
+              <div class="rm-card rm-card--center">
+                <div class="rm-card-label">${t.label}</div>
+                <div class="rm-card-value--lg${t.negative ? ' rm-card-value--negative' : ''}">${t.value}</div>
               </div>
             `).join('')}
           </div>
@@ -410,22 +410,20 @@
       if (!report.signals || report.signals.length === 0) return '';
 
       return `
-        <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5">
-          <h3 class="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2.5 m-0">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shadow-sm">
-              <i class="ph ph-heartbeat text-blue-500 text-base"></i>
+        <section class="rm-section">
+          <h3 class="rm-section-title">
+            <div class="rm-section-icon">
+              <i class="ph ph-heartbeat"></i>
             </div>
             Health Signals
           </h3>
-          <div class="flex flex-wrap gap-2">
+          <div class="rm-signals">
             ${report.signals.map(s => {
-              const cls = s.pass
-                ? 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 text-emerald-600 border-emerald-200/50'
-                : 'bg-gradient-to-br from-red-50 to-red-100/50 text-red-600 border-red-200/50';
+              const cls = s.pass ? 'rm-signal--pass' : 'rm-signal--fail';
               return `
-                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${cls}">
+                <div class="rm-signal ${cls}">
                   <i class="ph-fill ${s.pass ? 'ph-check-circle' : 'ph-x-circle'}"></i>
-                  <span class="leading-none">${escapeHtml(s.label)}</span>
+                  <span>${escapeHtml(s.label)}</span>
                 </div>
               `;
             }).join('')}
@@ -440,14 +438,14 @@
       if (!report.verdict) return '';
 
       return `
-        <section class="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-200/50 p-4 sm:p-5">
-          <h3 class="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2.5 m-0">
-            <div class="w-8 h-8 rounded-lg bg-white/80 flex items-center justify-center shadow-sm">
-              <i class="ph ph-lightbulb text-blue-500 text-base"></i>
+        <section class="rm-section rm-section--verdict">
+          <h3 class="rm-section-title">
+            <div class="rm-section-icon rm-section-icon--verdict">
+              <i class="ph ph-lightbulb"></i>
             </div>
             Verdict
           </h3>
-          <p class="text-sm text-neutral-700 leading-relaxed m-0">${escapeHtml(report.verdict)}</p>
+          <p class="rm-verdict-text">${escapeHtml(report.verdict)}</p>
         </section>
       `;
     },
@@ -462,40 +460,40 @@
     renderPremiumGated(sectionType) {
       if (sectionType === 'directors') {
         return `
-          <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5 relative overflow-hidden" data-locked="directors">
-            <h3 class="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2.5 m-0">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shadow-sm">
-                <i class="ph ph-users text-blue-500 text-base"></i>
+          <section class="rm-section rm-section--locked" data-locked="directors">
+            <h3 class="rm-section-title">
+              <div class="rm-section-icon">
+                <i class="ph ph-users"></i>
               </div>
               Directors
-              <span class="inline-flex items-center gap-1 ml-auto px-2 py-0.5 rounded-full bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/50 text-[10px] font-bold uppercase tracking-wider text-blue-500">
-                <i class="ph ph-star text-[10px]"></i> Premium
+              <span class="rm-premium-badge">
+                <i class="ph ph-star"></i> Premium
               </span>
             </h3>
-            <div class="blur-sm select-none pointer-events-none">
-              <div class="flex flex-col gap-2">
-                <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-100/50">
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shrink-0">
-                    <i class="ph ph-user text-blue-500 text-sm"></i>
+            <div class="rm-locked-blur">
+              <div class="rm-director-rows">
+                <div class="rm-director-row">
+                  <div class="rm-director-avatar">
+                    <i class="ph ph-user"></i>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium text-neutral-800">Director Name Hidden</div>
-                    <div class="text-[11px] text-neutral-400">Role \u00B7 Appointed Jan 2020</div>
+                  <div class="rm-director-info">
+                    <div class="rm-director-name">Director Name Hidden</div>
+                    <div class="rm-director-meta">Role \u00B7 Appointed Jan 2020</div>
                   </div>
                 </div>
-                <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-100/50">
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shrink-0">
-                    <i class="ph ph-user text-blue-500 text-sm"></i>
+                <div class="rm-director-row">
+                  <div class="rm-director-avatar">
+                    <i class="ph ph-user"></i>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium text-neutral-800">Director Name Hidden</div>
-                    <div class="text-[11px] text-neutral-400">Role \u00B7 Appointed Mar 2019</div>
+                  <div class="rm-director-info">
+                    <div class="rm-director-name">Director Name Hidden</div>
+                    <div class="rm-director-meta">Role \u00B7 Appointed Mar 2019</div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="absolute inset-0 flex items-center justify-center z-[2]">
-              <button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border-none bg-blue-600 text-white text-sm font-semibold cursor-pointer transition-all hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/25" data-unlock="directors">
+            <div class="rm-unlock-overlay">
+              <button class="rm-unlock-btn" data-unlock="directors">
                 <i class="ph ph-lock-simple-open"></i>
                 Unlock with Premium
               </button>
@@ -506,24 +504,24 @@
 
       if (sectionType === 'ccjs') {
         return `
-          <section class="bg-slate-50 rounded-xl border border-neutral-200/50 p-4 sm:p-5 relative overflow-hidden" data-locked="ccjs">
-            <h3 class="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2.5 m-0">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shadow-sm">
-                <i class="ph ph-gavel text-blue-500 text-base"></i>
+          <section class="rm-section rm-section--locked" data-locked="ccjs">
+            <h3 class="rm-section-title">
+              <div class="rm-section-icon">
+                <i class="ph ph-gavel"></i>
               </div>
               CCJs & Charges
-              <span class="inline-flex items-center gap-1 ml-auto px-2 py-0.5 rounded-full bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/50 text-[10px] font-bold uppercase tracking-wider text-blue-500">
-                <i class="ph ph-star text-[10px]"></i> Premium
+              <span class="rm-premium-badge">
+                <i class="ph ph-star"></i> Premium
               </span>
             </h3>
-            <div class="blur-sm select-none pointer-events-none">
-              <div class="text-center py-6 text-neutral-400">
-                <i class="ph ph-gavel block text-2xl mb-2 opacity-50"></i>
-                <p class="text-sm m-0">County Court Judgements and charge data</p>
+            <div class="rm-locked-blur">
+              <div class="rm-empty">
+                <i class="ph ph-gavel"></i>
+                <p>County Court Judgements and charge data</p>
               </div>
             </div>
-            <div class="absolute inset-0 flex items-center justify-center z-[2]">
-              <button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border-none bg-blue-600 text-white text-sm font-semibold cursor-pointer transition-all hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/25" data-unlock="ccjs">
+            <div class="rm-unlock-overlay">
+              <button class="rm-unlock-btn" data-unlock="ccjs">
                 <i class="ph ph-lock-simple-open"></i>
                 Unlock with Premium
               </button>
@@ -539,13 +537,13 @@
 
     renderFooter(report) {
       return `
-        <div class="px-5 sm:px-8 py-3.5 border-t border-neutral-200/50 flex justify-center items-center shrink-0 bg-slate-50">
-          <div class="w-full max-w-3xl flex justify-between items-center">
-            <p class="text-xs text-neutral-400 m-0 flex items-center gap-1.5">
-              <i class="ph ph-database text-sm"></i>
+        <div class="rm-footer">
+          <div class="rm-footer-inner">
+            <p class="rm-footer-source">
+              <i class="ph ph-database"></i>
               Data sourced from Companies House
             </p>
-            <div class="flex gap-2 items-center">
+            <div class="rm-footer-actions">
               ${this.renderFooterUpgrade(report)}
             </div>
           </div>
@@ -555,13 +553,13 @@
 
     renderFooterDefault() {
       return `
-        <div class="px-5 sm:px-8 py-3.5 border-t border-neutral-200/50 flex justify-center items-center shrink-0 bg-slate-50">
-          <div class="w-full max-w-3xl flex justify-between items-center">
-            <p class="text-xs text-neutral-400 m-0 flex items-center gap-1.5">
-              <i class="ph ph-database text-sm"></i>
+        <div class="rm-footer">
+          <div class="rm-footer-inner">
+            <p class="rm-footer-source">
+              <i class="ph ph-database"></i>
               Data sourced from Companies House
             </p>
-            <div class="flex gap-2 items-center"></div>
+            <div class="rm-footer-actions"></div>
           </div>
         </div>
       `;
@@ -572,16 +570,16 @@
         const Wallet = window.CompanyWiseWallet;
         const balance = Wallet ? Wallet.getBalance() : 0;
         return `
-          <span class="text-xs text-emerald-600 flex items-center gap-1.5">
-            <i class="ph-fill ph-shield-check text-sm"></i>
+          <span class="rm-footer-premium">
+            <i class="ph-fill ph-shield-check"></i>
             Premium unlocked
           </span>
-          ${balance > 0 ? '<span class="text-xs text-neutral-400 flex items-center gap-1.5"><i class="ph-fill ph-star text-sm"></i> ' + balance + ' credit' + (balance !== 1 ? 's' : '') + ' left</span>' : ''}
+          ${balance > 0 ? '<span class="rm-footer-credits"><i class="ph-fill ph-star"></i> ' + balance + ' credit' + (balance !== 1 ? 's' : '') + ' left</span>' : ''}
         `;
       }
 
       return `
-        <button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border-none bg-blue-600 text-white text-xs font-semibold cursor-pointer transition-all hover:bg-blue-700 hover:-translate-y-0.5" id="report-footer-upgrade">
+        <button class="rm-footer-upgrade" id="report-footer-upgrade">
           <i class="ph ph-star"></i>
           Get Premium Access
         </button>

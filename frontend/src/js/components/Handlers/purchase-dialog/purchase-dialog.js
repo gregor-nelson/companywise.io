@@ -369,6 +369,9 @@
             this.processMockPayment();
           });
         }
+
+        // Auto-fill test data for quick testing
+        this.prefillTestData();
       }
 
       // Step 3: Delivery
@@ -412,6 +415,22 @@
             this.close();
           });
         }
+      }
+    },
+
+    // ---- Test helpers ----
+
+    prefillTestData() {
+      const fields = {
+        'pd-email': 'test@companywise.io',
+        'pd-name': 'J. Smith',
+        'pd-card': '4242 4242 4242 4242',
+        'pd-expiry': '12 / 30',
+        'pd-cvc': '123',
+      };
+      for (const [id, value] of Object.entries(fields)) {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
       }
     },
 

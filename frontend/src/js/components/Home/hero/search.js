@@ -84,12 +84,14 @@
     },
 
     async executeSearch(query) {
+      this.showDropdownLoading();
       try {
         const results = await window.CompanyWiseAPI.searchCompanies(query);
         this.lastResults = results;
         this.renderDropdown(results);
       } catch (err) {
         this.lastResults = [];
+        this.closeDropdown();
         this.showError('Could not reach server \u2014 try again');
       }
     },
@@ -116,27 +118,37 @@
     renderDropdown(results) {
       if (results.length === 0) {
         this.dropdownEl.innerHTML = `
-          <div class="hero-search-dropdown-item" style="cursor: default; color: var(--text-400);">
-            <span>No companies found \u2014 try a different name or number</span>
+          <div class="hero-search-dropdown-list">
+            <div class="hero-search-dropdown-item" style="cursor: default;">
+              <span>No companies found \u2014 try a different name or number</span>
+            </div>
           </div>`;
         this.dropdownEl.classList.add('active');
         return;
       }
 
       const query = this.inputEl.value;
+      const total = results.length;
+      const label = total === 1 ? '1 company found' : `${total} companies found`;
 
-      this.dropdownEl.innerHTML = results
-        .map(
-          (c) => `
-          <div class="hero-search-dropdown-item" data-number="${escapeHtml(c.company_number)}">
-            <div>
-              <div class="company-name">${this.highlight(c.name || '', query)}</div>
-              <div class="company-number">${escapeHtml(c.company_number)}${c.jurisdiction ? ' \u00b7 ' + escapeHtml(c.jurisdiction) : ''}</div>
-            </div>
-            <i class="ph ph-arrow-right company-arrow"></i>
-          </div>`
-        )
-        .join('');
+      this.dropdownEl.innerHTML = `
+        <div class="hero-search-dropdown-list">
+          ${results
+            .map(
+              (c) => `
+              <div class="hero-search-dropdown-item" data-number="${escapeHtml(c.company_number)}">
+                <div>
+                  <div class="company-name">${this.highlight(c.name || '', query)}</div>
+                  <div class="company-number">${escapeHtml(c.company_number)}${c.jurisdiction ? ' \u00b7 ' + escapeHtml(c.jurisdiction) : ''}</div>
+                </div>
+                <i class="ph ph-arrow-right company-arrow"></i>
+              </div>`
+            )
+            .join('')}
+        </div>
+        <div class="hero-search-dropdown-footer">
+          <i class="ph ph-magnifying-glass"></i>${label}
+        </div>`;
 
       this.dropdownEl.classList.add('active');
 
@@ -153,16 +165,26 @@
       if (!query) return escapeHtml(text);
       const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`(${escaped})`, 'gi');
-      return escapeHtml(text).replace(
-        regex,
-        '<mark style="background: var(--green-glow); color: var(--green-primary); border-radius: 2px; padding: 0 2px;">$1</mark>'
-      );
+      return escapeHtml(text).replace(regex, '<mark>$1</mark>');
     },
 
     select(company) {
       this.inputEl.value = company.name || company.company_number;
       this.closeDropdown();
       if (this.onSelect) this.onSelect(company);
+    },
+
+    showDropdownLoading() {
+      const rows = Array.from({ length: 3 }, () => `
+        <div class="hero-search-dropdown-loading-row">
+          <div>
+            <div class="skel-text skel-name"></div>
+            <div class="skel-text skel-meta"></div>
+          </div>
+        </div>`).join('');
+
+      this.dropdownEl.innerHTML = `<div class="hero-search-dropdown-loading">${rows}</div>`;
+      this.dropdownEl.classList.add('active');
     },
 
     closeDropdown() {

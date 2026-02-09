@@ -223,153 +223,7 @@
   }
 }
 
-/* ============================================
-   Search
-   ============================================ */
-
-.hero-search-wrapper {
-  position: relative;
-  width: 100%;
-  max-width: var(--max-w-xl);
-}
-
-.hero-search-form {
-  display: flex;
-  align-items: stretch;
-  background: var(--surface);
-  border: var(--border-1) solid var(--border);
-  border-radius: var(--rounded-xl);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--duration-200) var(--ease-in-out),
-              border-color var(--duration-200) var(--ease-in-out);
-}
-
-.hero-search-form:focus-within {
-  border-color: var(--brand);
-  box-shadow: var(--shadow-md),
-    0 0 0 3px color-mix(in srgb, var(--brand) 12%, transparent);
-}
-
-.hero-search-prefix {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 var(--space-3);
-  color: var(--brand);
-  font-size: var(--text-lg);
-  flex-shrink: 0;
-}
-
-.hero-search-input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-family: var(--font);
-  font-size: var(--text-sm);
-  color: var(--text);
-  padding: var(--space-3) 0;
-}
-
-.hero-search-input::placeholder {
-  color: var(--text-faint);
-}
-
-@media (min-width: 768px) {
-  .hero-search-input {
-    font-size: var(--text-base);
-    padding: var(--space-3-5) 0;
-  }
-}
-
-.hero-search-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1-5);
-  padding: var(--space-2-5) var(--space-4);
-  margin: var(--space-1);
-  background: var(--cta);
-  color: var(--text);
-  font-family: var(--font);
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  border: none;
-  border-radius: var(--rounded-lg);
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background var(--duration-200) var(--ease-in-out),
-              transform var(--duration-200) var(--ease-in-out);
-}
-
-.hero-search-btn:hover {
-  background: var(--cta-hover);
-  transform: scale(1.02);
-}
-
-.hero-search-btn:disabled {
-  background: var(--cta-disabled);
-  cursor: not-allowed;
-  transform: none;
-}
-
-@media (min-width: 768px) {
-  .hero-search-btn {
-    padding: var(--space-2-5) var(--space-5);
-    font-size: var(--text-base);
-  }
-}
-
-/* Spinner (inside button during loading) */
-.hero-search-spinner {
-  width: var(--space-4);
-  height: var(--space-4);
-  border: var(--border-2) solid color-mix(in srgb, var(--text) 20%, transparent);
-  border-top-color: var(--text);
-  border-radius: var(--rounded-full);
-  animation: hero-spin 600ms linear infinite;
-}
-
-@keyframes hero-spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Dropdown */
-.hero-search-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: var(--space-1);
-  background: var(--surface);
-  border: var(--border-1) solid var(--border);
-  border-radius: var(--rounded-xl);
-  box-shadow: var(--shadow-lg);
-  z-index: var(--z-50);
-  overflow: hidden;
-}
-
-.hero-search-dropdown:empty {
-  display: none;
-}
-
-/* Error */
-.hero-search-error {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-  margin-top: var(--space-2);
-  font-size: var(--text-sm);
-  color: var(--danger);
-}
-
-.hero-search-error i {
-  font-size: var(--text-base);
-  flex-shrink: 0;
-}
+/* Search styles → see search.css */
 
 /* ============================================
    Check Types
@@ -471,7 +325,7 @@
    ============================================ */
 
 .hero-illustration {
-  display: none;
+  display: block;
   overflow: visible;
 }
 
@@ -485,9 +339,14 @@
 .hero-card-stack {
   position: relative;
   width: 100%;
-  max-width: var(--max-w-lg);
+  max-width: var(--max-w-sm);
   margin: 0 auto;
-  min-height: 480px;
+}
+
+@media (min-width: 1024px) {
+  .hero-card-stack {
+    max-width: var(--max-w-lg);
+  }
 }
 
 /* Back Depth Card */
@@ -551,12 +410,14 @@
   transform: translateY(0);
 }
 
-.hero-unified-card:hover {
-  transform: rotate(-1deg) scale(1.01);
-}
+@media (min-width: 1024px) {
+  .hero-unified-card:hover {
+    transform: rotate(-1deg) scale(1.01);
+  }
 
-.hero-unified-card.visible:hover {
-  transform: rotate(-1deg) scale(1.01);
+  .hero-unified-card.visible:hover {
+    transform: rotate(-1deg) scale(1.01);
+  }
 }
 
 /* ---- Card Inner — Cross-fade ---- */
