@@ -29,39 +29,151 @@
     container: null,
     company: null,
 
-    init() {
+    async init() {
       this.container = document.getElementById('premium-report-container');
       if (!this.container) return;
 
-      this.company = this.getCompanyFromContext();
-      if (!this.company) {
-        this.renderEmpty();
-        return;
-      }
+      const params = new URLSearchParams(window.location.search);
+      const isDemo = params.get('demo') === 'true';
+      const companyNumber = params.get('company');
 
-      const Wallet = window.CompanyWiseWallet;
-      const companyNumber = this.company.number;
-
-      // Already has access — render immediately
-      if (Wallet && Wallet.hasAccess(companyNumber)) {
-        this.render(this.company);
-        this.initScrollReveal();
-        return;
-      }
-
-      // Has credits — spend one and render
-      if (Wallet && Wallet.getBalance() > 0) {
-        if (Wallet.spendCredit(companyNumber)) {
+      // Demo route — render demo data immediately, no wallet check
+      if (isDemo) {
+        var Transformer = window.CompanyWisePremiumTransformer;
+        if (Transformer) {
+          this.company = Transformer.getDemoCompany();
           this.render(this.company);
           this.initScrollReveal();
         } else {
-          this.renderAccessDenied();
+          this.renderError('Demo data is not available.');
         }
         return;
       }
 
-      // No access, no credits — show access denied with upgrade prompt
-      this.renderAccessDenied();
+      // Company route — wallet gate then API fetch
+      if (companyNumber) {
+        var Wallet = window.CompanyWiseWallet;
+
+        // Already has access — fetch and render
+        if (Wallet && Wallet.hasAccess(companyNumber)) {
+          await this.fetchAndRender(companyNumber);
+          return;
+        }
+
+        // Has credits — spend one and fetch
+        if (Wallet && Wallet.getBalance() > 0) {
+          if (Wallet.spendCredit(companyNumber)) {
+            await this.fetchAndRender(companyNumber);
+          } else {
+            this.renderAccessDenied();
+          }
+          return;
+        }
+
+        // No access, no credits
+        this.renderAccessDenied();
+        return;
+      }
+
+      // No params — empty state
+      this.renderEmpty();
+    },
+
+    async fetchAndRender(companyNumber) {
+      this.renderLoading();
+
+      try {
+        var API = window.CompanyWisePremiumAPI;
+        var Transformer = window.CompanyWisePremiumTransformer;
+
+        var companyData = await API.getCompany(companyNumber);
+
+        // Fetch filing facts (non-critical)
+        var factsData = null;
+        var latestFiling = (companyData.filings || [])[0];
+        if (latestFiling) {
+          try {
+            factsData = await API.getFilingFacts(latestFiling.id);
+          } catch (_) {
+            // Non-critical — render without financials
+          }
+        }
+
+        var report = Transformer.transform(companyData, factsData);
+        this.company = report;
+        this.render(report);
+        this.initScrollReveal();
+      } catch (err) {
+        var msg = err.status === 404
+          ? 'Company not found. Please check the company number and try again.'
+          : 'Could not load company data. Please try again later.';
+        this.renderError(msg);
+      }
+    },
+
+    // ---- Loading State ----
+    renderLoading() {
+      this.container.innerHTML = `
+        <div class="pr-loading" style="padding: 2rem 1rem;">
+          <!-- Breadcrumb skeleton -->
+          <div class="pr-fade-up" style="margin-bottom: 1.5rem;">
+            <div style="height: 1rem; width: 200px; background: var(--surface-200); border-radius: 0.25rem;"></div>
+          </div>
+          <!-- Header skeleton -->
+          <div style="background: var(--surface-50); border: 1px solid var(--surface-200); border-radius: 1rem; padding: 2rem; margin-bottom: 1.5rem;">
+            <div style="height: 1.5rem; width: 60%; background: var(--surface-200); border-radius: 0.25rem; margin-bottom: 0.75rem;"></div>
+            <div style="height: 1rem; width: 40%; background: var(--surface-200); border-radius: 0.25rem; margin-bottom: 1.5rem;"></div>
+            <div style="display: flex; gap: 1rem;">
+              <div style="height: 0.875rem; width: 120px; background: var(--surface-200); border-radius: 0.25rem;"></div>
+              <div style="height: 0.875rem; width: 140px; background: var(--surface-200); border-radius: 0.25rem;"></div>
+              <div style="height: 0.875rem; width: 100px; background: var(--surface-200); border-radius: 0.25rem;"></div>
+            </div>
+          </div>
+          <!-- Score card skeleton -->
+          <div style="background: var(--surface-50); border: 1px solid var(--surface-200); border-radius: 1rem; padding: 2rem; margin-bottom: 1.5rem; display: flex; gap: 2rem; align-items: center;">
+            <div style="width: 120px; height: 120px; border-radius: 50%; background: var(--surface-200);"></div>
+            <div style="flex: 1;">
+              <div style="height: 1.25rem; width: 50%; background: var(--surface-200); border-radius: 0.25rem; margin-bottom: 0.75rem;"></div>
+              <div style="height: 0.875rem; width: 80%; background: var(--surface-200); border-radius: 0.25rem; margin-bottom: 0.5rem;"></div>
+              <div style="height: 0.875rem; width: 60%; background: var(--surface-200); border-radius: 0.25rem;"></div>
+            </div>
+          </div>
+          <!-- Section skeletons -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div style="background: var(--surface-50); border: 1px solid var(--surface-200); border-radius: 1rem; padding: 2rem;">
+              <div style="height: 1.25rem; width: 180px; background: var(--surface-200); border-radius: 0.25rem; margin-bottom: 1rem;"></div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                <div style="height: 3rem; background: var(--surface-200); border-radius: 0.5rem;"></div>
+                <div style="height: 3rem; background: var(--surface-200); border-radius: 0.5rem;"></div>
+                <div style="height: 3rem; background: var(--surface-200); border-radius: 0.5rem;"></div>
+              </div>
+            </div>
+            <div style="background: var(--surface-50); border: 1px solid var(--surface-200); border-radius: 1rem; padding: 2rem;">
+              <div style="height: 1.25rem; width: 160px; background: var(--surface-200); border-radius: 0.25rem; margin-bottom: 1rem;"></div>
+              <div style="height: 4rem; background: var(--surface-200); border-radius: 0.5rem;"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
+    // ---- Error State ----
+    renderError(message) {
+      this.container.innerHTML = `
+        <div class="pr-placeholder" style="padding: 6rem 1rem;">
+          <div style="width: 3.5rem; height: 3.5rem; border-radius: 1rem; background: linear-gradient(to bottom right, #fef2f2, rgba(254, 226, 226, 0.5)); border: 1px solid rgba(239, 68, 68, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+            <i class="ph ph-warning-circle" style="font-size: 1.5rem; color: var(--red-500, #ef4444);"></i>
+          </div>
+          <h2 style="font-family: var(--font); font-size: 1.5rem; font-weight: 700; color: var(--text-900); margin: 0 0 0.5rem;">Something went wrong</h2>
+          <p class="pr-placeholder-text" style="max-width: 400px; margin: 0 auto 1.5rem;">
+            ${escapeHtml(message)}
+          </p>
+          <a href="../../../pages/Home/home.html" class="btn-primary" style="margin-top: 1.5rem;">
+            <i class="ph ph-arrow-left"></i>
+            Back to search
+          </a>
+        </div>
+      `;
     },
 
     renderAccessDenied() {
@@ -95,24 +207,6 @@
           }
         });
       }
-    },
-
-    // Resolve company data — checks URL params, then falls back to mock
-    getCompanyFromContext() {
-      const params = new URLSearchParams(window.location.search);
-      const companyNumber = params.get('company');
-
-      // Try mock data for development
-      if (window.CompanyWiseMockData) {
-        if (companyNumber) {
-          return window.CompanyWiseMockData.findCompany(companyNumber);
-        }
-        // Default to first company with financials for demo
-        return window.CompanyWiseMockData.companies.find(c => c.financials) ||
-               window.CompanyWiseMockData.companies[0];
-      }
-
-      return null;
     },
 
     // ---- Main Render ----
@@ -164,11 +258,26 @@
 
     // ---- Report Header ----
     renderHeader(c) {
-      const badgeIcon = c.risk === 'low'
-        ? 'ph-shield-check'
-        : c.risk === 'medium'
-        ? 'ph-shield-warning'
-        : 'ph-shield-slash';
+      const hasRisk = c.risk && typeof c.risk === 'string';
+
+      let badgeHtml = '';
+      if (hasRisk) {
+        const badgeIcon = c.risk === 'low'
+          ? 'ph-shield-check'
+          : c.risk === 'medium'
+          ? 'ph-shield-warning'
+          : 'ph-shield-slash';
+        badgeHtml = `
+          <div class="pr-header-actions">
+            <span class="pr-badge pr-badge--${c.risk}">
+              <i class="ph-fill ${badgeIcon}"></i>
+              ${c.risk} risk
+            </span>
+          </div>
+        `;
+      }
+
+      const companyMeta = c.companyType || c.type || '';
 
       const now = new Date();
       const generated = now.toLocaleDateString('en-GB', {
@@ -180,14 +289,9 @@
           <div class="pr-header-top">
             <div class="pr-header-info">
               <h1 class="pr-company-name">${escapeHtml(c.name)}</h1>
-              <p class="pr-company-meta">${escapeHtml(c.number)} · ${escapeHtml(c.type)}</p>
+              <p class="pr-company-meta">${escapeHtml(c.number)}${companyMeta ? ' \u00B7 ' + escapeHtml(companyMeta) : ''}</p>
             </div>
-            <div class="pr-header-actions">
-              <span class="pr-badge pr-badge--${c.risk}">
-                <i class="ph-fill ${badgeIcon}"></i>
-                ${c.risk} risk
-              </span>
-            </div>
+            ${badgeHtml}
           </div>
           <div class="pr-header-meta">
             <div class="pr-meta-item">
@@ -209,9 +313,24 @@
 
     // ---- Risk Score Card ----
     renderScoreCard(c) {
+      if (!c.flags || c.flags.length === 0) {
+        // No flags — show a simplified verdict-only card
+        const verdict = c.verdict || c.detailedRecommendation || c.recommendation || '';
+        if (!verdict) return '';
+        return `
+          <div class="pr-score-card pr-fade-up">
+            <div class="pr-score-details" style="flex: 1;">
+              <h2 class="pr-score-title">Assessment</h2>
+              <p class="pr-score-summary">${escapeHtml(verdict)}</p>
+            </div>
+          </div>
+        `;
+      }
+
       const score = c.riskScore || this.deriveScore(c);
       const circumference = 2 * Math.PI * 48;
       const offset = circumference - (score / 100) * circumference;
+      const riskLevel = c.risk || 'medium';
 
       const positiveFlags = c.flags.filter(f => f.type === 'green').length;
       const negativeFlags = c.flags.filter(f => f.type === 'red').length;
@@ -222,23 +341,23 @@
           <div class="pr-score-ring">
             <svg viewBox="0 0 120 120">
               <circle class="pr-score-ring-bg" cx="60" cy="60" r="48" />
-              <circle class="pr-score-ring-fill pr-score-ring-fill--${c.risk}"
+              <circle class="pr-score-ring-fill pr-score-ring-fill--${riskLevel}"
                 cx="60" cy="60" r="48"
                 stroke-dasharray="${circumference}"
                 stroke-dashoffset="${offset}" />
             </svg>
             <div class="pr-score-value">
-              <span class="pr-score-number pr-score-number--${c.risk}">${score}</span>
+              <span class="pr-score-number pr-score-number--${riskLevel}">${score}</span>
               <span class="pr-score-label">/ 100</span>
             </div>
           </div>
           <div class="pr-score-details">
             <h2 class="pr-score-title">
-              ${c.risk === 'low' ? 'Low Risk — Likely Safe'
-                : c.risk === 'medium' ? 'Medium Risk — Proceed with Caution'
-                : 'High Risk — Significant Concerns'}
+              ${riskLevel === 'low' ? 'Low Risk \u2014 Likely Safe'
+                : riskLevel === 'medium' ? 'Medium Risk \u2014 Proceed with Caution'
+                : 'High Risk \u2014 Significant Concerns'}
             </h2>
-            <p class="pr-score-summary">${c.detailedRecommendation || c.recommendation}</p>
+            <p class="pr-score-summary">${c.detailedRecommendation || c.recommendation || c.verdict || ''}</p>
             <div class="pr-score-factors">
               ${positiveFlags > 0 ? `
                 <span class="pr-score-factor pr-score-factor--positive">
@@ -266,11 +385,21 @@
 
     // ---- Company Overview ----
     renderOverview(c) {
-      const age = this.getCompanyAge(c.incorporated);
-      const incDate = new Date(c.incorporated).toLocaleDateString('en-GB', {
-        day: 'numeric', month: 'short', year: 'numeric'
-      });
-      const sicDescription = c.sicCode.split(' - ')[1] || c.sicCode;
+      const incDateRaw = c.incorporationDate || c.incorporated || null;
+      const age = incDateRaw ? this.getCompanyAge(incDateRaw) : 'N/A';
+      const incDate = incDateRaw
+        ? new Date(incDateRaw).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        : 'N/A';
+
+      const sicCode = c.sicCode || null;
+      const sicNumber = sicCode ? sicCode.split(' - ')[0] : 'N/A';
+      const sicDescription = sicCode
+        ? (sicCode.split(' - ')[1] || sicCode)
+        : (c.activity || 'N/A');
+
+      const status = c.status || 'N/A';
+      const companyType = c.type || c.companyType || 'N/A';
+      const address = c.address || 'N/A';
 
       return `
         <div class="pr-section pr-fade-up">
@@ -284,11 +413,11 @@
             <div class="pr-overview-grid">
               <div class="pr-overview-item">
                 <div class="pr-overview-label">Status</div>
-                <div class="pr-overview-value">${c.status}</div>
+                <div class="pr-overview-value">${escapeHtml(status)}</div>
               </div>
               <div class="pr-overview-item">
                 <div class="pr-overview-label">Company Age</div>
-                <div class="pr-overview-value">${age}</div>
+                <div class="pr-overview-value">${escapeHtml(age)}</div>
               </div>
               <div class="pr-overview-item">
                 <div class="pr-overview-label">Incorporated</div>
@@ -296,19 +425,19 @@
               </div>
               <div class="pr-overview-item">
                 <div class="pr-overview-label">Company Type</div>
-                <div class="pr-overview-value">${c.type}</div>
+                <div class="pr-overview-value">${escapeHtml(companyType)}</div>
               </div>
               <div class="pr-overview-item">
                 <div class="pr-overview-label">SIC Code</div>
-                <div class="pr-overview-value">${c.sicCode.split(' - ')[0]}</div>
+                <div class="pr-overview-value">${escapeHtml(sicNumber)}</div>
               </div>
               <div class="pr-overview-item">
                 <div class="pr-overview-label">Business Activity</div>
-                <div class="pr-overview-value">${sicDescription}</div>
+                <div class="pr-overview-value">${escapeHtml(sicDescription)}</div>
               </div>
               <div class="pr-overview-item pr-overview-item--full">
                 <div class="pr-overview-label">Registered Address</div>
-                <div class="pr-overview-value">${escapeHtml(c.address)}</div>
+                <div class="pr-overview-value">${escapeHtml(address)}</div>
               </div>
             </div>
           </div>
@@ -320,10 +449,12 @@
     renderRiskAnalysis(c) {
       if (!c.flags || c.flags.length === 0) return '';
 
+      const riskLevel = c.risk || 'medium';
+
       return `
         <div class="pr-section pr-fade-up">
           <div class="pr-section-header">
-            <div class="pr-section-icon ${c.risk === 'high' ? 'pr-section-icon--red' : c.risk === 'medium' ? 'pr-section-icon--amber' : 'pr-section-icon--emerald'}">
+            <div class="pr-section-icon ${riskLevel === 'high' ? 'pr-section-icon--red' : riskLevel === 'medium' ? 'pr-section-icon--amber' : 'pr-section-icon--emerald'}">
               <i class="ph ph-shield-warning"></i>
             </div>
             <h3 class="pr-section-title">Risk Analysis</h3>
@@ -347,21 +478,58 @@
 
     // ---- Filing Compliance ----
     renderFilingCompliance(c) {
-      const lastAcc = c.lastAccounts
-        ? new Date(c.lastAccounts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-        : 'Never filed';
-      const nextAcc = c.nextAccountsDue
-        ? new Date(c.nextAccountsDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-        : 'N/A';
-      const confDue = c.confirmationDue
-        ? new Date(c.confirmationDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-        : 'N/A';
+      // Support both mock shape (c.lastAccounts) and API shape (c.filing)
+      let lastAcc, nextAcc, confDue;
+      let isAccountsOverdue = false;
+      let isConfirmationOverdue = false;
 
-      const isAccountsOverdue = c.nextAccountsDue && new Date(c.nextAccountsDue) < new Date();
-      const isConfirmationOverdue = c.confirmationDue && new Date(c.confirmationDue) < new Date();
+      if (c.lastAccounts || c.nextAccountsDue || c.confirmationDue) {
+        // Mock / demo data shape
+        lastAcc = c.lastAccounts
+          ? new Date(c.lastAccounts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          : 'Never filed';
+        nextAcc = c.nextAccountsDue
+          ? new Date(c.nextAccountsDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          : 'N/A';
+        confDue = c.confirmationDue
+          ? new Date(c.confirmationDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          : 'N/A';
+        isAccountsOverdue = c.nextAccountsDue && new Date(c.nextAccountsDue) < new Date();
+        isConfirmationOverdue = c.confirmationDue && new Date(c.confirmationDue) < new Date();
+      } else if (c.filing) {
+        // API transformed shape
+        lastAcc = c.filing.balanceSheetDateFormatted || 'Never filed';
+        nextAcc = 'N/A';
+        confDue = 'N/A';
+      } else {
+        lastAcc = 'N/A';
+        nextAcc = 'N/A';
+        confDue = 'N/A';
+      }
 
-      // Build timeline from filing history if available
+      // Build timeline
       const timeline = this.buildTimeline(c);
+
+      // Filing stats — use filing object when available
+      let totalFilingsHtml = '';
+      if (c.filing && c.filing.totalFilings) {
+        totalFilingsHtml = `
+          <div class="pr-filing-stat">
+            <div class="pr-filing-stat-label">Total Filings</div>
+            <div class="pr-filing-stat-value">${c.filing.totalFilings}</div>
+          </div>
+        `;
+      }
+
+      let periodHtml = '';
+      if (c.filing && c.filing.periodMonths) {
+        periodHtml = `
+          <div class="pr-filing-stat">
+            <div class="pr-filing-stat-label">Period Length</div>
+            <div class="pr-filing-stat-value">${c.filing.periodMonths} months</div>
+          </div>
+        `;
+      }
 
       return `
         <div class="pr-section pr-fade-up">
@@ -385,6 +553,8 @@
                 <div class="pr-filing-stat-label">Confirmation Due</div>
                 <div class="pr-filing-stat-value">${confDue}${isConfirmationOverdue ? ' (Overdue)' : ''}</div>
               </div>
+              ${totalFilingsHtml}
+              ${periodHtml}
             </div>
             ${timeline.length > 0 ? `
               <div class="pr-timeline">
@@ -401,7 +571,7 @@
               <div class="pr-placeholder">
                 <i class="ph ph-clock-countdown"></i>
                 <p class="pr-placeholder-text">
-                  Detailed filing history will be available when connected to the Companies House API.
+                  Detailed filing history is not available for this company.
                 </p>
               </div>
             `}
@@ -436,7 +606,6 @@
       const f = c.financials;
       const fmt = this.formatCurrency;
       const pct = this.formatPercent;
-      const yoy = this.calcYoY;
 
       const accountsDate = f.accountsDate
         ? new Date(f.accountsDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -446,7 +615,7 @@
         || (f.currentAssets && f.currentLiabilities ? (f.currentAssets / f.currentLiabilities).toFixed(1) : null);
 
       const grossMargin = f.grossMargin
-        || (f.grossProfit && f.turnover ? f.grossProfit.current / f.turnover.current : null);
+        || (f.grossProfit && f.turnover && f.grossProfit.current && f.turnover.current ? f.grossProfit.current / f.turnover.current : null);
 
       return `
         <div class="pr-section pr-fade-up">
@@ -586,7 +755,7 @@
                       </div>
                       <div class="pr-director-info">
                         <div class="pr-director-name">${escapeHtml(dir.name)}</div>
-                        <div class="pr-director-role">${escapeHtml(dir.role)} · Appointed ${appointedDate}</div>
+                        <div class="pr-director-role">${escapeHtml(dir.role)} \u00B7 Appointed ${appointedDate}</div>
                         <div class="pr-director-tags">
                           <span class="pr-director-tag pr-director-tag--info">
                             <i class="ph ph-calendar-blank"></i>
@@ -614,7 +783,7 @@
               <div class="pr-placeholder">
                 <i class="ph ph-user-circle-dashed"></i>
                 <p class="pr-placeholder-text">
-                  Director information will be available when connected to the Companies House API.
+                  Director information is not available for this company.
                 </p>
               </div>
             `}
@@ -646,9 +815,9 @@
                     <div class="pr-charge-info">
                       <div class="pr-charge-title">${charge.description}</div>
                       <div class="pr-charge-meta">
-                        ${charge.holder ? `Holder: ${charge.holder} · ` : ''}
+                        ${charge.holder ? `Holder: ${charge.holder} \u00B7 ` : ''}
                         ${charge.created ? `Created ${new Date(charge.created).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}` : ''}
-                        ${charge.status ? ` · ${charge.status.charAt(0).toUpperCase() + charge.status.slice(1)}` : ''}
+                        ${charge.status ? ` \u00B7 ${charge.status.charAt(0).toUpperCase() + charge.status.slice(1)}` : ''}
                       </div>
                     </div>
                   </div>
@@ -658,7 +827,7 @@
               <div class="pr-placeholder">
                 <i class="ph ph-shield-check"></i>
                 <p class="pr-placeholder-text">
-                  No registered charges or CCJs found. This data will be enriched from Companies House API.
+                  No registered charges or CCJs found for this company.
                 </p>
               </div>
             `}
@@ -669,6 +838,9 @@
 
     // ---- Recommendation ----
     renderRecommendation(c) {
+      const recommendationText = c.detailedRecommendation || c.recommendation || c.verdict || '';
+      if (!recommendationText) return '';
+
       const actions = this.getActionItems(c);
 
       return `
@@ -681,7 +853,7 @@
           </div>
           <div class="pr-section-body">
             <p class="pr-recommendation-text">
-              ${c.detailedRecommendation || c.recommendation}
+              ${recommendationText}
             </p>
             ${actions.length > 0 ? `
               <div class="pr-action-items">
@@ -727,25 +899,17 @@
     buildTimeline(c) {
       const timeline = [];
 
-      // Build from filing history if available
-      if (window.CompanyWiseMockData && window.CompanyWiseMockData.filingHistory) {
-        const history = window.CompanyWiseMockData.filingHistory.filter(
-          f => f.companyNumber === c.number
-        );
-        history.slice(0, 6).forEach(filing => {
-          const date = new Date(filing.date).toLocaleDateString('en-GB', {
-            day: 'numeric', month: 'short', year: 'numeric'
-          });
-          timeline.push({
-            date,
-            label: filing.type,
-            detail: filing.description || null,
-            status: filing.overdue ? 'danger' : 'success'
-          });
+      // Build from filing object when available (API data)
+      if (c.filing && c.filing.balanceSheetDate) {
+        timeline.push({
+          date: c.filing.balanceSheetDateFormatted || new Date(c.filing.balanceSheetDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+          label: 'Balance Sheet Date',
+          detail: c.filing.periodMonths ? c.filing.periodMonths + ' month period' : null,
+          status: 'success'
         });
       }
 
-      // Fall back to key dates from the company object
+      // Fall back to key dates from the company object (mock/demo data)
       if (timeline.length === 0) {
         if (c.lastAccounts) {
           timeline.push({
@@ -781,6 +945,14 @@
     getActionItems(c) {
       const actions = [];
 
+      if (!c.risk) {
+        // No risk assessment — return generic advice
+        actions.push('Review the financial data above to form your own assessment.');
+        actions.push('Consider requesting a deposit or milestone-based payment schedule.');
+        actions.push('Include clear payment terms in your contract.');
+        return actions;
+      }
+
       if (c.risk === 'high') {
         actions.push('Request 100% payment upfront before starting work.');
         actions.push('Consider using an escrow service for larger projects.');
@@ -798,8 +970,7 @@
     },
 
     deriveScore(c) {
-      // Simple score derivation from flags when no explicit score
-      let score = 70; // baseline
+      let score = 70;
       if (c.flags) {
         c.flags.forEach(flag => {
           if (flag.type === 'green') score += 8;
@@ -811,6 +982,7 @@
     },
 
     getCompanyAge(dateStr) {
+      if (!dateStr) return 'N/A';
       const inc = new Date(dateStr);
       const now = new Date();
       const years = now.getFullYear() - inc.getFullYear();

@@ -366,6 +366,81 @@
   color: var(--text);
 }
 
+/* ---- Recover Account ---- */
+.am-recover {
+  margin-top: var(--space-5);
+}
+
+.am-recover-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.am-recover-divider-line {
+  flex: 1;
+  height: var(--border-1);
+  background: var(--border);
+}
+
+.am-recover-divider-text {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+.am-recover-hint {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.am-recover-field {
+  margin-bottom: var(--space-3);
+}
+
+.am-recover-input {
+  width: 100%;
+  padding: var(--space-2-5) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text);
+  background: var(--surface);
+  border: var(--border-1) solid var(--border);
+  border-radius: var(--rounded-lg);
+  outline: none;
+  transition:
+    border-color var(--duration-150) var(--ease-in-out),
+    box-shadow var(--duration-150) var(--ease-in-out);
+}
+
+.am-recover-input::placeholder {
+  font-family: var(--font);
+  color: var(--text-faint);
+}
+
+.am-recover-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 12%, transparent);
+}
+
+.am-recover-message {
+  font-size: var(--text-xs);
+  margin-bottom: var(--space-3);
+  min-height: var(--space-4);
+}
+
+.am-recover-message:empty {
+  display: none;
+}
+
+.am-recover-message--error {
+  color: var(--danger);
+}
+
 /* ---- Body scroll lock ---- */
 body.modal-open {
   overflow: hidden;

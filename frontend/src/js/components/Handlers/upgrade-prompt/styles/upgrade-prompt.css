@@ -1,0 +1,184 @@
+/* ============================================
+   COMPANYWISE — upgrade-prompt.css
+   Upgrade mini-dialog card · Mobile-first
+   Colour palette: design tokens
+   ============================================ */
+
+/* ---- Container ---- */
+
+.up-mini-dialog {
+  width: 100%;
+  padding: var(--space-3) 0 0;
+  opacity: var(--opacity-0);
+  transform: translateY(var(--space-3));
+  transition:
+    opacity var(--duration-300) var(--ease-out),
+    transform var(--duration-300) var(--ease-out);
+}
+
+.up-mini-dialog.up-mini-visible {
+  opacity: var(--opacity-100);
+  transform: translateY(0);
+}
+
+/* ---- Card ---- */
+
+.up-mini-card {
+  background: var(--surface);
+  border: var(--border-1) solid color-mix(in srgb, var(--text) 6%, transparent);
+  border-radius: var(--rounded-2xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .up-mini-card {
+    padding: var(--space-5);
+  }
+}
+
+/* ---- Header ---- */
+
+.up-mini-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.up-mini-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--rounded-xl);
+  background: linear-gradient(
+    to bottom right,
+    var(--amber-50),
+    color-mix(in srgb, var(--cta) 12%, transparent)
+  );
+  color: var(--amber-600);
+  flex-shrink: 0;
+}
+
+.up-mini-icon i {
+  font-size: var(--text-xl);
+}
+
+.up-mini-title {
+  font-family: var(--font);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text);
+  line-height: var(--leading-tight);
+  margin: 0;
+}
+
+.up-mini-desc {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  line-height: var(--leading-normal);
+  margin: var(--space-0-5) 0 0;
+}
+
+/* ---- Features ---- */
+
+.up-mini-features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-top: var(--border-1) solid var(--border);
+  border-bottom: var(--border-1) solid var(--border);
+}
+
+@media (min-width: 640px) {
+  .up-mini-features {
+    flex-direction: row;
+    gap: var(--space-4);
+  }
+}
+
+.up-mini-feature {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+}
+
+.up-mini-feature i {
+  font-size: var(--text-base);
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
+/* ---- Actions ---- */
+
+.up-mini-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+@media (min-width: 640px) {
+  .up-mini-actions {
+    flex-direction: row;
+  }
+}
+
+.up-mini-btn-primary,
+.up-mini-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1-5);
+  font-family: var(--font);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  border-radius: var(--rounded-xl);
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-200) var(--ease-in-out);
+  padding: var(--space-2-5) var(--space-4);
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .up-mini-btn-primary,
+  .up-mini-btn-secondary {
+    width: auto;
+  }
+}
+
+.up-mini-btn-primary {
+  background: var(--cta);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.up-mini-btn-primary:hover {
+  background: var(--cta-hover);
+  box-shadow: var(--shadow-md);
+  transform: scale(1.02);
+}
+
+.up-mini-btn-primary i {
+  font-size: var(--text-sm);
+}
+
+.up-mini-btn-secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: var(--border-1) solid var(--border);
+}
+
+.up-mini-btn-secondary:hover {
+  background: var(--muted);
+  color: var(--text-secondary);
+  border-color: color-mix(in srgb, var(--text) 12%, transparent);
+}

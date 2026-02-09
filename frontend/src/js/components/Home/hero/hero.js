@@ -330,6 +330,14 @@
       requestAnimationFrame(() => {
         inner.classList.add('hero-unified-card-inner--visible');
       });
+
+      // Demo card button handlers
+      const demoPremiumBtn = document.getElementById('hero-view-premium-btn');
+      if (demoPremiumBtn) {
+        demoPremiumBtn.addEventListener('click', () => {
+          window.location.href = '../Report/Premium/premium-report.html?demo=true';
+        });
+      }
     },
 
     // Result card: real API data enriched with filing facts
@@ -584,11 +592,13 @@
       const premiumBtn = document.getElementById('hero-view-premium-btn');
       if (premiumBtn) {
         premiumBtn.addEventListener('click', () => {
-          if (window.CompanyWisePricing) {
-            window.CompanyWisePricing.scrollTo();
-          } else {
-            const pricingSection = document.getElementById('pricing');
-            if (pricingSection) pricingSection.scrollIntoView({ behavior: 'smooth' });
+          const Wallet = window.CompanyWiseWallet;
+          const reportUrl = '../Report/Premium/premium-report.html?company=' + encodeURIComponent(company.company_number);
+
+          if (Wallet && (Wallet.hasAccess(company.company_number) || Wallet.getBalance() > 0)) {
+            window.location.href = reportUrl;
+          } else if (window.CompanyWisePurchase) {
+            window.CompanyWisePurchase.open({ returnTo: { number: company.company_number, name: company.name } });
           }
         });
       }

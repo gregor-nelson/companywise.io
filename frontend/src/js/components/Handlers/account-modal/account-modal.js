@@ -117,6 +117,24 @@
         + '<p class="am-empty-text">You haven\u2019t purchased any credits yet.</p>'
         + '<div class="am-actions">'
         + '  <button class="am-btn am-btn-primary" data-am-buy>Buy Credits</button>'
+        + '</div>'
+
+        + '<div class="am-recover">'
+        + '  <div class="am-recover-divider">'
+        + '    <span class="am-recover-divider-line"></span>'
+        + '    <span class="am-recover-divider-text">or</span>'
+        + '    <span class="am-recover-divider-line"></span>'
+        + '  </div>'
+        + '  <h3 class="am-section-title">Recover Account</h3>'
+        + '  <p class="am-recover-hint">Paste your recovery token to restore your credits.</p>'
+        + '  <div class="am-recover-field">'
+        + '    <input class="am-recover-input" type="text" data-am-recover-input'
+        + '      placeholder="Paste recovery token\u2026" autocomplete="off" spellcheck="false">'
+        + '  </div>'
+        + '  <div class="am-recover-message" data-am-recover-message></div>'
+        + '  <button class="am-btn am-btn-secondary" data-am-recover>'
+        + '    <i class="ph ph-arrow-counter-clockwise"></i> Recover'
+        + '  </button>'
         + '</div>';
     }
 
@@ -172,6 +190,42 @@
             copyBtn.innerHTML = '<i class="ph ph-copy"></i> Copy';
           }, 2000);
         });
+      });
+    }
+
+    var recoverBtn = dialog.querySelector('[data-am-recover]');
+    var recoverInput = dialog.querySelector('[data-am-recover-input]');
+    var recoverMessage = dialog.querySelector('[data-am-recover-message]');
+
+    if (recoverBtn && recoverInput) {
+      recoverBtn.addEventListener('click', function () {
+        var token = recoverInput.value.trim();
+        if (!token) {
+          recoverMessage.textContent = 'Please paste your recovery token.';
+          recoverMessage.className = 'am-recover-message am-recover-message--error';
+          recoverInput.focus();
+          return;
+        }
+
+        var Wallet = window.CompanyWiseWallet;
+        if (!Wallet) {
+          recoverMessage.textContent = 'Wallet system unavailable. Try refreshing.';
+          recoverMessage.className = 'am-recover-message am-recover-message--error';
+          return;
+        }
+
+        var success = Wallet.recoverFromToken(token);
+        if (!success) {
+          recoverMessage.textContent = 'Invalid token. Please check and try again.';
+          recoverMessage.className = 'am-recover-message am-recover-message--error';
+        }
+      });
+
+      recoverInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          recoverBtn.click();
+        }
       });
     }
   }
