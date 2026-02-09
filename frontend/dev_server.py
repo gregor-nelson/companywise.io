@@ -3,7 +3,9 @@
 import http.server
 import json
 import os
+import socket
 import urllib.request
+import webbrowser
 from pathlib import Path
 
 os.chdir(os.path.join(os.path.dirname(__file__), "src"))
@@ -13,11 +15,18 @@ SRC = Path(".")
 WATCH_EXTS = {".html", ".css", ".js"}
 
 RELOAD_SCRIPT = """<script>(function(){
-  var t=0;
+  var t=0,css=0;
   setInterval(function(){
     fetch("/__reload").then(function(r){return r.json()}).then(function(d){
-      if(t&&d.t>t) location.reload();
-      t=d.t;
+      if(!t){t=d.t;css=d.css;return}
+      if(d.t>t){
+        if(d.css>css&&d.t===d.css){
+          document.querySelectorAll('link[rel="stylesheet"]').forEach(function(l){
+            l.href=l.href.split("?")[0]+"?r="+d.css;
+          });
+          t=d.t;css=d.css;
+        }else{location.reload()}
+      }
     }).catch(function(){});
   },500);
 })()</script>"""
@@ -25,18 +34,36 @@ RELOAD_SCRIPT = """<script>(function(){
 
 def latest_mtime():
     best = 0
+    best_css = 0
     for f in SRC.rglob("*"):
         if f.suffix in WATCH_EXTS:
             try:
                 mt = f.stat().st_mtime
                 if mt > best:
                     best = mt
+                if f.suffix == ".css" and mt > best_css:
+                    best_css = mt
             except OSError:
                 pass
-    return best
+    return best, best_css
+
+
+def find_port(start=3000):
+    for port in range(start, start + 20):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(("", port))
+                return port
+            except OSError:
+                continue
+    return start
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+
     def do_GET(self):
         path = self.path.split("?")[0]
 
@@ -54,10 +81,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
 
     def _reload_check(self):
-        body = json.dumps({"t": latest_mtime()}).encode()
+        t, css = latest_mtime()
+        body = json.dumps({"t": t, "css": css}).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Cache-Control", "no-cache")
         self.send_header("Content-Length", len(body))
         self.end_headers()
         self.wfile.write(body)
@@ -101,6 +128,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             super().log_message(format, *args)
 
 
-print("Frontend: http://localhost:3000  (hot-reload enabled)")
-print("API proxy: /api/* -> http://localhost:8000")
-http.server.HTTPServer(("", 3000), Handler).serve_forever()
+port = find_port(3000)
+url = f"http://localhost:{port}"
+print(f"Frontend: {url}  (hot-reload enabled)")
+print(f"API proxy: /api/* -> {API_BACKEND}")
+webbrowser.open(url)
+http.server.HTTPServer(("", port), Handler).serve_forever()
