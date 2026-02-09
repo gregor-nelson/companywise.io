@@ -25,16 +25,26 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from backend.db.connection import get_connection
-from backend.loader.bulk_loader import load_batch_sequential, BatchResult
+from backend.db.connection import get_connection, init_db
+from backend.loader.bulk_loader import (
+    BatchResult,
+    ResolutionCache,
+    configure_for_bulk_load,
+    drop_indexes_for_bulk_load,
+    load_batch,
+    recreate_indexes,
+    restore_normal_config,
+)
 
 # Configure logging
+log_dir = PROJECT_ROOT / "logs"
+log_dir.mkdir(exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(PROJECT_ROOT / "logs" / "batch_load.log")
+        logging.FileHandler(log_dir / "batch_load.log")
     ]
 )
 logger = logging.getLogger(__name__)
@@ -170,40 +180,61 @@ def load_all_batches(
     failed_batches: list[tuple[str, str]] = []
     start_time = time.time()
 
-    # Process each batch
-    for i, batch_path in enumerate(pending, 1):
-        if shutdown_requested:
-            logger.warning("Shutdown requested. Stopping batch processing.")
-            break
+    # Set up shared connection, cache, and indexes for entire run
+    init_db()
+    conn = get_connection()
 
-        elapsed = time.time() - start_time
-        eta = estimate_remaining(i - 1, total_batches, elapsed)
+    try:
+        configure_for_bulk_load(conn)
+        drop_indexes_for_bulk_load(conn)
+        cache = ResolutionCache(conn)
 
-        logger.info("=" * 70)
-        logger.info(f"BATCH {i}/{total_batches}: {batch_path.name}")
-        logger.info(f"Elapsed: {format_duration(elapsed)} | ETA: {eta}")
-        logger.info("=" * 70)
+        # Process each batch
+        for i, batch_path in enumerate(pending, 1):
+            if shutdown_requested:
+                logger.warning("Shutdown requested. Stopping batch processing.")
+                break
 
-        batch_start = time.time()
+            elapsed = time.time() - start_time
+            eta = estimate_remaining(i - 1, total_batches, elapsed)
 
+            logger.info("=" * 70)
+            logger.info(f"BATCH {i}/{total_batches}: {batch_path.name}")
+            logger.info(f"Elapsed: {format_duration(elapsed)} | ETA: {eta}")
+            logger.info("=" * 70)
+
+            batch_start = time.time()
+
+            try:
+                result = load_batch(batch_path, conn=conn, cache=cache)
+                results.append(result)
+
+                batch_duration = time.time() - batch_start
+                files_per_min = result.files_total / (batch_duration / 60) if batch_duration > 0 else 0
+
+                logger.info(
+                    f"Batch complete: {result.files_processed}/{result.files_total} files "
+                    f"in {format_duration(batch_duration)} ({files_per_min:.0f} files/min)"
+                )
+
+                if result.files_failed > 0:
+                    logger.warning(f"  {result.files_failed} files failed in this batch")
+
+            except Exception as e:
+                logger.error(f"BATCH FAILED: {batch_path.name} - {e}")
+                failed_batches.append((batch_path.name, str(e)))
+
+        # Recreate indexes after all batches are done
+        logger.info("Recreating indexes...")
+        recreate_indexes(conn)
+
+    finally:
         try:
-            result = load_batch_sequential(batch_path)
-            results.append(result)
-
-            batch_duration = time.time() - batch_start
-            files_per_min = result.files_total / (batch_duration / 60) if batch_duration > 0 else 0
-
-            logger.info(
-                f"Batch complete: {result.files_processed}/{result.files_total} files "
-                f"in {format_duration(batch_duration)} ({files_per_min:.0f} files/min)"
-            )
-
-            if result.files_failed > 0:
-                logger.warning(f"  {result.files_failed} files failed in this batch")
-
-        except Exception as e:
-            logger.error(f"BATCH FAILED: {batch_path.name} - {e}")
-            failed_batches.append((batch_path.name, str(e)))
+            restore_normal_config(conn)
+            conn.commit()
+        except:
+            pass
+        conn.close()
 
     # Calculate totals
     total_duration = time.time() - start_time

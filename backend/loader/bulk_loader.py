@@ -52,7 +52,8 @@ logger = logging.getLogger(__name__)
 
 # Performance tuning constants
 COMMIT_BATCH_SIZE = 500  # Commit every N files
-PARALLEL_WORKERS = 4     # Number of parallel parsing workers
+PARALLEL_WORKERS = 2     # Number of parallel parsing workers (keep low for 2GB VPS)
+CHUNK_SIZE = 200         # Process ZIP entries in chunks to limit peak memory
 
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -301,17 +302,62 @@ def parse_file_content(args: tuple[str, bytes, str]) -> list[ParsedFile]:
 
 
 def configure_for_bulk_load(conn: sqlite3.Connection) -> None:
-    """Configure SQLite for maximum bulk load performance."""
-    conn.execute("PRAGMA synchronous = OFF")
-    conn.execute("PRAGMA journal_mode = MEMORY")
+    """Configure SQLite for maximum bulk load performance.
+
+    Uses WAL + synchronous=NORMAL for crash safety (no corruption on power loss)
+    while still being significantly faster than the default synchronous=FULL.
+    """
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA synchronous = NORMAL")
     conn.execute("PRAGMA temp_store = MEMORY")
-    conn.execute("PRAGMA cache_size = -256000")  # 256MB cache
+    conn.execute("PRAGMA cache_size = -64000")  # 64MB cache (safe for 2GB VPS)
+    conn.execute("PRAGMA foreign_keys = OFF")
 
 
 def restore_normal_config(conn: sqlite3.Connection) -> None:
     """Restore normal SQLite configuration after bulk load."""
+    conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA synchronous = NORMAL")
     conn.execute("PRAGMA journal_mode = WAL")
+
+
+# Indexes that are safe to drop during bulk load and recreate after.
+# Excludes UNIQUE constraints (enforced by table definition, not separate indexes).
+_BULK_LOAD_INDEXES = [
+    # Filings
+    ("idx_filings_company", "filings", "company_number"),
+    ("idx_filings_date", "filings", "balance_sheet_date"),
+    ("idx_filings_batch", "filings", "batch_id"),
+    # Concepts
+    ("idx_concepts_name", "concepts", "concept"),
+    # Context definitions
+    ("idx_context_def_hash", "context_definitions", "definition_hash"),
+    ("idx_context_def_period", "context_definitions", "period_type, instant_date"),
+    # Numeric facts
+    ("idx_numeric_filing", "numeric_facts", "filing_id"),
+    ("idx_numeric_concept", "numeric_facts", "concept_id"),
+    ("idx_numeric_filing_concept", "numeric_facts", "filing_id, concept_id"),
+    ("idx_numeric_context", "numeric_facts", "context_id"),
+    # Text facts
+    ("idx_text_filing", "text_facts", "filing_id"),
+    ("idx_text_concept", "text_facts", "concept_id"),
+]
+
+
+def drop_indexes_for_bulk_load(conn: sqlite3.Connection) -> None:
+    """Drop non-unique indexes before bulk loading for faster inserts."""
+    for idx_name, _, _ in _BULK_LOAD_INDEXES:
+        conn.execute(f"DROP INDEX IF EXISTS {idx_name}")
+    conn.commit()
+    logger.info(f"Dropped {len(_BULK_LOAD_INDEXES)} indexes for bulk load")
+
+
+def recreate_indexes(conn: sqlite3.Connection) -> None:
+    """Recreate indexes after bulk loading."""
+    for idx_name, table, columns in _BULK_LOAD_INDEXES:
+        conn.execute(f"CREATE INDEX IF NOT EXISTS {idx_name} ON {table}({columns})")
+    conn.commit()
+    logger.info(f"Recreated {len(_BULK_LOAD_INDEXES)} indexes")
 
 
 def bulk_insert_filing(
@@ -475,7 +521,12 @@ def mark_batch_complete(conn: sqlite3.Connection, batch_id: int) -> None:
     )
 
 
-def load_batch(zip_path: str | Path, workers: int = PARALLEL_WORKERS) -> BatchResult:
+def load_batch(
+    zip_path: str | Path,
+    workers: int = PARALLEL_WORKERS,
+    conn: sqlite3.Connection | None = None,
+    cache: ResolutionCache | None = None,
+) -> BatchResult:
     """
     Load a daily ZIP file into the database with optimized performance.
 
@@ -483,7 +534,9 @@ def load_batch(zip_path: str | Path, workers: int = PARALLEL_WORKERS) -> BatchRe
 
     Args:
         zip_path: Path to the ZIP file to process
-        workers: Number of parallel workers for parsing (default: 4)
+        workers: Number of parallel workers for parsing (default: 2)
+        conn: Optional external DB connection (caller manages lifecycle)
+        cache: Optional external ResolutionCache (persists across batches)
 
     Returns:
         BatchResult with statistics and any errors
@@ -493,20 +546,22 @@ def load_batch(zip_path: str | Path, workers: int = PARALLEL_WORKERS) -> BatchRe
     if not zip_path.exists():
         raise FileNotFoundError(f"ZIP file not found: {zip_path}")
 
-    # Ensure database is initialized
-    init_db()
+    # If caller provides conn/cache, they own the lifecycle
+    owns_conn = conn is None
+    if owns_conn:
+        init_db()
+        conn = get_connection()
 
-    conn = get_connection()
     errors: list[str] = []
     files_processed = 0
     files_failed = 0
 
     try:
-        # Configure for bulk load performance
-        configure_for_bulk_load(conn)
+        if owns_conn:
+            configure_for_bulk_load(conn)
 
-        # Create resolution cache (pre-loads existing lookup entries)
-        cache = ResolutionCache(conn)
+        if cache is None:
+            cache = ResolutionCache(conn)
 
         with zipfile.ZipFile(zip_path, 'r') as zf:
             # Get list of processable files
@@ -522,87 +577,92 @@ def load_batch(zip_path: str | Path, workers: int = PARALLEL_WORKERS) -> BatchRe
             batch_id = create_batch(conn, zip_path, files_total)
             conn.commit()
 
-            # Phase 1: Parallel parsing
-            logger.info("Phase 1: Parsing files...")
-            parse_jobs = []
-            for entry in entries:
-                content = zf.read(entry)
-                source_type = detect_source_type(entry)
-                parse_jobs.append((entry, content, source_type))
+            # Process files in chunks to limit peak memory usage.
+            # Each chunk: read from ZIP -> parse -> insert to DB -> release.
+            logger.info(f"Processing in chunks of {CHUNK_SIZE} (parse + insert per chunk)...")
 
-            parsed_files: list[ParsedFile] = []
+            total_inserted = 0
 
-            # Use multiprocessing for parallel parsing
-            with ProcessPoolExecutor(max_workers=workers) as executor:
-                futures = {executor.submit(parse_file_content, job): job[0] for job in parse_jobs}
+            for chunk_start in range(0, files_total, CHUNK_SIZE):
+                chunk_entries = entries[chunk_start:chunk_start + CHUNK_SIZE]
+                chunk_num = (chunk_start // CHUNK_SIZE) + 1
+                total_chunks = (files_total + CHUNK_SIZE - 1) // CHUNK_SIZE
 
-                completed = 0
-                for future in as_completed(futures):
-                    completed += 1
-                    if completed % 1000 == 0:
-                        logger.info(f"Parsed {completed}/{files_total} files")
+                # Read chunk from ZIP
+                parse_jobs = []
+                for entry in chunk_entries:
+                    content = zf.read(entry)
+                    source_type = detect_source_type(entry)
+                    parse_jobs.append((entry, content, source_type))
 
+                # Parse chunk (parallel)
+                parsed_files: list[ParsedFile] = []
+
+                with ProcessPoolExecutor(max_workers=workers) as executor:
+                    futures = {executor.submit(parse_file_content, job): job[0] for job in parse_jobs}
+
+                    for future in as_completed(futures):
+                        try:
+                            results = future.result()
+                            parsed_files.extend(results)
+                        except Exception as e:
+                            source_file = futures[future]
+                            parsed_files.append(ParsedFile(
+                                source_file=source_file,
+                                source_type='unknown',
+                                error=str(e)
+                            ))
+
+                # Free raw bytes before DB insertion
+                del parse_jobs
+
+                # Insert chunk into DB
+                for pf in parsed_files:
                     try:
-                        results = future.result()
-                        parsed_files.extend(results)
+                        if pf.error:
+                            files_failed += 1
+                            errors.append(f"{pf.source_file}: {pf.error}")
+                            continue
+
+                        if not pf.parsed:
+                            files_failed += 1
+                            errors.append(f"{pf.source_file}: No parsed data")
+                            continue
+
+                        company_number = upsert_company(
+                            conn, pf.parsed.company_number, pf.parsed.company_name
+                        )
+
+                        if not company_number:
+                            parts = pf.source_file.split("_")
+                            if len(parts) >= 3:
+                                company_number = parts[2]
+                                upsert_company(conn, company_number, None)
+
+                        if not company_number:
+                            files_failed += 1
+                            errors.append(f"{pf.source_file}: No company number")
+                            continue
+
+                        bulk_insert_filing(
+                            conn, pf.parsed, company_number,
+                            batch_id, pf.source_file, pf.source_type,
+                            cache
+                        )
+                        files_processed += 1
+
                     except Exception as e:
-                        source_file = futures[future]
-                        parsed_files.append(ParsedFile(
-                            source_file=source_file,
-                            source_type='unknown',
-                            error=str(e)
-                        ))
-
-            logger.info(f"Parsing complete: {len(parsed_files)} items to insert")
-
-            # Phase 2: Batch database insertion
-            logger.info("Phase 2: Inserting into database...")
-
-            for i, pf in enumerate(parsed_files, 1):
-                try:
-                    if pf.error:
                         files_failed += 1
-                        errors.append(f"{pf.source_file}: {pf.error}")
-                        continue
+                        errors.append(f"{pf.source_file}: {str(e)}")
 
-                    if not pf.parsed:
-                        files_failed += 1
-                        errors.append(f"{pf.source_file}: No parsed data")
-                        continue
-
-                    # Get company number
-                    company_number = upsert_company(
-                        conn, pf.parsed.company_number, pf.parsed.company_name
-                    )
-
-                    if not company_number:
-                        # Try to extract from filename
-                        parts = pf.source_file.split("_")
-                        if len(parts) >= 3:
-                            company_number = parts[2]
-                            upsert_company(conn, company_number, None)
-
-                    if not company_number:
-                        files_failed += 1
-                        errors.append(f"{pf.source_file}: No company number")
-                        continue
-
-                    # Insert filing with all data
-                    bulk_insert_filing(
-                        conn, pf.parsed, company_number,
-                        batch_id, pf.source_file, pf.source_type,
-                        cache
-                    )
-                    files_processed += 1
-
-                except Exception as e:
-                    files_failed += 1
-                    errors.append(f"{pf.source_file}: {str(e)}")
-
-                # Batch commit for performance
-                if i % COMMIT_BATCH_SIZE == 0:
-                    conn.commit()
-                    logger.info(f"Inserted {i}/{len(parsed_files)} ({files_processed} successful)")
+                # Commit after each chunk and free parsed data
+                conn.commit()
+                total_inserted += len(chunk_entries)
+                del parsed_files
+                logger.info(
+                    f"Chunk {chunk_num}/{total_chunks}: "
+                    f"{total_inserted}/{files_total} files ({files_processed} successful)"
+                )
 
             # Final commit
             mark_batch_complete(conn, batch_id)
@@ -623,37 +683,50 @@ def load_batch(zip_path: str | Path, workers: int = PARALLEL_WORKERS) -> BatchRe
             )
 
     finally:
-        # Restore normal configuration
-        try:
-            restore_normal_config(conn)
-            conn.commit()
-        except:
-            pass
-        conn.close()
+        if owns_conn:
+            try:
+                restore_normal_config(conn)
+                conn.commit()
+            except:
+                pass
+            conn.close()
 
 
-def load_batch_sequential(zip_path: str | Path) -> BatchResult:
+def load_batch_sequential(
+    zip_path: str | Path,
+    conn: sqlite3.Connection | None = None,
+    cache: ResolutionCache | None = None,
+) -> BatchResult:
     """
     Load a batch without multiprocessing (for debugging or when parallel fails).
 
     Uses batch commits and executemany but processes files sequentially.
+
+    Args:
+        zip_path: Path to the ZIP file to process
+        conn: Optional external DB connection (caller manages lifecycle)
+        cache: Optional external ResolutionCache (persists across batches)
     """
     zip_path = Path(zip_path)
 
     if not zip_path.exists():
         raise FileNotFoundError(f"ZIP file not found: {zip_path}")
 
-    init_db()
-    conn = get_connection()
+    owns_conn = conn is None
+    if owns_conn:
+        init_db()
+        conn = get_connection()
+
     errors: list[str] = []
     files_processed = 0
     files_failed = 0
 
     try:
-        configure_for_bulk_load(conn)
+        if owns_conn:
+            configure_for_bulk_load(conn)
 
-        # Create resolution cache
-        cache = ResolutionCache(conn)
+        if cache is None:
+            cache = ResolutionCache(conn)
 
         with zipfile.ZipFile(zip_path, 'r') as zf:
             entries = [
@@ -733,12 +806,13 @@ def load_batch_sequential(zip_path: str | Path) -> BatchResult:
             )
 
     finally:
-        try:
-            restore_normal_config(conn)
-            conn.commit()
-        except:
-            pass
-        conn.close()
+        if owns_conn:
+            try:
+                restore_normal_config(conn)
+                conn.commit()
+            except:
+                pass
+            conn.close()
 
 
 def get_batch_stats(batch_id: int | None = None) -> dict:

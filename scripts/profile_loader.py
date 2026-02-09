@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # Use fast lxml-based parser (14x faster)
 from backend.parser.ixbrl_fast import parse_ixbrl_fast as parse_ixbrl
 from backend.db.connection import get_connection, init_db
-from backend.loader.bulk_loader import bulk_insert_filing, configure_for_bulk_load
+from backend.loader.bulk_loader import bulk_insert_filing, configure_for_bulk_load, ResolutionCache
 
 
 def get_sample_files(zip_path: Path, count: int = 100) -> list[tuple[str, bytes]]:
@@ -83,6 +83,7 @@ def profile_db_only(parsed_results: list, batch_id: int = 1) -> dict:
     init_db(force=True)  # Fresh database
     conn = get_connection()
     configure_for_bulk_load(conn)
+    cache = ResolutionCache(conn)
 
     # Create dummy batch
     conn.execute("INSERT INTO batches (filename, downloaded_at, file_count) VALUES (?, ?, ?)",
@@ -100,7 +101,8 @@ def profile_db_only(parsed_results: list, batch_id: int = 1) -> dict:
 
         bulk_insert_filing(
             conn, parsed, company_number,
-            batch_id, f"test_file_{i}.html", "ixbrl_html"
+            batch_id, f"test_file_{i}.html", "ixbrl_html",
+            cache
         )
 
         if i % 50 == 0:
@@ -181,7 +183,7 @@ def profile_zip_read(zip_path: Path, count: int = 500) -> dict:
 
 def main():
     # Find a test ZIP file
-    daily_dir = Path("scripts/data/daily")
+    daily_dir = Path(__file__).resolve().parent / "data" / "daily"
     zip_files = sorted(daily_dir.glob("*.zip"))
 
     if not zip_files:
@@ -197,7 +199,7 @@ def main():
         total_files = len([n for n in zf.namelist() if not n.endswith('/')])
     print(f"Total files in ZIP: {total_files}")
 
-    sample_size = 200  # Profile with 200 files
+    sample_size = 50  # Profile with 50 files (safe for 2GB VPS)
 
     # Phase 1: ZIP reading
     zip_stats = profile_zip_read(test_zip, sample_size)
@@ -206,11 +208,13 @@ def main():
     samples = get_sample_files(test_zip, sample_size)
     parse_stats = profile_parsing_only(samples)
 
-    # Phase 3: Profile database insertion
+    # Phase 3: Profile database insertion (then free parsed results)
     db_stats = profile_db_only(parse_stats["results"])
+    del parse_stats["results"]  # Free parsed data before detailed profiling
 
     # Phase 4: Detailed cProfile breakdown
     profile_detailed_parsing(samples)
+    del samples  # Free raw bytes
 
     # Summary
     print(f"\n{'='*60}")
