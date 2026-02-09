@@ -70,6 +70,9 @@ def signal_handler(signum, frame):
 
 def get_loaded_batches() -> set[str]:
     """Get set of already-loaded batch filenames from database."""
+    from backend.db.connection import DEFAULT_DB_PATH
+    if not DEFAULT_DB_PATH.exists():
+        return set()
     conn = get_connection(read_only=True)
     try:
         cursor = conn.execute(

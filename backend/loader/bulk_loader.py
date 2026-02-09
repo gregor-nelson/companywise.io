@@ -52,8 +52,8 @@ logger = logging.getLogger(__name__)
 
 # Performance tuning constants
 COMMIT_BATCH_SIZE = 500  # Commit every N files
-PARALLEL_WORKERS = 2     # Number of parallel parsing workers (keep low for 2GB VPS)
-CHUNK_SIZE = 200         # Process ZIP entries in chunks to limit peak memory
+PARALLEL_WORKERS = 4     # Number of parallel parsing workers (match core count)
+CHUNK_SIZE = 1000        # Process ZIP entries in chunks to limit peak memory
 
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -316,7 +316,8 @@ def configure_for_bulk_load(conn: sqlite3.Connection) -> None:
     conn.execute("PRAGMA journal_mode = WAL")
     conn.execute("PRAGMA synchronous = NORMAL")
     conn.execute("PRAGMA temp_store = MEMORY")
-    conn.execute("PRAGMA cache_size = -64000")  # 64MB cache (safe for 2GB VPS)
+    conn.execute("PRAGMA cache_size = -262144")  # 256MB cache
+    conn.execute("PRAGMA mmap_size = 1073741824")  # 1GB memory-mapped I/O
     conn.execute("PRAGMA foreign_keys = OFF")
 
 
