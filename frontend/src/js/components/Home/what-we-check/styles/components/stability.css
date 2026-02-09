@@ -1,0 +1,608 @@
+/* ============================================
+   COMPANYWISE — stability.css
+   Stability panel card styles · Mobile-first
+   Colour palette: design tokens
+   ============================================ */
+
+
+/* ============================================
+   Status Indicator Card
+   ============================================ */
+
+/* ---- Beacon ---- */
+
+.status-beacon {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--page);
+  border-radius: var(--rounded-xl);
+}
+
+.status-beacon__light {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--rounded-full);
+  flex-shrink: 0;
+}
+
+.status-beacon__light i {
+  font-size: var(--text-xl);
+}
+
+.status-beacon__light--ok {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.status-beacon__light--warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.status-beacon__light--danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.status-beacon__light--critical {
+  background: color-mix(in srgb, var(--red-500) 10%, transparent);
+  color: var(--red-500);
+}
+
+.status-beacon__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.status-beacon__label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text);
+}
+
+.status-beacon__since {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ---- Traffic Light ---- */
+
+.status-traffic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2-5) 0;
+}
+
+.status-traffic__light {
+  width: var(--space-3);
+  height: var(--space-3);
+  border-radius: var(--rounded-full);
+  opacity: var(--opacity-20);
+  transition: opacity var(--duration-300) var(--ease-out);
+}
+
+.status-traffic__light--ok {
+  background: var(--success);
+}
+
+.status-traffic__light--warning {
+  background: var(--warning);
+}
+
+.status-traffic__light--danger {
+  background: var(--danger);
+}
+
+.status-traffic__light--active {
+  opacity: var(--opacity-100);
+  box-shadow: 0 0 var(--space-2) currentColor;
+}
+
+/* ---- Status History ---- */
+
+.status-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.status-history__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--text-muted);
+}
+
+.status-history__label i {
+  font-size: var(--text-sm);
+}
+
+.status-history__entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.status-history__entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-2-5);
+  background: var(--page);
+  border-radius: var(--rounded-lg);
+  font-size: var(--text-xs);
+}
+
+.status-history__date {
+  color: var(--text-faint);
+}
+
+.status-history__status {
+  font-weight: var(--font-medium);
+  color: var(--text);
+}
+
+@media (min-width: 768px) {
+  .status-beacon__light {
+    width: var(--space-11);
+    height: var(--space-11);
+  }
+
+  .status-beacon__light i {
+    font-size: var(--text-2xl);
+  }
+
+  .status-traffic__light {
+    width: var(--space-3-5);
+    height: var(--space-3-5);
+  }
+}
+
+
+/* ============================================
+   Age Timeline Card
+   ============================================ */
+
+/* ---- Age Display ---- */
+
+.age-display {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1-5);
+  padding: var(--space-3);
+  background: var(--page);
+  border-radius: var(--rounded-xl);
+}
+
+.age-display__value {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text);
+  line-height: var(--leading-none);
+}
+
+.age-display__unit {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+}
+
+.age-display__months {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+/* ---- Bracket Badge ---- */
+
+.age-bracket {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1) var(--space-2-5);
+  border-radius: var(--rounded-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+}
+
+.age-bracket i {
+  font-size: var(--text-sm);
+}
+
+.age-bracket--danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.age-bracket--warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.age-bracket--ok {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.age-bracket--strong {
+  background: var(--brand-bg);
+  color: var(--brand);
+}
+
+/* ---- Timeline Bar ---- */
+
+.age-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+.age-timeline__bar {
+  position: relative;
+  height: var(--space-1-5);
+  background: var(--muted);
+  border-radius: var(--rounded-full);
+  overflow: visible;
+}
+
+.age-timeline__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: var(--rounded-full);
+  transition: width var(--duration-700) var(--ease-out-expo);
+}
+
+.age-timeline__fill--danger {
+  background: var(--danger);
+}
+
+.age-timeline__fill--warning {
+  background: var(--warning);
+}
+
+.age-timeline__fill--ok {
+  background: var(--success);
+}
+
+.age-timeline__fill--strong {
+  background: var(--brand);
+}
+
+.age-timeline__marker {
+  position: absolute;
+  top: 50%;
+  width: var(--space-2-5);
+  height: var(--space-2-5);
+  background: var(--surface);
+  border: var(--border-2) solid var(--text);
+  border-radius: var(--rounded-full);
+  transform: translate(-50%, -50%);
+  z-index: var(--z-10);
+}
+
+.age-timeline__milestones {
+  position: relative;
+  height: var(--space-4);
+}
+
+.age-timeline__milestone {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+/* ---- Age Meta ---- */
+
+.age-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+.age-meta__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.age-meta__item i {
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .age-display__value {
+    font-size: var(--text-4xl);
+  }
+
+  .age-meta {
+    flex-direction: row;
+    gap: var(--space-4);
+  }
+}
+
+
+/* ============================================
+   Address Trail Card
+   ============================================ */
+
+/* ---- Summary ---- */
+
+.address-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  background: var(--page);
+  border-radius: var(--rounded-xl);
+}
+
+.address-summary__count {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1-5);
+}
+
+.address-summary__value {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text);
+  line-height: var(--leading-none);
+}
+
+.address-summary__label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.address-summary__freq {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1) var(--space-2-5);
+  border-radius: var(--rounded-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+}
+
+.address-summary__freq i {
+  font-size: var(--text-sm);
+}
+
+.address-summary__freq--ok {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.address-summary__freq--warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.address-summary__freq--danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* ---- Trail ---- */
+
+.address-trail {
+  display: flex;
+  flex-direction: column;
+}
+
+.address-trail__stop {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-1-5) 0;
+}
+
+.address-trail__pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: var(--space-5);
+}
+
+.address-trail__pin i {
+  font-size: var(--text-base);
+  z-index: var(--z-10);
+}
+
+.address-trail__stop--current .address-trail__pin i {
+  color: var(--brand);
+}
+
+.address-trail__stop--previous .address-trail__pin i {
+  color: var(--text-faint);
+}
+
+.address-trail__line {
+  flex: 1;
+  width: var(--border-2);
+  background: var(--border);
+  margin-top: var(--space-0-5);
+  min-height: var(--space-4);
+}
+
+.address-trail__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  padding-bottom: var(--space-2);
+}
+
+.address-trail__date {
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  font-weight: var(--font-medium);
+}
+
+.address-trail__address {
+  font-size: var(--text-sm);
+  color: var(--text);
+  line-height: var(--leading-relaxed);
+}
+
+.address-trail__stop--previous .address-trail__address {
+  color: var(--text-muted);
+}
+
+/* ---- Tenure ---- */
+
+.address-tenure {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-2-5) var(--space-3);
+  background: var(--page);
+  border-radius: var(--rounded-lg);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.address-tenure i {
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+
+/* ============================================
+   Name History Card
+   ============================================ */
+
+/* ---- Summary ---- */
+
+.name-summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1-5);
+  padding: var(--space-3);
+  background: var(--page);
+  border-radius: var(--rounded-xl);
+}
+
+.name-summary__count {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text);
+  line-height: var(--leading-none);
+}
+
+.name-summary__label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ---- Name Stack ---- */
+
+.name-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.name-tag {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2-5);
+  padding: var(--space-2-5) var(--space-3);
+  border-radius: var(--rounded-xl);
+  transition: transform var(--duration-200) var(--ease-out);
+}
+
+.name-tag--current {
+  background: var(--brand-bg);
+  border: var(--border-1) solid color-mix(in srgb, var(--brand) 15%, transparent);
+}
+
+.name-tag--previous {
+  background: var(--page);
+}
+
+.name-tag__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-7);
+  height: var(--space-7);
+  border-radius: var(--rounded-lg);
+  flex-shrink: 0;
+}
+
+.name-tag__icon i {
+  font-size: var(--text-sm);
+}
+
+.name-tag--current .name-tag__icon {
+  background: color-mix(in srgb, var(--brand) 15%, transparent);
+  color: var(--brand);
+}
+
+.name-tag--previous .name-tag__icon {
+  background: var(--muted);
+  color: var(--text-faint);
+}
+
+.name-tag__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  min-width: 0;
+}
+
+.name-tag__name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.name-tag--previous .name-tag__name {
+  color: var(--text-muted);
+}
+
+.name-tag__date {
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+
+/* ---- No Changes ---- */
+
+.name-clear {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--success-bg);
+  border-radius: var(--rounded-xl);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--success);
+}
+
+.name-clear i {
+  font-size: var(--text-lg);
+  flex-shrink: 0;
+}
