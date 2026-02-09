@@ -1,0 +1,15 @@
+[Unit]
+Description=CompanyWise FastAPI Backend
+After=network.target
+
+[Service]
+Type=simple
+User=debian
+WorkingDirectory=/home/debian/companywise.io
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/debian/.pyenv/versions/3.11.11/bin/uvicorn backend.api.app:app --host 127.0.0.1 --port 7001
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
