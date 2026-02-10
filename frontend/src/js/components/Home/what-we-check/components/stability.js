@@ -1,6 +1,6 @@
 /* ============================================
    COMPANYWISE — Stability Panel Component
-   Unique visual cards for company stability signals
+   Composed illustration: anchor card + floating data widgets
    ============================================ */
 
 (function() {
@@ -141,112 +141,40 @@
   };
 
   // ============================================================================
-  // CARD RENDERERS
+  // CARD RENDERERS — Composed Illustration Style
   // ============================================================================
 
   /**
-   * Render a placeholder card when data isn't available yet
+   * Placeholder when signal data isn't available
    */
-  function renderNoDataCard(signal, message) {
+  function renderNoDataCard(signal, extraClass) {
     return `
-      <div class="wwc-card wwc-card--stability wwc-card--no-data" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--muted">
+      <div class="stab-card ${extraClass || ''} stab-card--no-data" data-signal="${signal.id}">
+        <div class="stab-card__header">
+          <div class="stab-card__icon stab-card__icon--muted">
             <i class="ph ${signal.icon}"></i>
           </div>
+          <div class="stab-card__titles">
+            <h4 class="stab-card__name">${signal.title}</h4>
+          </div>
         </div>
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${message || 'Data not yet available for this signal.'}</p>
+        <div class="stab-card__empty">
+          <i class="ph ph-database"></i>
+          <span>Data not yet available</span>
         </div>
       </div>
     `;
   }
 
   /**
-   * Render a status indicator card (for company status)
-   * Visual: Traffic-light status badge with status history
+   * Anchor card — Company Age
+   * Big number display + bracket badge + timeline bar + meta footer
    */
-  function renderStatusIndicator(signal) {
-    const { data } = signal;
-
-    if (!signal.hasData || data.status === null) {
-      return renderNoDataCard(signal, 'No company status found in dataset.');
-    }
-
-    const statusMap = {
-      active:          { class: 'ok',       icon: 'ph-check-circle',   label: 'Active' },
-      dormant:         { class: 'warning',  icon: 'ph-pause-circle',   label: 'Dormant' },
-      'in-liquidation':{ class: 'danger',   icon: 'ph-warning-circle', label: 'In Liquidation' },
-      'struck-off':    { class: 'critical', icon: 'ph-x-circle',      label: 'Struck Off' },
-      dissolved:       { class: 'critical', icon: 'ph-x-circle',      label: 'Dissolved' }
-    };
-
-    const statusInfo = statusMap[data.statusCode] || statusMap['active'];
-
-    return `
-      <div class="wwc-card wwc-card--stability wwc-card--status" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
-            <i class="ph ${signal.icon}"></i>
-          </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
-          </div>
-        </div>
-
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--status">
-          <div class="status-beacon">
-            <div class="status-beacon__light status-beacon__light--${statusInfo.class}">
-              <i class="ph-fill ${statusInfo.icon}"></i>
-            </div>
-            <div class="status-beacon__info">
-              <span class="status-beacon__label">${statusInfo.label}</span>
-              <span class="status-beacon__since">Since ${data.incorporatedDate}</span>
-            </div>
-          </div>
-
-          <div class="status-traffic">
-            <div class="status-traffic__light status-traffic__light--ok ${statusInfo.class === 'ok' ? 'status-traffic__light--active' : ''}"></div>
-            <div class="status-traffic__light status-traffic__light--warning ${statusInfo.class === 'warning' ? 'status-traffic__light--active' : ''}"></div>
-            <div class="status-traffic__light status-traffic__light--danger ${statusInfo.class === 'danger' || statusInfo.class === 'critical' ? 'status-traffic__light--active' : ''}"></div>
-          </div>
-
-          ${data.previousStatuses && data.previousStatuses.length > 1 ? `
-            <div class="status-history">
-              <div class="status-history__label">
-                <i class="ph ph-clock-counter-clockwise"></i>
-                <span>Status history</span>
-              </div>
-              <div class="status-history__entries">
-                ${data.previousStatuses.map(entry => `
-                  <div class="status-history__entry">
-                    <span class="status-history__date">${entry.date}</span>
-                    <span class="status-history__status">${entry.status}</span>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Render an age timeline card (for company age)
-   * Visual: Horizontal progress timeline with age bracket milestones
-   */
-  function renderAgeTimeline(signal) {
+  function renderAnchorCard(signal) {
     const { data } = signal;
 
     if (!signal.hasData || data.years === null) {
-      return renderNoDataCard(signal, 'No incorporation date found in dataset.');
+      return renderNoDataCard(signal, 'stab-card--anchor');
     }
 
     const thresholds = signal.thresholds || { new: 2, growing: 5, established: 10 };
@@ -264,54 +192,52 @@
     const bracketInfo = bracketMap[data.bracket] || bracketMap['new'];
 
     return `
-      <div class="wwc-card wwc-card--stability wwc-card--age" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
+      <div class="stab-card stab-card--anchor" data-signal="${signal.id}">
+        <div class="stab-card__header">
+          <div class="stab-card__icon stab-card__icon--amber">
             <i class="ph ${signal.icon}"></i>
           </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
+          <div class="stab-card__titles">
+            <h4 class="stab-card__name">${signal.title}</h4>
+            <p class="stab-card__sub">How long have they been trading?</p>
           </div>
+          <span class="stab-card__badge stab-card__badge--medium">Med</span>
         </div>
 
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--age">
-          <div class="age-display">
-            <span class="age-display__value">${data.years}</span>
-            <span class="age-display__unit">years</span>
-            <span class="age-display__months">${data.months} months</span>
-          </div>
-
-          <div class="age-bracket age-bracket--${bracketInfo.class}">
-            <i class="ph-fill ph-shield-check"></i>
-            <span>${bracketInfo.label}</span>
-          </div>
-
-          <div class="age-timeline">
-            <div class="age-timeline__bar">
-              <div class="age-timeline__fill age-timeline__fill--${bracketInfo.class}" style="width: ${progressPercent}%"></div>
-              <div class="age-timeline__marker" style="left: ${progressPercent}%"></div>
+        <div class="stab-anchor__body">
+          <div class="stab-anchor__age">
+            <div class="stab-anchor__age-display">
+              <span class="stab-anchor__age-value">${data.years}</span>
+              <span class="stab-anchor__age-unit">years</span>
+              <span class="stab-anchor__age-months">${data.months} months</span>
             </div>
-            <div class="age-timeline__milestones">
-              <span class="age-timeline__milestone" style="left: 0%">0</span>
-              <span class="age-timeline__milestone" style="left: ${(thresholds.new / maxYears) * 100}%">${thresholds.new}yr</span>
-              <span class="age-timeline__milestone" style="left: ${(thresholds.growing / maxYears) * 100}%">${thresholds.growing}yr</span>
-              <span class="age-timeline__milestone" style="left: ${(thresholds.established / maxYears) * 100}%">${thresholds.established}yr</span>
-              <span class="age-timeline__milestone" style="left: 100%">${maxYears}+</span>
+            <div class="stab-anchor__bracket stab-anchor__bracket--${bracketInfo.class}">
+              <i class="ph-fill ph-shield-check"></i>
+              <span>${bracketInfo.label}</span>
             </div>
           </div>
 
-          <div class="age-meta">
-            <div class="age-meta__item">
+          <div class="stab-anchor__timeline">
+            <div class="stab-anchor__timeline-bar">
+              <div class="stab-anchor__timeline-fill stab-anchor__timeline-fill--${bracketInfo.class}" style="width: ${progressPercent}%"></div>
+              <div class="stab-anchor__timeline-marker" style="left: ${progressPercent}%"></div>
+            </div>
+            <div class="stab-anchor__timeline-milestones">
+              <span class="stab-anchor__milestone" style="left: 0%">0</span>
+              <span class="stab-anchor__milestone" style="left: ${(thresholds.new / maxYears) * 100}%">${thresholds.new}yr</span>
+              <span class="stab-anchor__milestone" style="left: ${(thresholds.growing / maxYears) * 100}%">${thresholds.growing}yr</span>
+              <span class="stab-anchor__milestone" style="left: ${(thresholds.established / maxYears) * 100}%">${thresholds.established}yr</span>
+              <span class="stab-anchor__milestone" style="left: 100%">${maxYears}+</span>
+            </div>
+          </div>
+
+          <div class="stab-anchor__meta">
+            <div class="stab-anchor__meta-item">
               <i class="ph ph-calendar"></i>
               <span>Incorporated: ${data.incorporatedDate}</span>
             </div>
             ${data.firstFilingDate ? `
-              <div class="age-meta__item">
+              <div class="stab-anchor__meta-item">
                 <i class="ph ph-file-text"></i>
                 <span>First filing: ${data.firstFilingDate}</span>
               </div>
@@ -323,71 +249,52 @@
   }
 
   /**
-   * Render an address trail card (for address changes)
-   * Visual: Vertical location trail with pin markers
+   * Float card — Company Status (top-right)
+   * Traffic-light beacon + status label + since date
    */
-  function renderAddressTrail(signal) {
+  function renderStatusFloat(signal) {
     const { data } = signal;
 
-    if (!signal.hasData || data.changeCount === null) {
-      return renderNoDataCard(signal, 'No address change history available.');
+    if (!signal.hasData || data.status === null) {
+      return renderNoDataCard(signal, 'stab-card--float-status');
     }
 
-    const frequencyMap = {
-      'none':     { class: 'ok',      label: 'No changes' },
-      'low':      { class: 'ok',      label: 'Low frequency' },
-      'moderate': { class: 'warning', label: 'Moderate frequency' },
-      'high':     { class: 'danger',  label: 'High frequency' }
+    const statusMap = {
+      active:          { class: 'ok',       icon: 'ph-check-circle',   label: 'Active' },
+      dormant:         { class: 'warning',  icon: 'ph-pause-circle',   label: 'Dormant' },
+      'in-liquidation':{ class: 'danger',   icon: 'ph-warning-circle', label: 'In Liquidation' },
+      'struck-off':    { class: 'critical', icon: 'ph-x-circle',      label: 'Struck Off' },
+      dissolved:       { class: 'critical', icon: 'ph-x-circle',      label: 'Dissolved' }
     };
 
-    const freqInfo = frequencyMap[data.frequency] || frequencyMap['low'];
+    const statusInfo = statusMap[data.statusCode] || statusMap['active'];
 
     return `
-      <div class="wwc-card wwc-card--stability wwc-card--address" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
+      <div class="stab-card stab-card--float-status" data-signal="${signal.id}">
+        <div class="stab-card__header">
+          <div class="stab-card__icon stab-card__icon--red">
             <i class="ph ${signal.icon}"></i>
           </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
+          <div class="stab-card__titles">
+            <h4 class="stab-card__name">${signal.title}</h4>
           </div>
         </div>
 
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--address">
-          <div class="address-summary">
-            <div class="address-summary__count">
-              <span class="address-summary__value">${data.changeCount}</span>
-              <span class="address-summary__label">changes</span>
+        <div class="stab-status__body">
+          <div class="stab-status__beacon">
+            <div class="stab-status__light stab-status__light--${statusInfo.class}">
+              <i class="ph-fill ${statusInfo.icon}"></i>
             </div>
-            <div class="address-summary__freq address-summary__freq--${freqInfo.class}">
-              <i class="ph ph-map-pin"></i>
-              <span>${freqInfo.label}</span>
+            <div class="stab-status__info">
+              <span class="stab-status__label">${statusInfo.label}</span>
+              <span class="stab-status__since">Since ${data.incorporatedDate}</span>
             </div>
           </div>
 
-          <div class="address-trail">
-            ${data.recentChanges.map((change, idx) => `
-              <div class="address-trail__stop ${idx === 0 ? 'address-trail__stop--current' : 'address-trail__stop--previous'}">
-                <div class="address-trail__pin">
-                  <i class="ph-fill ph-map-pin"></i>
-                  ${idx < data.recentChanges.length - 1 ? '<div class="address-trail__line"></div>' : ''}
-                </div>
-                <div class="address-trail__detail">
-                  <span class="address-trail__date">${change.date}</span>
-                  <span class="address-trail__address">${change.address}</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-
-          <div class="address-tenure">
-            <i class="ph ph-clock"></i>
-            <span>${data.yearsAtCurrent} year${data.yearsAtCurrent !== 1 ? 's' : ''} at current address</span>
+          <div class="stab-status__traffic">
+            <div class="stab-status__dot stab-status__dot--ok ${statusInfo.class === 'ok' ? 'stab-status__dot--active' : ''}"></div>
+            <div class="stab-status__dot stab-status__dot--warning ${statusInfo.class === 'warning' ? 'stab-status__dot--active' : ''}"></div>
+            <div class="stab-status__dot stab-status__dot--danger ${statusInfo.class === 'danger' || statusInfo.class === 'critical' ? 'stab-status__dot--active' : ''}"></div>
           </div>
         </div>
       </div>
@@ -395,58 +302,86 @@
   }
 
   /**
-   * Render a name history card (for previous names)
-   * Visual: Stacked name tags showing rebrand trail
+   * Float card — Address Changes (bottom-left)
+   * Change count + frequency badge + tenure line (no trail stops)
    */
-  function renderNameHistory(signal) {
+  function renderAddressFloat(signal) {
+    const { data } = signal;
+
+    if (!signal.hasData || data.changeCount === null) {
+      return renderNoDataCard(signal, 'stab-card--float-address');
+    }
+
+    const frequencyMap = {
+      'none':     { class: 'ok',      label: 'No changes' },
+      'low':      { class: 'ok',      label: 'Low' },
+      'moderate': { class: 'warning', label: 'Moderate' },
+      'high':     { class: 'danger',  label: 'High' }
+    };
+
+    const freqInfo = frequencyMap[data.frequency] || frequencyMap['low'];
+
+    return `
+      <div class="stab-card stab-card--float-address" data-signal="${signal.id}">
+        <div class="stab-card__header">
+          <div class="stab-card__icon stab-card__icon--amber">
+            <i class="ph ${signal.icon}"></i>
+          </div>
+          <div class="stab-card__titles">
+            <h4 class="stab-card__name">${signal.title}</h4>
+          </div>
+        </div>
+
+        <div class="stab-address__body">
+          <div class="stab-address__summary">
+            <span class="stab-address__count">${data.changeCount}</span>
+            <span class="stab-address__label">changes</span>
+            <span class="stab-address__freq stab-address__freq--${freqInfo.class}">${freqInfo.label}</span>
+          </div>
+
+          <div class="stab-address__tenure">
+            <i class="ph ph-clock"></i>
+            <span>${data.yearsAtCurrent} year${data.yearsAtCurrent !== 1 ? 's' : ''} at current</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Float card — Previous Names (bottom-right)
+   * Compact pill: count or "no changes" indicator
+   */
+  function renderNamesFloat(signal) {
     const { data } = signal;
 
     if (!signal.hasData || data.nameCount === null) {
-      return renderNoDataCard(signal, 'No previous name data available.');
+      return renderNoDataCard(signal, 'stab-card--float-names');
     }
 
     const hasChanges = data.nameCount > 0;
 
     return `
-      <div class="wwc-card wwc-card--stability wwc-card--names" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
+      <div class="stab-card stab-card--float-names" data-signal="${signal.id}">
+        <div class="stab-card__header">
+          <div class="stab-card__icon stab-card__icon--blue">
             <i class="ph ${signal.icon}"></i>
           </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
+          <div class="stab-card__titles">
+            <h4 class="stab-card__name">${signal.title}</h4>
           </div>
         </div>
 
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--names">
+        <div class="stab-names__body">
           ${hasChanges ? `
-            <div class="name-summary">
-              <span class="name-summary__count">${data.nameCount}</span>
-              <span class="name-summary__label">name change${data.nameCount !== 1 ? 's' : ''}</span>
-            </div>
-
-            <div class="name-stack">
-              ${data.names.map((entry, idx) => `
-                <div class="name-tag name-tag--${entry.type}" style="--stack-offset: ${idx}">
-                  <div class="name-tag__icon">
-                    <i class="ph ${entry.type === 'current' ? 'ph-check-circle' : 'ph-arrow-bend-up-left'}"></i>
-                  </div>
-                  <div class="name-tag__content">
-                    <span class="name-tag__name">${entry.name}</span>
-                    <span class="name-tag__date">${entry.type === 'current' ? 'Current' : entry.date}</span>
-                  </div>
-                </div>
-              `).join('')}
+            <div class="stab-names__count">
+              <span class="stab-names__value">${data.nameCount}</span>
+              <span class="stab-names__label">name change${data.nameCount !== 1 ? 's' : ''}</span>
             </div>
           ` : `
-            <div class="name-clear">
+            <div class="stab-names__clear">
               <i class="ph ph-check-circle"></i>
-              <span>No name changes on record</span>
+              <span>No name changes</span>
             </div>
           `}
         </div>
@@ -455,27 +390,33 @@
   }
 
   // ============================================================================
-  // PANEL RENDERER
+  // PANEL RENDERER — Composed Showcase
   // ============================================================================
 
   /**
-   * Render all cards for the Stability panel
+   * Renders the full Stability panel as a composed illustration:
+   * - Anchor card (Company Age) centred with timeline
+   * - Float card top-right (Company Status)
+   * - Float card bottom-left (Address Changes)
+   * - Float card bottom-right (Previous Names)
+   * - Depth card + blur accent for layered feel
    */
   function renderStabilityPanel(signals) {
-    return signals.map(signal => {
-      switch (signal.cardType) {
-        case 'status-indicator':
-          return renderStatusIndicator(signal);
-        case 'age-timeline':
-          return renderAgeTimeline(signal);
-        case 'address-trail':
-          return renderAddressTrail(signal);
-        case 'name-history':
-          return renderNameHistory(signal);
-        default:
-          return renderNoDataCard(signal);
-      }
-    }).join('');
+    const age = signals.find(s => s.id === 'company-age');
+    const status = signals.find(s => s.id === 'company-status');
+    const address = signals.find(s => s.id === 'address-changes');
+    const names = signals.find(s => s.id === 'previous-names');
+
+    return `
+      <div class="stab-showcase">
+        <div class="stab-showcase__depth" aria-hidden="true"></div>
+        ${age ? renderAnchorCard(age) : ''}
+        ${status ? renderStatusFloat(status) : ''}
+        ${address ? renderAddressFloat(address) : ''}
+        ${names ? renderNamesFloat(names) : ''}
+        <div class="stab-showcase__blur" aria-hidden="true"></div>
+      </div>
+    `;
   }
 
   // ============================================================================
