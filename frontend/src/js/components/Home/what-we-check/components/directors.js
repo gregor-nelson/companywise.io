@@ -1,6 +1,6 @@
 /* ============================================
    COMPANYWISE — Directors Panel Component
-   Unique visual cards for directors & control signals
+   Composed illustration: anchor card + floating data widget
    ============================================ */
 
 (function() {
@@ -140,90 +140,91 @@
   };
 
   // ============================================================================
-  // CARD RENDERERS
+  // CARD RENDERERS — Composed Illustration Style
   // ============================================================================
 
   /**
-   * Render a placeholder card when data isn't available yet
+   * Placeholder when signal data isn't available
    */
-  function renderNoDataCard(signal, message) {
+  function renderNoDataCard(signal, extraClass) {
     return `
-      <div class="wwc-card wwc-card--directors wwc-card--no-data" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--muted">
+      <div class="dir-card ${extraClass || ''} dir-card--no-data" data-signal="${signal.id}">
+        <div class="dir-card__header">
+          <div class="dir-card__icon dir-card__icon--muted">
             <i class="ph ${signal.icon}"></i>
           </div>
+          <div class="dir-card__titles">
+            <h4 class="dir-card__name">${signal.title}</h4>
+          </div>
         </div>
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${message || 'Data not yet available for this signal.'}</p>
+        <div class="dir-card__empty">
+          <i class="ph ph-database"></i>
+          <span>Data not yet available</span>
         </div>
       </div>
     `;
   }
 
   /**
-   * Render a director network card (for director history)
-   * Visual: Director profile rows with dissolved company indicators
+   * Anchor card — Director History
+   * Primary showcase card with stats row + director roster + tenure footer
    */
-  function renderDirectorNetwork(signal) {
+  function renderAnchorCard(signal) {
     const { data } = signal;
 
     if (!signal.hasData || data.totalDirectors === null) {
-      return renderNoDataCard(signal, 'No director data available from Companies House.');
+      return renderNoDataCard(signal, 'dir-card--anchor');
     }
 
     const hasConcern = data.totalDissolved > 2;
+    const rosterRows = data.directors.slice(0, 2);
 
     return `
-      <div class="wwc-card wwc-card--directors wwc-card--network" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
+      <div class="dir-card dir-card--anchor" data-signal="${signal.id}">
+        <div class="dir-card__header">
+          <div class="dir-card__icon dir-card__icon--amber">
             <i class="ph ${signal.icon}"></i>
           </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
+          <div class="dir-card__titles">
+            <h4 class="dir-card__name">${signal.title}</h4>
+            <p class="dir-card__sub">Track record across companies</p>
           </div>
+          <span class="dir-card__badge dir-card__badge--medium">Med</span>
         </div>
 
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--network">
-          <div class="director-stats">
-            <div class="director-stat">
-              <span class="director-stat__value">${data.activeDirectors}</span>
-              <span class="director-stat__label">Active</span>
+        <div class="dir-anchor__body">
+          <div class="dir-anchor__stats">
+            <div class="dir-anchor__stat">
+              <span class="dir-anchor__stat-value">${data.activeDirectors}</span>
+              <span class="dir-anchor__stat-label">Active</span>
             </div>
-            <div class="director-stat director-stat--muted">
-              <span class="director-stat__value">${data.resignedCount}</span>
-              <span class="director-stat__label">Resigned</span>
+            <div class="dir-anchor__stat dir-anchor__stat--muted">
+              <span class="dir-anchor__stat-value">${data.resignedCount}</span>
+              <span class="dir-anchor__stat-label">Resigned</span>
             </div>
-            <div class="director-stat ${hasConcern ? 'director-stat--alert' : ''}">
-              <span class="director-stat__value">${data.totalDissolved}</span>
-              <span class="director-stat__label">Dissolved cos.</span>
+            <div class="dir-anchor__stat ${hasConcern ? 'dir-anchor__stat--alert' : ''}">
+              <span class="dir-anchor__stat-value">${data.totalDissolved}</span>
+              <span class="dir-anchor__stat-label">Dissolved cos.</span>
             </div>
           </div>
 
-          <div class="director-roster">
-            ${data.directors.map(dir => `
-              <div class="director-row director-row--${dir.status}">
-                <div class="director-row__avatar">
+          <div class="dir-anchor__roster">
+            ${rosterRows.map(dir => `
+              <div class="dir-anchor__row dir-anchor__row--${dir.status}">
+                <div class="dir-anchor__row-avatar">
                   <i class="ph-fill ph-user-circle"></i>
                 </div>
-                <div class="director-row__info">
-                  <span class="director-row__name">${dir.name}</span>
-                  <span class="director-row__meta">${dir.role} · ${dir.appointedDate}${dir.resignedDate ? ' – ' + dir.resignedDate : ''}</span>
+                <div class="dir-anchor__row-info">
+                  <span class="dir-anchor__row-name">${dir.name}</span>
+                  <span class="dir-anchor__row-meta">${dir.role} · ${dir.appointedDate}${dir.resignedDate ? ' – ' + dir.resignedDate : ''}</span>
                 </div>
-                <div class="director-row__flags">
-                  <span class="director-row__companies" title="Other company appointments">
+                <div class="dir-anchor__row-flags">
+                  <span class="dir-anchor__row-companies" title="Other company appointments">
                     <i class="ph ph-buildings"></i>
                     <span>${dir.otherCompanies}</span>
                   </span>
                   ${dir.dissolvedCompanies > 0 ? `
-                    <span class="director-row__dissolved" title="Dissolved companies linked">
+                    <span class="dir-anchor__row-dissolved" title="Dissolved companies linked">
                       <i class="ph ph-warning"></i>
                       <span>${dir.dissolvedCompanies}</span>
                     </span>
@@ -233,7 +234,7 @@
             `).join('')}
           </div>
 
-          <div class="director-tenure">
+          <div class="dir-anchor__tenure">
             <i class="ph ph-clock"></i>
             <span>Avg. tenure: <strong>${data.avgTenureYears} years</strong></span>
           </div>
@@ -243,17 +244,16 @@
   }
 
   /**
-   * Render an ownership chart card (for PSC register)
-   * Visual: Ownership percentage bars with control type indicators
+   * Float card — PSC Register
+   * Compact ownership entries with percentage bars + transparency indicator
    */
-  function renderOwnershipChart(signal) {
+  function renderPSCFloat(signal) {
     const { data } = signal;
 
     if (!signal.hasData || data.pscCount === null) {
-      return renderNoDataCard(signal, 'No PSC register data available.');
+      return renderNoDataCard(signal, 'dir-card--float-psc');
     }
 
-    // Map ownership band text to approximate percentage for bar widths
     const ownershipToPercent = {
       '75-100%': 87,
       '50-75%':  62,
@@ -262,48 +262,43 @@
     };
 
     return `
-      <div class="wwc-card wwc-card--directors wwc-card--ownership" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
+      <div class="dir-card dir-card--float-psc" data-signal="${signal.id}">
+        <div class="dir-card__header">
+          <div class="dir-card__icon dir-card__icon--blue">
             <i class="ph ${signal.icon}"></i>
           </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
+          <div class="dir-card__titles">
+            <h4 class="dir-card__name">${signal.title}</h4>
           </div>
         </div>
 
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--ownership">
-          <div class="ownership-header">
-            <span class="ownership-header__count">${data.pscCount} person${data.pscCount !== 1 ? 's' : ''}</span>
-            <span class="ownership-header__control">with significant control</span>
+        <div class="dir-psc__body">
+          <div class="dir-psc__count">
+            <span class="dir-psc__count-value">${data.pscCount}</span>
+            <span class="dir-psc__count-label">person${data.pscCount !== 1 ? 's' : ''} with significant control</span>
           </div>
 
-          <div class="ownership-entries">
+          <div class="dir-psc__entries">
             ${data.entries.map(psc => {
               const barWidth = ownershipToPercent[psc.ownership] || 50;
               return `
-                <div class="ownership-entry">
-                  <div class="ownership-entry__person">
-                    <div class="ownership-entry__avatar">
+                <div class="dir-psc__entry">
+                  <div class="dir-psc__entry-person">
+                    <div class="dir-psc__entry-avatar">
                       <i class="ph-fill ph-user-circle"></i>
                     </div>
-                    <div class="ownership-entry__info">
-                      <span class="ownership-entry__name">${psc.name}</span>
-                      <span class="ownership-entry__since">Since ${psc.notifiedDate}</span>
+                    <div class="dir-psc__entry-info">
+                      <span class="dir-psc__entry-name">${psc.name}</span>
+                      <span class="dir-psc__entry-since">Since ${psc.notifiedDate}</span>
                     </div>
                   </div>
-                  <div class="ownership-entry__control">
-                    <div class="ownership-entry__bar-track">
-                      <div class="ownership-entry__bar-fill" style="width: ${barWidth}%"></div>
+                  <div class="dir-psc__entry-control">
+                    <div class="dir-psc__entry-track">
+                      <div class="dir-psc__entry-fill" style="width: ${barWidth}%"></div>
                     </div>
-                    <div class="ownership-entry__detail">
-                      <span class="ownership-entry__percent">${psc.ownership}</span>
-                      <span class="ownership-entry__type">
+                    <div class="dir-psc__entry-detail">
+                      <span class="dir-psc__entry-percent">${psc.ownership}</span>
+                      <span class="dir-psc__entry-type">
                         <i class="ph ${psc.controlType === 'shares' ? 'ph-chart-pie-slice' : 'ph-key'}"></i>
                         ${psc.controlType}
                       </span>
@@ -314,7 +309,7 @@
             }).join('')}
           </div>
 
-          <div class="ownership-footer">
+          <div class="dir-psc__footer dir-psc__footer--${data.hasExemptions ? 'warning' : 'clear'}">
             <i class="ph ${data.hasExemptions ? 'ph-warning' : 'ph-check-circle'}"></i>
             <span>${data.hasExemptions ? 'Exemptions or super-secure persons present' : 'Full transparency — no exemptions'}</span>
           </div>
@@ -324,23 +319,27 @@
   }
 
   // ============================================================================
-  // PANEL RENDERER
+  // PANEL RENDERER — Composed Showcase
   // ============================================================================
 
   /**
-   * Render all cards for the Directors panel
+   * Renders the full Directors panel as a composed illustration:
+   * - Anchor card (Director History) centred with stats + roster
+   * - Float card bottom-right (PSC Register)
+   * - Depth card + blur accent for layered feel
    */
   function renderDirectorsPanel(signals) {
-    return signals.map(signal => {
-      switch (signal.cardType) {
-        case 'director-network':
-          return renderDirectorNetwork(signal);
-        case 'ownership-chart':
-          return renderOwnershipChart(signal);
-        default:
-          return renderNoDataCard(signal);
-      }
-    }).join('');
+    const directorHistory = signals.find(s => s.id === 'director-history');
+    const pscRegister = signals.find(s => s.id === 'psc-register');
+
+    return `
+      <div class="dir-showcase">
+        <div class="dir-showcase__depth" aria-hidden="true"></div>
+        ${directorHistory ? renderAnchorCard(directorHistory) : ''}
+        ${pscRegister ? renderPSCFloat(pscRegister) : ''}
+        <div class="dir-showcase__blur" aria-hidden="true"></div>
+      </div>
+    `;
   }
 
   // ============================================================================

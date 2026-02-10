@@ -1,6 +1,6 @@
 /* ============================================
    COMPANYWISE — Financial Panel Component
-   Unique visual cards for financial health signals
+   Composed illustration: anchor card + floating data widgets
    ============================================ */
 
 (function() {
@@ -124,252 +124,6 @@
   };
 
   // ============================================================================
-  // CARD RENDERERS
-  // ============================================================================
-
-  /**
-   * Render a placeholder card when data isn't available yet
-   */
-  function renderNoDataCard(signal, message) {
-    return `
-      <div class="wwc-card wwc-card--financial wwc-card--no-data" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--muted">
-            <i class="ph ${signal.icon}"></i>
-          </div>
-        </div>
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${message || 'Data not yet available for this signal.'}</p>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Render a deadline tracker card (for overdue accounts)
-   * Visual: Circular countdown gauge with urgency colors
-   */
-  function renderDeadlineTracker(signal) {
-    const { data } = signal;
-
-    if (!signal.hasData || data.daysOverdue === null) {
-      return renderNoDataCard(signal, 'No accounts due date found in dataset.');
-    }
-
-    const thresholds = signal.thresholds || { warning: 14, danger: 30, critical: 60 };
-    const urgencyClass = getUrgencyClass(data.daysOverdue, thresholds);
-    const gaugePercent = Math.min((data.daysOverdue / 90) * 100, 100);
-    const circumference = 2 * Math.PI * 54;
-    const dashOffset = circumference - (gaugePercent / 100) * circumference;
-
-    return `
-      <div class="wwc-card wwc-card--financial wwc-card--deadline" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
-            <i class="ph ${signal.icon}"></i>
-          </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
-          </div>
-        </div>
-
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--deadline">
-          <div class="deadline-gauge">
-            <svg viewBox="0 0 120 120" class="deadline-gauge__svg">
-              <circle cx="60" cy="60" r="54" class="deadline-gauge__track"></circle>
-              <circle cx="60" cy="60" r="54" class="deadline-gauge__fill deadline-gauge__fill--${urgencyClass}"
-                style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${dashOffset};"
-              ></circle>
-            </svg>
-            <div class="deadline-gauge__center">
-              <span class="deadline-gauge__value ${urgencyClass}">${data.daysOverdue}</span>
-              <span class="deadline-gauge__label">days</span>
-            </div>
-          </div>
-
-          <div class="deadline-meta">
-            <div class="deadline-meta__status deadline-meta__status--${data.status}">
-              <i class="ph-fill ph-warning-circle"></i>
-              <span>Accounts overdue</span>
-            </div>
-            <div class="deadline-meta__date">
-              <i class="ph ph-calendar"></i>
-              <span>Due: ${data.dueDate}</span>
-            </div>
-          </div>
-
-          <div class="deadline-scale">
-            <div class="deadline-scale__bar">
-              <div class="deadline-scale__zone deadline-scale__zone--ok" style="width: 15.5%"></div>
-              <div class="deadline-scale__zone deadline-scale__zone--warning" style="width: 17.8%"></div>
-              <div class="deadline-scale__zone deadline-scale__zone--danger" style="width: 33.3%"></div>
-              <div class="deadline-scale__zone deadline-scale__zone--critical" style="width: 33.3%"></div>
-              <div class="deadline-scale__marker" style="left: ${gaugePercent}%"></div>
-            </div>
-            <div class="deadline-scale__labels">
-              <span>0</span>
-              <span>14</span>
-              <span>30</span>
-              <span>60</span>
-              <span>90+</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Render a legal record card (for CCJs & Charges)
-   * Visual: Stacked case files with status indicators
-   */
-  function renderLegalRecord(signal) {
-    const { data } = signal;
-
-    if (!signal.hasData || (data.activeCCJs === null && data.activeCharges === null)) {
-      return renderNoDataCard(signal, 'No CCJ or charge data available yet.');
-    }
-
-    const hasActiveIssues = data.activeCCJs > 0 || data.activeCharges > 0;
-
-    return `
-      <div class="wwc-card wwc-card--financial wwc-card--legal" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
-            <i class="ph ${signal.icon}"></i>
-          </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
-          </div>
-        </div>
-
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--legal">
-          <div class="legal-stack">
-            <div class="legal-file legal-file--active ${data.activeCCJs > 0 ? 'legal-file--has-items' : ''}">
-              <div class="legal-file__tab legal-file__tab--danger">
-                <i class="ph-bold ph-warning"></i>
-              </div>
-              <div class="legal-file__content">
-                <span class="legal-file__count">${data.activeCCJs}</span>
-                <span class="legal-file__label">Active CCJs</span>
-              </div>
-            </div>
-
-            <div class="legal-file legal-file--charges ${data.activeCharges > 0 ? 'legal-file--has-items' : ''}">
-              <div class="legal-file__tab legal-file__tab--warning">
-                <i class="ph-bold ph-link"></i>
-              </div>
-              <div class="legal-file__content">
-                <span class="legal-file__count">${data.activeCharges}</span>
-                <span class="legal-file__label">Charges</span>
-              </div>
-            </div>
-
-            <div class="legal-file legal-file--satisfied">
-              <div class="legal-file__tab legal-file__tab--success">
-                <i class="ph-bold ph-check"></i>
-              </div>
-              <div class="legal-file__content">
-                <span class="legal-file__count">${data.satisfiedCount}</span>
-                <span class="legal-file__label">Satisfied</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="legal-total ${hasActiveIssues ? 'legal-total--alert' : 'legal-total--clear'}">
-            <i class="ph ${hasActiveIssues ? 'ph-currency-gbp' : 'ph-check-circle'}"></i>
-            <span>${hasActiveIssues ? `Total outstanding: <strong>${data.totalValue}</strong>` : 'No active judgments'}</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Render accounts snapshot card (for financial health)
-   * Visual: Mini financial dashboard with trend arrows
-   */
-  function renderAccountsSnapshot(signal) {
-    const { data } = signal;
-
-    if (!signal.hasData || (data.turnover.value === null && data.netAssets.value === null)) {
-      return renderNoDataCard(signal, 'No parsed accounts data available. Company may file micro or dormant accounts.');
-    }
-
-    return `
-      <div class="wwc-card wwc-card--financial wwc-card--accounts" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
-            <i class="ph ${signal.icon}"></i>
-          </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
-          </div>
-        </div>
-
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--accounts">
-          <div class="accounts-dashboard">
-            <div class="accounts-metric">
-              <div class="accounts-metric__header">
-                <span class="accounts-metric__label">Turnover</span>
-                <span class="accounts-metric__trend accounts-metric__trend--${data.turnover.trend}">
-                  <i class="ph-bold ph-trend-${data.turnover.trend}"></i>
-                  ${data.turnover.change}
-                </span>
-              </div>
-              <div class="accounts-metric__value">${data.turnover.value}</div>
-              <div class="accounts-metric__bar">
-                <div class="accounts-metric__fill accounts-metric__fill--${data.turnover.trend}" style="width: 78%"></div>
-              </div>
-            </div>
-
-            <div class="accounts-metric">
-              <div class="accounts-metric__header">
-                <span class="accounts-metric__label">Net Assets</span>
-                <span class="accounts-metric__trend accounts-metric__trend--${data.netAssets.trend}">
-                  <i class="ph-bold ph-trend-${data.netAssets.trend}"></i>
-                  ${data.netAssets.change}
-                </span>
-              </div>
-              <div class="accounts-metric__value">${data.netAssets.value}</div>
-              <div class="accounts-metric__bar">
-                <div class="accounts-metric__fill accounts-metric__fill--${data.netAssets.trend}" style="width: 62%"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="accounts-footer">
-            <div class="accounts-badge">
-              <i class="ph ph-file-text"></i>
-              <span>${data.accountsType} accounts</span>
-            </div>
-            <div class="accounts-period">
-              <i class="ph ph-calendar-blank"></i>
-              <span>${data.filingYear}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  // ============================================================================
   // HELPERS
   // ============================================================================
 
@@ -381,25 +135,233 @@
   }
 
   // ============================================================================
-  // PANEL RENDERER
+  // CARD RENDERERS — Composed Illustration Style
   // ============================================================================
 
   /**
-   * Render all cards for the Financial panel
+   * Placeholder when signal data isn't available
+   */
+  function renderNoDataCard(signal, extraClass) {
+    return `
+      <div class="fin-card ${extraClass || ''} fin-card--no-data" data-signal="${signal.id}">
+        <div class="fin-card__header">
+          <div class="fin-card__icon fin-card__icon--muted">
+            <i class="ph ${signal.icon}"></i>
+          </div>
+          <div class="fin-card__titles">
+            <h4 class="fin-card__name">${signal.title}</h4>
+          </div>
+        </div>
+        <div class="fin-card__empty">
+          <i class="ph ph-database"></i>
+          <span>Data not yet available</span>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Anchor card — Overdue Accounts
+   * Primary showcase card with SVG radial gauge + scale bar
+   */
+  function renderAnchorCard(signal) {
+    const { data } = signal;
+
+    if (!signal.hasData || data.daysOverdue === null) {
+      return renderNoDataCard(signal, 'fin-card--anchor');
+    }
+
+    const thresholds = signal.thresholds || { warning: 14, danger: 30, critical: 60 };
+    const urgencyClass = getUrgencyClass(data.daysOverdue, thresholds);
+    const gaugePercent = Math.min((data.daysOverdue / 90) * 100, 100);
+    const circumference = 2 * Math.PI * 54;
+    const dashOffset = circumference - (gaugePercent / 100) * circumference;
+
+    return `
+      <div class="fin-card fin-card--anchor" data-signal="${signal.id}">
+        <div class="fin-card__header">
+          <div class="fin-card__icon fin-card__icon--red">
+            <i class="ph ${signal.icon}"></i>
+          </div>
+          <div class="fin-card__titles">
+            <h4 class="fin-card__name">${signal.title}</h4>
+            <p class="fin-card__sub">Are their filings late?</p>
+          </div>
+          <span class="fin-card__badge fin-card__badge--high">High</span>
+        </div>
+
+        <div class="fin-anchor__body">
+          <div class="fin-anchor__gauge">
+            <svg viewBox="0 0 120 120" class="fin-gauge__svg">
+              <circle cx="60" cy="60" r="54" class="fin-gauge__track"></circle>
+              <circle cx="60" cy="60" r="54" class="fin-gauge__fill fin-gauge__fill--${urgencyClass}"
+                style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${dashOffset};"
+              ></circle>
+            </svg>
+            <div class="fin-gauge__center">
+              <span class="fin-gauge__value fin-gauge__value--${urgencyClass}">${data.daysOverdue}</span>
+              <span class="fin-gauge__label">days</span>
+            </div>
+          </div>
+
+          <div class="fin-anchor__detail">
+            <div class="fin-anchor__status fin-anchor__status--${data.status}">
+              <i class="ph-fill ph-warning-circle"></i>
+              <span>Accounts overdue</span>
+            </div>
+            <div class="fin-anchor__due">
+              <i class="ph ph-calendar"></i>
+              <span>Due: ${data.dueDate}</span>
+            </div>
+
+            <div class="fin-anchor__scale">
+              <div class="fin-anchor__scale-bar">
+                <div class="fin-anchor__zone fin-anchor__zone--ok" style="width: 15.5%"></div>
+                <div class="fin-anchor__zone fin-anchor__zone--warning" style="width: 17.8%"></div>
+                <div class="fin-anchor__zone fin-anchor__zone--danger" style="width: 33.3%"></div>
+                <div class="fin-anchor__zone fin-anchor__zone--critical" style="width: 33.3%"></div>
+                <div class="fin-anchor__marker" style="left: ${gaugePercent}%"></div>
+              </div>
+              <div class="fin-anchor__scale-labels">
+                <span>0</span><span>14</span><span>30</span><span>60</span><span>90+</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Float card — CCJs & Charges
+   * Compact 3-item breakdown with total
+   */
+  function renderCCJFloat(signal) {
+    const { data } = signal;
+
+    if (!signal.hasData || (data.activeCCJs === null && data.activeCharges === null)) {
+      return renderNoDataCard(signal, 'fin-card--float-ccj');
+    }
+
+    const hasActiveIssues = data.activeCCJs > 0 || data.activeCharges > 0;
+
+    return `
+      <div class="fin-card fin-card--float-ccj" data-signal="${signal.id}">
+        <div class="fin-card__header">
+          <div class="fin-card__icon fin-card__icon--red">
+            <i class="ph ${signal.icon}"></i>
+          </div>
+          <div class="fin-card__titles">
+            <h4 class="fin-card__name">${signal.title}</h4>
+          </div>
+        </div>
+
+        <div class="fin-ccj__body">
+          <div class="fin-ccj__items">
+            <div class="fin-ccj__item ${data.activeCCJs > 0 ? 'fin-ccj__item--danger' : ''}">
+              <span class="fin-ccj__value">${data.activeCCJs}</span>
+              <span class="fin-ccj__label">Active CCJs</span>
+            </div>
+            <div class="fin-ccj__item ${data.activeCharges > 0 ? 'fin-ccj__item--warning' : ''}">
+              <span class="fin-ccj__value">${data.activeCharges}</span>
+              <span class="fin-ccj__label">Charges</span>
+            </div>
+            <div class="fin-ccj__item fin-ccj__item--ok">
+              <span class="fin-ccj__value">${data.satisfiedCount}</span>
+              <span class="fin-ccj__label">Satisfied</span>
+            </div>
+          </div>
+
+          <div class="fin-ccj__total ${hasActiveIssues ? 'fin-ccj__total--alert' : 'fin-ccj__total--clear'}">
+            <i class="ph ${hasActiveIssues ? 'ph-currency-gbp' : 'ph-check-circle'}"></i>
+            <span>${hasActiveIssues ? 'Total: <strong>' + data.totalValue + '</strong>' : 'No active judgments'}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Float card — Financial Health
+   * Compact dual-metric display with trend indicators
+   */
+  function renderHealthFloat(signal) {
+    const { data } = signal;
+
+    if (!signal.hasData || (data.turnover.value === null && data.netAssets.value === null)) {
+      return renderNoDataCard(signal, 'fin-card--float-health');
+    }
+
+    return `
+      <div class="fin-card fin-card--float-health" data-signal="${signal.id}">
+        <div class="fin-card__header">
+          <div class="fin-card__icon fin-card__icon--emerald">
+            <i class="ph ${signal.icon}"></i>
+          </div>
+          <div class="fin-card__titles">
+            <h4 class="fin-card__name">${signal.title}</h4>
+          </div>
+        </div>
+
+        <div class="fin-health__body">
+          <div class="fin-health__metrics">
+            <div class="fin-health__metric">
+              <span class="fin-health__label">Turnover</span>
+              <div class="fin-health__row">
+                <span class="fin-health__value">${data.turnover.value}</span>
+                <span class="fin-health__trend fin-health__trend--${data.turnover.trend}">
+                  <i class="ph-bold ph-trend-${data.turnover.trend}"></i>
+                  ${data.turnover.change}
+                </span>
+              </div>
+            </div>
+            <div class="fin-health__divider"></div>
+            <div class="fin-health__metric">
+              <span class="fin-health__label">Net Assets</span>
+              <div class="fin-health__row">
+                <span class="fin-health__value">${data.netAssets.value}</span>
+                <span class="fin-health__trend fin-health__trend--${data.netAssets.trend}">
+                  <i class="ph-bold ph-trend-${data.netAssets.trend}"></i>
+                  ${data.netAssets.change}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="fin-health__footer">
+            <span><i class="ph ph-file-text"></i> ${data.accountsType} accounts</span>
+            <span><i class="ph ph-calendar-blank"></i> ${data.filingYear}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ============================================================================
+  // PANEL RENDERER — Composed Showcase
+  // ============================================================================
+
+  /**
+   * Renders the full Financial panel as a composed illustration:
+   * - Anchor card (Overdue Accounts) centred with gauge
+   * - Float card top-right (CCJs & Charges)
+   * - Float card bottom-left (Financial Health)
+   * - Depth card + blur accent for layered feel
    */
   function renderFinancialPanel(signals) {
-    return signals.map(signal => {
-      switch (signal.cardType) {
-        case 'deadline-tracker':
-          return renderDeadlineTracker(signal);
-        case 'legal-record':
-          return renderLegalRecord(signal);
-        case 'accounts-snapshot':
-          return renderAccountsSnapshot(signal);
-        default:
-          return renderDeadlineTracker(signal);
-      }
-    }).join('');
+    const overdue = signals.find(s => s.id === 'overdue-accounts');
+    const ccjs = signals.find(s => s.id === 'ccjs-charges');
+    const financial = signals.find(s => s.id === 'financial-position');
+
+    return `
+      <div class="fin-showcase">
+        <div class="fin-showcase__depth" aria-hidden="true"></div>
+        ${overdue ? renderAnchorCard(overdue) : ''}
+        ${ccjs ? renderCCJFloat(ccjs) : ''}
+        ${financial ? renderHealthFloat(financial) : ''}
+        <div class="fin-showcase__blur" aria-hidden="true"></div>
+      </div>
+    `;
   }
 
   // ============================================================================

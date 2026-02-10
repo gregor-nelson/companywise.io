@@ -1,6 +1,6 @@
 /* ============================================
    COMPANYWISE — Operations Panel Component
-   Unique visual cards for operational context signals
+   Composed illustration: anchor card + floating data widgets
    ============================================ */
 
 (function() {
@@ -130,161 +130,99 @@
   };
 
   // ============================================================================
-  // CARD RENDERERS
+  // CARD RENDERERS — Composed Illustration Style
   // ============================================================================
 
   /**
-   * Render a placeholder card when data isn't available yet
+   * Placeholder when signal data isn't available
    */
-  function renderNoDataCard(signal, message) {
+  function renderNoDataCard(signal, extraClass) {
     return `
-      <div class="wwc-card wwc-card--operations wwc-card--no-data" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--muted">
+      <div class="ops-card ${extraClass || ''} ops-card--no-data" data-signal="${signal.id}">
+        <div class="ops-card__header">
+          <div class="ops-card__icon ops-card__icon--muted">
             <i class="ph ${signal.icon}"></i>
           </div>
+          <div class="ops-card__titles">
+            <h4 class="ops-card__name">${signal.title}</h4>
+          </div>
         </div>
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${message || 'Data not yet available for this signal.'}</p>
+        <div class="ops-card__empty">
+          <i class="ph ph-database"></i>
+          <span>Data not yet available</span>
         </div>
       </div>
     `;
   }
 
   /**
-   * Render an address verification card (for virtual office check)
-   * Visual: Address card with verification stamp and shared-address indicator
+   * Anchor card — Filing Consistency
+   * Primary showcase card with filing breakdown + recent history (capped at 3)
    */
-  function renderAddressVerify(signal) {
+  function renderAnchorCard(signal) {
     const { data } = signal;
 
-    if (!signal.hasData || data.address === null) {
-      return renderNoDataCard(signal, 'No registered address data available.');
+    if (!signal.hasData || data.totalFilings === null) {
+      return renderNoDataCard(signal, 'ops-card--anchor');
     }
 
-    return `
-      <div class="wwc-card wwc-card--operations wwc-card--address-verify" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
-            <i class="ph ${signal.icon}"></i>
-          </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
-          </div>
-        </div>
-
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--address-verify">
-          <div class="verify-address">
-            <div class="verify-address__icon">
-              <i class="ph ph-map-pin"></i>
-            </div>
-            <div class="verify-address__text">${data.address}</div>
-          </div>
-
-          <div class="verify-stamp verify-stamp--${data.isVirtualOffice ? 'flagged' : 'clear'}">
-            <div class="verify-stamp__badge">
-              <i class="ph-fill ${data.isVirtualOffice ? 'ph-warning-circle' : 'ph-check-circle'}"></i>
-              <span>${data.isVirtualOffice ? 'Virtual Office Detected' : 'No Virtual Office Match'}</span>
-            </div>
-            ${data.isVirtualOffice ? `
-              <div class="verify-stamp__detail">
-                <span class="verify-stamp__provider">
-                  <i class="ph ph-buildings"></i>
-                  Provider: <strong>${data.provider}</strong>
-                </span>
-                <span class="verify-stamp__confidence">
-                  <i class="ph ph-target"></i>
-                  Confidence: <strong>${data.matchConfidence}</strong>
-                </span>
-              </div>
-            ` : ''}
-          </div>
-
-          <div class="verify-shared ${data.companiesAtAddress > 50 ? 'verify-shared--crowded' : ''}">
-            <i class="ph ph-buildings"></i>
-            <span><strong>${data.companiesAtAddress}</strong> companies at this address</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Render a sector analysis card (for SIC code)
-   * Visual: Sector badge with risk meter and industry stats
-   */
-  function renderSectorAnalysis(signal) {
-    const { data } = signal;
-
-    if (!signal.hasData || !data.codes || data.codes.length === 0) {
-      return renderNoDataCard(signal, 'No SIC code data available for this company.');
-    }
-
-    const riskMap = {
-      'low':    { class: 'ok',      label: 'Low Risk Sector',    barWidth: 25 },
-      'medium': { class: 'warning', label: 'Medium Risk Sector', barWidth: 55 },
-      'high':   { class: 'danger',  label: 'High Risk Sector',   barWidth: 85 }
-    };
-
-    const riskInfo = riskMap[data.sectorRiskLevel] || riskMap['medium'];
+    // Cap filing history to 3 most recent entries
+    const recentFilings = (data.filingHistory || []).slice(0, 3);
 
     return `
-      <div class="wwc-card wwc-card--operations wwc-card--sector" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
+      <div class="ops-card ops-card--anchor" data-signal="${signal.id}">
+        <div class="ops-card__header">
+          <div class="ops-card__icon ops-card__icon--amber">
             <i class="ph ${signal.icon}"></i>
           </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
+          <div class="ops-card__titles">
+            <h4 class="ops-card__name">${signal.title}</h4>
+            <p class="ops-card__sub">Do they file regularly?</p>
           </div>
+          <span class="ops-card__badge ops-card__badge--medium">Med</span>
         </div>
 
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
-        </div>
-
-        <div class="wwc-card__visual wwc-card__visual--sector">
-          <div class="sector-badge">
-            <div class="sector-badge__icon">
-              <i class="ph ph-factory"></i>
+        <div class="ops-anchor__body">
+          <div class="ops-anchor__breakdown">
+            <div class="ops-anchor__stat">
+              <span class="ops-anchor__stat-value">${data.annualAccounts}</span>
+              <span class="ops-anchor__stat-label">Acc</span>
             </div>
-            <div class="sector-badge__info">
-              <span class="sector-badge__name">${data.primarySector}</span>
-              <span class="sector-badge__risk sector-badge__risk--${riskInfo.class}">${riskInfo.label}</span>
+            <div class="ops-anchor__stat-divider"></div>
+            <div class="ops-anchor__stat">
+              <span class="ops-anchor__stat-value">${data.confirmationStatements}</span>
+              <span class="ops-anchor__stat-label">CS01</span>
+            </div>
+            <div class="ops-anchor__stat-divider"></div>
+            <div class="ops-anchor__stat">
+              <span class="ops-anchor__stat-value">${data.otherFilings}</span>
+              <span class="ops-anchor__stat-label">Other</span>
+            </div>
+            <div class="ops-anchor__stat-divider"></div>
+            <div class="ops-anchor__stat ops-anchor__stat--highlight">
+              <span class="ops-anchor__stat-value">${data.onTimeRate}</span>
+              <span class="ops-anchor__stat-label">On time</span>
             </div>
           </div>
 
-          <div class="sector-codes">
-            ${data.codes.map(sic => `
-              <div class="sector-code">
-                <span class="sector-code__number">${sic.code}</span>
-                <span class="sector-code__desc">${sic.description}</span>
+          <div class="ops-anchor__history">
+            ${recentFilings.map(filing => `
+              <div class="ops-anchor__entry">
+                <span class="ops-anchor__entry-badge ops-anchor__entry-badge--${filing.type.toLowerCase()}">${filing.type}</span>
+                <span class="ops-anchor__entry-label">${filing.label}</span>
+                <span class="ops-anchor__entry-date">${filing.date}</span>
+                <span class="ops-anchor__entry-status">
+                  ${filing.onTime === true ? '<i class="ph-fill ph-check-circle ops-anchor__entry-status--ok"></i>' :
+                    filing.onTime === false ? '<i class="ph-fill ph-warning-circle ops-anchor__entry-status--late"></i>' :
+                    '<i class="ph ph-minus-circle ops-anchor__entry-status--na"></i>'}
+                </span>
               </div>
             `).join('')}
           </div>
 
-          <div class="sector-risk-meter">
-            <div class="sector-risk-meter__label">Sector failure rate</div>
-            <div class="sector-risk-meter__bar">
-              <div class="sector-risk-meter__track">
-                <div class="sector-risk-meter__fill sector-risk-meter__fill--${riskInfo.class}" style="width: ${riskInfo.barWidth}%"></div>
-              </div>
-              <span class="sector-risk-meter__value">${data.sectorFailureRate}</span>
-            </div>
-          </div>
-
-          <div class="sector-stats">
-            <div class="sector-stat">
-              <i class="ph ph-clock"></i>
-              <span>Avg. company age: <strong>${data.sectorAvgAge}</strong></span>
-            </div>
+          <div class="ops-anchor__footer">
+            <span><i class="ph ph-file-text"></i> ${data.accountsType} accounts</span>
+            <span><i class="ph ph-calendar-blank"></i> Last: ${data.lastFiledDate}</span>
           </div>
         </div>
       </div>
@@ -292,85 +230,100 @@
   }
 
   /**
-   * Render a filing timeline card (for filing consistency)
-   * Visual: Filing history rows with on-time/late indicators and breakdown
+   * Float card — Virtual Office Check (top-right)
+   * Simplified: address line + stamp badge + shared count
    */
-  function renderFilingTimeline(signal) {
+  function renderVirtualOfficeFloat(signal) {
     const { data } = signal;
 
-    if (!signal.hasData || data.totalFilings === null) {
-      return renderNoDataCard(signal, 'No filing history available from Companies House.');
+    if (!signal.hasData || data.address === null) {
+      return renderNoDataCard(signal, 'ops-card--float-office');
     }
 
     return `
-      <div class="wwc-card wwc-card--operations wwc-card--filing" data-signal="${signal.id}">
-        <div class="wwc-card__header">
-          <div class="wwc-card__icon wwc-card__icon--${signal.iconColor}">
+      <div class="ops-card ops-card--float-office" data-signal="${signal.id}">
+        <div class="ops-card__header">
+          <div class="ops-card__icon ops-card__icon--blue">
             <i class="ph ${signal.icon}"></i>
           </div>
-          <div class="wwc-card__weight wwc-card__weight--${signal.weight}">
-            <span>${signal.weight}</span>
+          <div class="ops-card__titles">
+            <h4 class="ops-card__name">${signal.title}</h4>
           </div>
         </div>
 
-        <div class="wwc-card__body">
-          <h4 class="wwc-card__title">${signal.title}</h4>
-          <p class="wwc-card__desc">${signal.description}</p>
+        <div class="ops-office__body">
+          <div class="ops-office__address">
+            <i class="ph ph-map-pin"></i>
+            <span>${data.address}</span>
+          </div>
+
+          <div class="ops-office__stamp ops-office__stamp--${data.isVirtualOffice ? 'flagged' : 'clear'}">
+            <i class="ph-fill ${data.isVirtualOffice ? 'ph-warning-circle' : 'ph-check-circle'}"></i>
+            <span>${data.isVirtualOffice ? 'Virtual Office Detected' : 'No Virtual Office Match'}</span>
+          </div>
+
+          <div class="ops-office__shared ${data.companiesAtAddress > 50 ? 'ops-office__shared--crowded' : ''}">
+            <i class="ph ph-buildings"></i>
+            <span><strong>${data.companiesAtAddress}</strong> companies at address</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Float card — SIC Code Analysis (bottom-left)
+   * Sector badge + risk label + codes + failure rate bar
+   */
+  function renderSICFloat(signal) {
+    const { data } = signal;
+
+    if (!signal.hasData || !data.codes || data.codes.length === 0) {
+      return renderNoDataCard(signal, 'ops-card--float-sic');
+    }
+
+    const riskMap = {
+      'low':    { class: 'ok',      label: 'Low Risk' },
+      'medium': { class: 'warning', label: 'Medium Risk' },
+      'high':   { class: 'danger',  label: 'High Risk' }
+    };
+
+    const riskInfo = riskMap[data.sectorRiskLevel] || riskMap['medium'];
+    const barWidth = data.sectorRiskLevel === 'low' ? 25 : data.sectorRiskLevel === 'high' ? 85 : 55;
+
+    return `
+      <div class="ops-card ops-card--float-sic" data-signal="${signal.id}">
+        <div class="ops-card__header">
+          <div class="ops-card__icon ops-card__icon--blue">
+            <i class="ph ${signal.icon}"></i>
+          </div>
+          <div class="ops-card__titles">
+            <h4 class="ops-card__name">${signal.title}</h4>
+          </div>
         </div>
 
-        <div class="wwc-card__visual wwc-card__visual--filing">
-          <div class="filing-breakdown">
-            <div class="filing-breakdown__item">
-              <span class="filing-breakdown__value">${data.annualAccounts}</span>
-              <span class="filing-breakdown__label">Accounts</span>
-            </div>
-            <div class="filing-breakdown__item">
-              <span class="filing-breakdown__value">${data.confirmationStatements}</span>
-              <span class="filing-breakdown__label">CS01s</span>
-            </div>
-            <div class="filing-breakdown__item">
-              <span class="filing-breakdown__value">${data.otherFilings}</span>
-              <span class="filing-breakdown__label">Other</span>
-            </div>
-            <div class="filing-breakdown__item filing-breakdown__item--highlight">
-              <span class="filing-breakdown__value">${data.onTimeRate}</span>
-              <span class="filing-breakdown__label">On time</span>
-            </div>
+        <div class="ops-sic__body">
+          <div class="ops-sic__sector">
+            <span class="ops-sic__sector-name">${data.primarySector}</span>
+            <span class="ops-sic__sector-risk ops-sic__sector-risk--${riskInfo.class}">${riskInfo.label}</span>
           </div>
 
-          <div class="filing-history">
-            <div class="filing-history__label">
-              <i class="ph ph-clock-counter-clockwise"></i>
-              <span>Recent filings</span>
-            </div>
-            <div class="filing-history__entries">
-              ${data.filingHistory.map(filing => `
-                <div class="filing-entry">
-                  <div class="filing-entry__type">
-                    <span class="filing-entry__badge filing-entry__badge--${filing.type.toLowerCase()}">${filing.type}</span>
-                  </div>
-                  <div class="filing-entry__info">
-                    <span class="filing-entry__label">${filing.label}</span>
-                    <span class="filing-entry__date">${filing.date}</span>
-                  </div>
-                  <div class="filing-entry__status">
-                    ${filing.onTime === true ? '<i class="ph-fill ph-check-circle filing-entry__status--ok"></i>' :
-                      filing.onTime === false ? '<i class="ph-fill ph-warning-circle filing-entry__status--late"></i>' :
-                      '<i class="ph ph-minus-circle filing-entry__status--na"></i>'}
-                  </div>
-                </div>
-              `).join('')}
-            </div>
+          <div class="ops-sic__codes">
+            ${data.codes.map(sic => `
+              <div class="ops-sic__code">
+                <span class="ops-sic__code-num">${sic.code}</span>
+                <span class="ops-sic__code-desc">${sic.description}</span>
+              </div>
+            `).join('')}
           </div>
 
-          <div class="filing-footer">
-            <div class="filing-footer__type">
-              <i class="ph ph-file-text"></i>
-              <span>${data.accountsType} accounts</span>
-            </div>
-            <div class="filing-footer__date">
-              <i class="ph ph-calendar-blank"></i>
-              <span>Last filed: ${data.lastFiledDate}</span>
+          <div class="ops-sic__meter">
+            <span class="ops-sic__meter-label">Failure rate</span>
+            <div class="ops-sic__meter-row">
+              <div class="ops-sic__meter-track">
+                <div class="ops-sic__meter-fill ops-sic__meter-fill--${riskInfo.class}" style="width: ${barWidth}%"></div>
+              </div>
+              <span class="ops-sic__meter-value">${data.sectorFailureRate}</span>
             </div>
           </div>
         </div>
@@ -379,25 +332,30 @@
   }
 
   // ============================================================================
-  // PANEL RENDERER
+  // PANEL RENDERER — Composed Showcase
   // ============================================================================
 
   /**
-   * Render all cards for the Operations panel
+   * Renders the full Operations panel as a composed illustration:
+   * - Anchor card (Filing Consistency) centred
+   * - Float card top-right (Virtual Office Check)
+   * - Float card bottom-left (SIC Code Analysis)
+   * - Depth card + blur accent for layered feel
    */
   function renderOperationsPanel(signals) {
-    return signals.map(signal => {
-      switch (signal.cardType) {
-        case 'address-verify':
-          return renderAddressVerify(signal);
-        case 'sector-analysis':
-          return renderSectorAnalysis(signal);
-        case 'filing-timeline':
-          return renderFilingTimeline(signal);
-        default:
-          return renderNoDataCard(signal);
-      }
-    }).join('');
+    const filing = signals.find(s => s.id === 'filing-consistency');
+    const office = signals.find(s => s.id === 'virtual-office');
+    const sic = signals.find(s => s.id === 'sic-code');
+
+    return `
+      <div class="ops-showcase">
+        <div class="ops-showcase__depth" aria-hidden="true"></div>
+        ${filing ? renderAnchorCard(filing) : ''}
+        ${office ? renderVirtualOfficeFloat(office) : ''}
+        ${sic ? renderSICFloat(sic) : ''}
+        <div class="ops-showcase__blur" aria-hidden="true"></div>
+      </div>
+    `;
   }
 
   // ============================================================================
