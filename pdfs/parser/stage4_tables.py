@@ -91,6 +91,9 @@ def detect_table(page_number: int, image: np.ndarray) -> DetectedTable | None:
     # Step 4: Group words into rows
     rows = _build_rows(words, year_columns, col_tolerance, min_value_x)
 
+    # Step 5: Split compound values (e.g. two years concatenated in one cell)
+    _split_compound_values(rows, years)
+
     return DetectedTable(
         years=years,
         year_columns=year_columns,
@@ -245,17 +248,49 @@ def _build_rows(
         for w in cluster:
             w_centre = w.x + w.width // 2
 
-            # Is this word in a value column?
-            assigned = False
+            # Find the nearest value column within tolerance
+            best_year = None
+            best_dist = col_tolerance + 1
             for year, col_x in year_columns.items():
-                if abs(w_centre - col_x) <= col_tolerance:
-                    # Prefer the closest year column if ambiguous
-                    if value_assignments[year] is None:
-                        value_assignments[year] = w
+                dist = abs(w_centre - col_x)
+                if dist <= col_tolerance and dist < best_dist:
+                    best_dist = dist
+                    best_year = year
+
+            if best_year is not None:
+                if value_assignments[best_year] is None:
+                    value_assignments[best_year] = w
+                else:
+                    # Append to existing (e.g. parenthesised negative split across words)
+                    existing = value_assignments[best_year]
+                    value_assignments[best_year] = TableCell(
+                        text=existing.text + " " + w.text,
+                        x=existing.x,
+                        y=existing.y,
+                        width=(w.x + w.width) - existing.x,
+                        height=max(existing.height, w.height),
+                        confidence=min(existing.confidence, w.confidence),
+                    )
+            elif w_centre < min_value_x:
+                label_cells.append(w)
+            else:
+                # Rescue: word is right of labels but missed all columns.
+                # Assign to nearest column with extended tolerance (2x) to
+                # recover values that sit slightly outside the strict zone.
+                # Genuine note references sit further from columns than values.
+                rescue_year = None
+                rescue_dist = col_tolerance * 2
+                for year, col_x in year_columns.items():
+                    dist = abs(w_centre - col_x)
+                    if dist < rescue_dist:
+                        rescue_dist = dist
+                        rescue_year = year
+                if rescue_year is not None:
+                    if value_assignments[rescue_year] is None:
+                        value_assignments[rescue_year] = w
                     else:
-                        # Append to existing (e.g. parenthesised negative split across words)
-                        existing = value_assignments[year]
-                        value_assignments[year] = TableCell(
+                        existing = value_assignments[rescue_year]
+                        value_assignments[rescue_year] = TableCell(
                             text=existing.text + " " + w.text,
                             x=existing.x,
                             y=existing.y,
@@ -263,15 +298,6 @@ def _build_rows(
                             height=max(existing.height, w.height),
                             confidence=min(existing.confidence, w.confidence),
                         )
-                    assigned = True
-                    break
-
-            if not assigned:
-                # Check if it's a "Note" column reference (single digit/number near values)
-                # Skip note numbers — they're between label and values
-                if w_centre < min_value_x:
-                    label_cells.append(w)
-                # else: likely a note reference number, skip it
 
         label_text = " ".join(c.text for c in label_cells).strip()
 
@@ -289,3 +315,51 @@ def _build_rows(
         ))
 
     return rows
+
+
+# Regex for two financial values separated by whitespace in a single cell
+_COMPOUND_VALUE_RE = re.compile(
+    r"^(-?\(?\d[\d,]+\)?)\s+(-?\(?\d[\d,]+\)?)$"
+)
+
+
+def _split_compound_values(rows: list[TableRow], years: list[str]) -> None:
+    """Split cells containing two concatenated year values.
+
+    When Tesseract merges two column values into one word
+    (e.g. "(284,085) (55,657)"), split them so the first value stays
+    in the current year column and the second goes to the next year.
+    Years are ordered most-recent-first (left on page = first in list).
+    """
+    for row in rows:
+        for i, year in enumerate(years):
+            cell = row.values.get(year)
+            if cell is None:
+                continue
+            m = _COMPOUND_VALUE_RE.match(cell.text.strip())
+            if not m:
+                continue
+            next_year = years[i + 1] if i + 1 < len(years) else None
+            if next_year is None:
+                continue
+            # Only split if the target column is empty
+            if row.values.get(next_year) is not None:
+                continue
+            # First value stays in current column
+            row.values[year] = TableCell(
+                text=m.group(1),
+                x=cell.x,
+                y=cell.y,
+                width=cell.width // 2,
+                height=cell.height,
+                confidence=cell.confidence,
+            )
+            # Second value goes to next year column
+            row.values[next_year] = TableCell(
+                text=m.group(2),
+                x=cell.x + cell.width // 2,
+                y=cell.y,
+                width=cell.width // 2,
+                height=cell.height,
+                confidence=cell.confidence,
+            )

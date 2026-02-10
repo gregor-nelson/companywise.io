@@ -27,6 +27,7 @@
       this.touchStartY = 0;
       this.isDragging = false;
       this.currentTranslateX = 0;
+      this.rafId = null;
 
       this.render();
       this.elements = this.queryElements();
@@ -38,8 +39,6 @@
     // -------------------------------------------------------------------------
 
     render() {
-      const currentCategory = CATEGORIES[this.activeIndex];
-
       this.container.innerHTML = `
         <section id="what-we-check" class="wwc-section">
           <!-- Background Elements -->
@@ -74,14 +73,22 @@
 
                   <!-- Hero Zone (Desktop Left Column) -->
                   <div class="wwc-hero-zone" data-el="hero-zone">
-                    ${this.renderHeroContent(currentCategory)}
+                    ${CATEGORIES.map((cat, i) => `
+                      <div class="wwc-hero-panel${i === this.activeIndex ? ' wwc-hero-panel--active' : ''}" data-panel="${i}">
+                        ${this.renderHeroContent(cat)}
+                      </div>
+                    `).join('')}
                   </div>
 
                   <!-- Content Zone (Right Column) -->
                   <div class="wwc-content-zone">
                     <!-- Mobile Hero Header -->
                     <div class="wwc-mobile-hero" data-el="mobile-hero">
-                      ${this.renderMobileHero(currentCategory)}
+                      ${CATEGORIES.map((cat, i) => `
+                        <div class="wwc-mobile-hero-panel${i === this.activeIndex ? ' wwc-mobile-hero-panel--active' : ''}" data-panel="${i}">
+                          ${this.renderMobileHero(cat)}
+                        </div>
+                      `).join('')}
                     </div>
 
                     <!-- Swipeable Content Container -->
@@ -90,10 +97,12 @@
                       <div class="wwc-swipe-hint wwc-swipe-hint--left" data-el="hint-left"></div>
                       <div class="wwc-swipe-hint wwc-swipe-hint--right" data-el="hint-right"></div>
 
-                      <!-- Signals Grid -->
-                      <div class="wwc-signals-grid ${currentCategory.panelType ? 'wwc-signals-grid--' + currentCategory.panelType : (currentCategory.enhanced ? 'wwc-signals-grid--enhanced' : '')}" data-el="signals-grid">
-                        ${this.renderSignals(currentCategory.signals, currentCategory)}
-                      </div>
+                      <!-- Signals Grids (all pre-rendered, only active visible) -->
+                      ${CATEGORIES.map((cat, i) => `
+                        <div class="wwc-signals-grid${cat.panelType ? ' wwc-signals-grid--' + cat.panelType : (cat.enhanced ? ' wwc-signals-grid--enhanced' : '')}${i === this.activeIndex ? ' wwc-panel--active' : ''}" data-panel="${i}">
+                          ${this.renderSignals(cat.signals, cat)}
+                        </div>
+                      `).join('')}
                     </div>
 
                     <!-- Mobile Progress Dots -->
@@ -414,7 +423,6 @@
       return {
         heroZone: $('hero-zone'),
         mobileHero: $('mobile-hero'),
-        signalsGrid: $('signals-grid'),
         swipeContainer: $('swipe-container'),
         hintLeft: $('hint-left'),
         hintRight: $('hint-right'),
@@ -422,6 +430,9 @@
         weightBar: $('weight-bar'),
         tabs: [...this.container.querySelectorAll('.wwc-tab')],
         dotButtons: [...this.container.querySelectorAll('.wwc-dot')],
+        heroPanels: [...this.container.querySelectorAll('.wwc-hero-panel')],
+        mobileHeroPanels: [...this.container.querySelectorAll('.wwc-mobile-hero-panel')],
+        signalPanels: [...this.container.querySelectorAll('.wwc-signals-grid[data-panel]')],
         blurAccents: [...this.container.querySelectorAll('.wwc-blur-accent')],
         fadeElements: [...this.container.querySelectorAll('.fade-in-up')],
       };
@@ -463,7 +474,7 @@
       const swipeEl = this.elements.swipeContainer;
       if (swipeEl) {
         swipeEl.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: true });
-        swipeEl.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
+        swipeEl.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: true });
         swipeEl.addEventListener('touchend', this.onTouchEnd.bind(this), { passive: true });
       }
 
@@ -480,64 +491,69 @@
       if (this.isTransitioning) return;
 
       this.isTransitioning = true;
-      const direction = newIndex > this.activeIndex ? 'left' : 'right';
+      const oldIndex = this.activeIndex;
+      const direction = newIndex > oldIndex ? 'left' : 'right';
+      const enterDir = direction === 'left' ? 'right' : 'left';
+      const oldPanel = this.elements.signalPanels[oldIndex];
+      const newPanel = this.elements.signalPanels[newIndex];
 
       // Fade out current content
       this.elements.heroZone?.classList.add('wwc-transitioning');
       this.elements.mobileHero?.classList.add('wwc-transitioning');
-      this.elements.signalsGrid?.classList.add('wwc-transitioning', `wwc-exit-${direction}`);
+      oldPanel?.classList.add('wwc-transitioning', `wwc-exit-${direction}`);
 
-      // Update after fade out
-      setTimeout(() => {
+      const afterExit = () => {
         this.activeIndex = newIndex;
-        const category = CATEGORIES[newIndex];
 
-        // Update hero content
-        if (this.elements.heroZone) {
-          this.elements.heroZone.innerHTML = this.renderHeroContent(category);
-        }
+        // Swap hero panels
+        this.elements.heroPanels[oldIndex]?.classList.remove('wwc-hero-panel--active');
+        this.elements.heroPanels[newIndex]?.classList.add('wwc-hero-panel--active');
 
-        // Update mobile hero
-        if (this.elements.mobileHero) {
-          this.elements.mobileHero.innerHTML = this.renderMobileHero(category);
-        }
+        // Swap mobile hero panels
+        this.elements.mobileHeroPanels[oldIndex]?.classList.remove('wwc-mobile-hero-panel--active');
+        this.elements.mobileHeroPanels[newIndex]?.classList.add('wwc-mobile-hero-panel--active');
 
-        // Update signals
-        if (this.elements.signalsGrid) {
-          this.elements.signalsGrid.innerHTML = this.renderSignals(category.signals, category);
-          // Update grid class based on panel type or enhanced flag
-          this.elements.signalsGrid.className = 'wwc-signals-grid';
-          if (category.panelType) {
-            this.elements.signalsGrid.classList.add('wwc-signals-grid--' + category.panelType);
-          } else if (category.enhanced) {
-            this.elements.signalsGrid.classList.add('wwc-signals-grid--enhanced');
-          }
-          this.elements.signalsGrid.classList.remove(`wwc-exit-${direction}`);
-          this.elements.signalsGrid.classList.add(`wwc-enter-${direction === 'left' ? 'right' : 'left'}`);
-        }
+        // Swap signal panels
+        oldPanel?.classList.remove('wwc-panel--active', 'wwc-transitioning', `wwc-exit-${direction}`);
+        newPanel?.classList.add('wwc-panel--active', `wwc-enter-${enterDir}`);
 
-        // Update tabs
-        this.elements.tabs.forEach((tab, idx) => {
-          tab.classList.toggle('wwc-tab--active', idx === newIndex);
-          tab.setAttribute('aria-selected', idx === newIndex);
-        });
+        // Update tabs (only old + new)
+        this.elements.tabs[oldIndex]?.classList.remove('wwc-tab--active');
+        this.elements.tabs[oldIndex]?.setAttribute('aria-selected', 'false');
+        this.elements.tabs[newIndex]?.classList.add('wwc-tab--active');
+        this.elements.tabs[newIndex]?.setAttribute('aria-selected', 'true');
 
-        // Update dots
-        this.elements.dotButtons.forEach((dot, idx) => {
-          dot.classList.toggle('wwc-dot--active', idx === newIndex);
-        });
+        // Update dots (only old + new)
+        this.elements.dotButtons[oldIndex]?.classList.remove('wwc-dot--active');
+        this.elements.dotButtons[newIndex]?.classList.add('wwc-dot--active');
 
-        // Update swipe hints
         this.updateSwipeHints();
 
         // Fade in new content
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           this.elements.heroZone?.classList.remove('wwc-transitioning');
           this.elements.mobileHero?.classList.remove('wwc-transitioning');
-          this.elements.signalsGrid?.classList.remove('wwc-transitioning', `wwc-enter-${direction === 'left' ? 'right' : 'left'}`);
+          newPanel?.classList.remove(`wwc-enter-${enterDir}`);
           this.isTransitioning = false;
-        }, 50);
-      }, 150);
+        });
+      };
+
+      // Wait for exit transition, with safety fallback
+      if (oldPanel) {
+        let done = false;
+        const finish = () => {
+          if (done) return;
+          done = true;
+          oldPanel.removeEventListener('transitionend', onEnd);
+          clearTimeout(fallback);
+          afterExit();
+        };
+        const onEnd = (e) => { if (e.target === oldPanel) finish(); };
+        oldPanel.addEventListener('transitionend', onEnd);
+        const fallback = setTimeout(finish, 200);
+      } else {
+        afterExit();
+      }
     }
 
     updateSwipeHints() {
@@ -560,6 +576,10 @@
       this.touchStartY = e.touches[0].clientY;
       this.isDragging = false;
       this.currentTranslateX = 0;
+
+      // Promote active panel to compositor layer for smooth transforms
+      const panel = this.elements.signalPanels[this.activeIndex];
+      if (panel) panel.style.willChange = 'transform';
     }
 
     onTouchMove(e) {
@@ -571,37 +591,54 @@
       // Determine if horizontal swipe
       if (!this.isDragging && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
         this.isDragging = true;
-        this.elements.signalsGrid?.classList.add('wwc-dragging');
+        this.elements.signalPanels[this.activeIndex]?.classList.add('wwc-dragging');
       }
 
       if (this.isDragging) {
-        e.preventDefault();
-
         // Apply resistance at edges
         let translateX = deltaX;
         if ((this.activeIndex === 0 && deltaX > 0) ||
             (this.activeIndex === CATEGORIES.length - 1 && deltaX < 0)) {
-          translateX = deltaX * 0.3; // resistance
+          translateX = deltaX * 0.3;
         }
 
         this.currentTranslateX = translateX;
-        if (this.elements.signalsGrid) {
-          this.elements.signalsGrid.style.transform = `translateX(${translateX}px)`;
+
+        // Batch DOM write to next animation frame
+        if (!this.rafId) {
+          this.rafId = requestAnimationFrame(() => {
+            const panel = this.elements.signalPanels[this.activeIndex];
+            if (panel) panel.style.transform = `translateX(${this.currentTranslateX}px)`;
+            this.rafId = null;
+          });
         }
       }
     }
 
     onTouchEnd() {
-      if (!this.isDragging) return;
+      const panel = this.elements.signalPanels[this.activeIndex];
+
+      if (!this.isDragging) {
+        if (panel) panel.style.willChange = '';
+        return;
+      }
 
       this.isDragging = false;
-      this.elements.signalsGrid?.classList.remove('wwc-dragging');
+
+      // Cancel any pending animation frame
+      if (this.rafId) {
+        cancelAnimationFrame(this.rafId);
+        this.rafId = null;
+      }
+
+      panel?.classList.remove('wwc-dragging');
 
       const threshold = 80;
       const velocity = Math.abs(this.currentTranslateX) / 100;
 
-      if (this.elements.signalsGrid) {
-        this.elements.signalsGrid.style.transform = '';
+      if (panel) {
+        panel.style.transform = '';
+        panel.style.willChange = '';
       }
 
       if (Math.abs(this.currentTranslateX) > threshold || velocity > 0.5) {

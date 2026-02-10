@@ -528,6 +528,8 @@
   position: relative;
   flex: 1;
   overflow: hidden;
+  contain: content;
+  touch-action: pan-y;
 }
 
 .wwc-swipe-hint {
@@ -559,6 +561,27 @@
   .wwc-swipe-hint {
     display: none;
   }
+}
+
+
+/* ============================================
+   Pre-rendered Panel Visibility
+   ============================================ */
+
+/* Hero panels: display:contents so parent flex applies to children */
+.wwc-hero-panel,
+.wwc-mobile-hero-panel {
+  display: none;
+}
+
+.wwc-hero-panel--active,
+.wwc-mobile-hero-panel--active {
+  display: contents;
+}
+
+/* Signal panels: only active is visible */
+.wwc-signals-grid[data-panel]:not(.wwc-panel--active) {
+  display: none;
 }
 
 
