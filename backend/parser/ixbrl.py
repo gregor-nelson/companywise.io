@@ -359,22 +359,39 @@ def parse_ixbrl(html_content: str | bytes) -> ParsedIXBRL:
         if elem.get("name"):
             result.numeric_facts.append(parse_numeric_fact(elem))
 
-    for elem in find_all_ns(["nonNumeric", "ix:nonNumeric", "nonnumeric"]):
-        if elem.get("name"):
-            result.text_facts.append(parse_text_fact(elem))
+    # Concepts whose values are used as filing metadata (dates, identifiers).
+    # For these, always use text-only extraction even if the element has
+    # escape="true", which would otherwise store raw HTML markup.
+    _METADATA_CONCEPTS = {
+        "UKCompaniesHouseRegisteredNumber", "CompaniesHouseRegisteredNumber",
+        "EntityCurrentLegalOrRegisteredName", "EntityCurrentLegalName",
+        "BalanceSheetDate", "StartDateForPeriodCoveredByReport",
+        "EndDateForPeriodCoveredByReport",
+    }
 
-    # Extract metadata
-    for fact in result.text_facts:
+    for elem in find_all_ns(["nonNumeric", "ix:nonNumeric", "nonnumeric"]):
+        if not elem.get("name"):
+            continue
+        fact = parse_text_fact(elem)
+        result.text_facts.append(fact)
+
+        # Extract metadata using text-only value to avoid HTML markup
+        # leaking from escape-attribute elements or PDF-converted filings
+        if fact.concept not in _METADATA_CONCEPTS:
+            continue
+
+        metadata_value = elem.get_text(strip=True) if fact.escape else fact.value
+
         if fact.concept in ("UKCompaniesHouseRegisteredNumber", "CompaniesHouseRegisteredNumber"):
-            result.company_number = fact.value
+            result.company_number = metadata_value
         elif fact.concept in ("EntityCurrentLegalOrRegisteredName", "EntityCurrentLegalName"):
-            result.company_name = fact.value
+            result.company_name = metadata_value
         elif fact.concept == "BalanceSheetDate":
-            result.balance_sheet_date = fact.value
+            result.balance_sheet_date = metadata_value
         elif fact.concept == "StartDateForPeriodCoveredByReport":
-            result.period_start_date = fact.value
+            result.period_start_date = metadata_value
         elif fact.concept == "EndDateForPeriodCoveredByReport":
-            result.period_end_date = fact.value
+            result.period_end_date = metadata_value
 
     return result
 

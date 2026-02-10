@@ -28,8 +28,10 @@ except ImportError:
 BASE_URL = "https://download.companieshouse.gov.uk/"
 INDEX_URL = "https://download.companieshouse.gov.uk/historicmonthlyaccountsdata.html"
 
-# Pattern to match monthly account files
-# Format: Accounts_Monthly_Data-MONTHYYYY.zip (e.g., Accounts_Monthly_Data-December2024.zip)
+# Pattern to match href values for monthly account files
+# Format: archive/Accounts_Monthly_Data-MONTHYYYY.zip
+HREF_PATTERN = re.compile(r'href="((?:archive/)?Accounts_Monthly_Data-[A-Za-z]+\d{4}\.zip)"')
+# Pattern to extract month and year from filename
 MONTHLY_FILE_PATTERN = re.compile(r'Accounts_Monthly_Data-([A-Za-z]+)(\d{4})\.zip')
 
 
@@ -45,18 +47,21 @@ def get_archive_file_links() -> list[tuple[str, str, int]]:
     response = requests.get(INDEX_URL, timeout=30)
     response.raise_for_status()
 
-    # Find all matching filenames in the HTML
-    matches = MONTHLY_FILE_PATTERN.findall(response.text)
+    # Extract href values from anchor tags (gets correct paths including archive/ prefix)
+    href_matches = HREF_PATTERN.findall(response.text)
 
     # Build file list with year info
     files = []
     seen = set()
-    for month, year in matches:
-        filename = f"Accounts_Monthly_Data-{month}{year}.zip"
+    for href in href_matches:
+        filename = href.split("/")[-1]
         if filename not in seen:
             seen.add(filename)
-            url = urljoin(BASE_URL, filename)
-            files.append((filename, url, int(year)))
+            url = urljoin(BASE_URL, href)
+            match = MONTHLY_FILE_PATTERN.search(filename)
+            if match:
+                year = int(match.group(2))
+                files.append((filename, url, year))
 
     # Sort by year then month
     month_order = {

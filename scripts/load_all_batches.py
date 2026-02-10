@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 import signal
 import sqlite3
 import sys
@@ -50,8 +51,28 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Directory containing daily ZIP files
-DAILY_DATA_DIR = PROJECT_ROOT / "scripts" / "data" / "daily"
+# Default data directories (daily first, then monthly backfill)
+DEFAULT_DATA_DIRS = [
+    PROJECT_ROOT / "scripts" / "data" / "daily",
+    PROJECT_ROOT / "scripts" / "data" / "monthly",
+]
+
+MONTH_ORDER = {
+    'january': 1, 'february': 2, 'march': 3, 'april': 4,
+    'may': 5, 'june': 6, 'july': 7, 'august': 8,
+    'september': 9, 'october': 10, 'november': 11, 'december': 12
+}
+
+
+def batch_sort_key(path: Path) -> tuple:
+    """Sort daily files by date, monthly files chronologically after daily."""
+    match = re.match(r'Accounts_Monthly_Data-([A-Za-z]+)(\d{4})\.zip', path.name)
+    if match:
+        month_num = MONTH_ORDER.get(match.group(1).lower(), 0)
+        return (1, int(match.group(2)), month_num, path.name)
+    # Daily files (YYYY-MM-DD in name) sort lexically, grouped before monthly
+    return (0, 0, 0, path.name)
+
 
 # Global flag for graceful shutdown
 shutdown_requested = False
@@ -83,23 +104,32 @@ def get_loaded_batches() -> set[str]:
         conn.close()
 
 
-def get_pending_batches() -> list[Path]:
+def get_pending_batches(data_dirs: list[Path] | None = None) -> list[Path]:
     """
     Get list of ZIP files that haven't been loaded yet.
 
-    Returns files sorted by date (oldest first).
+    Scans one or more directories. Returns files sorted: daily first (by date),
+    then monthly (chronologically).
     """
-    if not DAILY_DATA_DIR.exists():
-        raise FileNotFoundError(f"Daily data directory not found: {DAILY_DATA_DIR}")
+    if data_dirs is None:
+        data_dirs = DEFAULT_DATA_DIRS
 
-    # Get all ZIP files
-    all_zips = sorted(DAILY_DATA_DIR.glob("*.zip"))
+    all_zips = []
+    for d in data_dirs:
+        if d.exists():
+            all_zips.extend(d.glob("*.zip"))
+        else:
+            logger.warning(f"Data directory not found, skipping: {d}")
+
+    if not all_zips:
+        logger.info("No ZIP files found in any data directory.")
 
     # Get already loaded
     loaded = get_loaded_batches()
 
-    # Filter to pending
+    # Filter to pending and sort
     pending = [z for z in all_zips if z.name not in loaded]
+    pending.sort(key=batch_sort_key)
 
     return pending
 
@@ -185,7 +215,8 @@ def estimate_remaining(
 
 def load_all_batches(
     dry_run: bool = False,
-    limit: int | None = None
+    limit: int | None = None,
+    data_dirs: list[Path] | None = None,
 ) -> dict:
     """
     Load all pending batches into the database.
@@ -193,6 +224,7 @@ def load_all_batches(
     Args:
         dry_run: If True, only show what would be loaded
         limit: Maximum number of batches to process (None = all)
+        data_dirs: Directories to scan for ZIPs (default: daily/ + monthly/)
 
     Returns:
         Statistics dict with results
@@ -201,7 +233,7 @@ def load_all_batches(
     (PROJECT_ROOT / "logs").mkdir(exist_ok=True)
 
     # Get pending batches
-    pending = get_pending_batches()
+    pending = get_pending_batches(data_dirs=data_dirs)
 
     if limit:
         pending = pending[:limit]
@@ -216,6 +248,7 @@ def load_all_batches(
             "batches_failed": 0,
             "files_total": 0,
             "files_processed": 0,
+            "files_skipped": 0,
             "files_failed": 0,
             "duration_seconds": 0
         }
@@ -273,6 +306,9 @@ def load_all_batches(
                     f"in {format_duration(batch_duration)} ({files_per_min:.0f} files/min)"
                 )
 
+                if result.files_skipped > 0:
+                    logger.info(f"  {result.files_skipped} files skipped (already in database)")
+
                 if result.files_failed > 0:
                     logger.warning(f"  {result.files_failed} files failed in this batch")
 
@@ -300,6 +336,7 @@ def load_all_batches(
                         pass
                     conn = get_connection()
                     configure_for_bulk_load(conn)
+                    drop_indexes_for_bulk_load(conn)
                     cache = ResolutionCache(conn)
 
     finally:
@@ -321,6 +358,7 @@ def load_all_batches(
     total_duration = time.time() - start_time
     total_files = sum(r.files_total for r in results)
     total_processed = sum(r.files_processed for r in results)
+    total_skipped = sum(r.files_skipped for r in results)
     total_failed = sum(r.files_failed for r in results)
 
     # Final report
@@ -331,6 +369,7 @@ def load_all_batches(
     logger.info(f"Batches processed: {len(results)}/{total_batches}")
     logger.info(f"Files total: {total_files:,}")
     logger.info(f"Files processed: {total_processed:,}")
+    logger.info(f"Files skipped: {total_skipped:,}")
     logger.info(f"Files failed: {total_failed:,}")
     logger.info(f"Total duration: {format_duration(total_duration)}")
 
@@ -355,6 +394,7 @@ def load_all_batches(
         "batches_failed": len(failed_batches),
         "files_total": total_files,
         "files_processed": total_processed,
+        "files_skipped": total_skipped,
         "files_failed": total_failed,
         "duration_seconds": total_duration,
         "interrupted": shutdown_requested
@@ -377,6 +417,12 @@ def main():
         default=None,
         help="Maximum number of batches to process"
     )
+    parser.add_argument(
+        "--data-dir",
+        type=Path,
+        default=None,
+        help="Specific directory to scan (default: both daily/ and monthly/)"
+    )
 
     args = parser.parse_args()
 
@@ -384,14 +430,20 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
+    # Resolve data directories
+    data_dirs = [args.data_dir] if args.data_dir else None
+
     logger.info("Companies House Batch Loader")
-    logger.info(f"Data directory: {DAILY_DATA_DIR}")
+    dirs_display = data_dirs if data_dirs else DEFAULT_DATA_DIRS
+    for d in dirs_display:
+        logger.info(f"Data directory: {d}")
     logger.info("")
 
     try:
         stats = load_all_batches(
             dry_run=args.dry_run,
-            limit=args.limit
+            limit=args.limit,
+            data_dirs=data_dirs,
         )
 
         if not args.dry_run:

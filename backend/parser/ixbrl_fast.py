@@ -271,21 +271,37 @@ def parse_ixbrl_fast(html_content: str | bytes) -> ParsedIXBRL:
     for elem in numeric_facts:
         result.numeric_facts.append(parse_numeric_fact_fast(elem))
 
-    for elem in text_facts:
-        result.text_facts.append(parse_text_fact_fast(elem))
+    # Concepts whose values are used as filing metadata (dates, identifiers).
+    # For these, always use text-only extraction even if the element has
+    # escape="true", which would otherwise store raw HTML markup.
+    _METADATA_CONCEPTS = {
+        "UKCompaniesHouseRegisteredNumber", "CompaniesHouseRegisteredNumber",
+        "EntityCurrentLegalOrRegisteredName", "EntityCurrentLegalName",
+        "BalanceSheetDate", "StartDateForPeriodCoveredByReport",
+        "EndDateForPeriodCoveredByReport",
+    }
 
-    # Extract metadata from text facts
-    for fact in result.text_facts:
+    for elem in text_facts:
+        fact = parse_text_fact_fast(elem)
+        result.text_facts.append(fact)
+
+        # Extract metadata using text-only value to avoid XBRL markup
+        # leaking from escape-attribute elements or PDF-converted filings
+        if fact.concept in _METADATA_CONCEPTS:
+            metadata_value = _get_all_text(elem) if fact.escape else fact.value
+        else:
+            continue
+
         if fact.concept in ("UKCompaniesHouseRegisteredNumber", "CompaniesHouseRegisteredNumber"):
-            result.company_number = fact.value
+            result.company_number = metadata_value
         elif fact.concept in ("EntityCurrentLegalOrRegisteredName", "EntityCurrentLegalName"):
-            result.company_name = fact.value
+            result.company_name = metadata_value
         elif fact.concept == "BalanceSheetDate":
-            result.balance_sheet_date = fact.value
+            result.balance_sheet_date = metadata_value
         elif fact.concept == "StartDateForPeriodCoveredByReport":
-            result.period_start_date = fact.value
+            result.period_start_date = metadata_value
         elif fact.concept == "EndDateForPeriodCoveredByReport":
-            result.period_end_date = fact.value
+            result.period_end_date = metadata_value
 
     return result
 

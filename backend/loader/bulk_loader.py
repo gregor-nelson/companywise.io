@@ -56,6 +56,13 @@ PARALLEL_WORKERS = 4     # Number of parallel parsing workers (match core count)
 CHUNK_SIZE = 1000        # Process ZIP entries in chunks to limit peak memory
 
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+# Zero-width / invisible Unicode chars that leak from HTML/iXBRL text extraction
+# and silently break strptime. Does NOT include \xa0 (non-breaking space) since
+# that is a space-like separator handled by the \s+ whitespace normalizer.
+_INVISIBLE_CHARS_RE = re.compile(
+    r"[\u200b\u200c\u200d\u200e\u200f\ufeff\u2060]"
+)
 
 
 def normalize_date_to_iso(date_str: str | None) -> str | None:
@@ -64,10 +71,15 @@ def normalize_date_to_iso(date_str: str | None) -> str | None:
     Handles formats found in Companies House data:
     - ISO: "2023-02-28" (returned as-is)
     - Long text: "28 February 2023" / "1 March 2022"
+    - Numeric spaced: "28 02 2023" / "1 3 2022" (DD MM YYYY)
     - Dot notation: "28.2.23" / "1.3.22" (2-digit year)
     - Slash notation: "28/02/2023" (DD/MM/YYYY)
     - Dash with full year: "28-2-2023" (D-M-YYYY)
     - US text: "February 28, 2023"
+
+    Also strips HTML tags from iXBRL escape-attribute content and removes
+    invisible Unicode characters (zero-width spaces, LTR/RTL marks, etc.)
+    that leak from HTML text extraction and silently break strptime.
     """
     if not date_str:
         return None
@@ -76,7 +88,24 @@ def normalize_date_to_iso(date_str: str | None) -> str | None:
         return None
     if _ISO_DATE_RE.match(date_str):
         return date_str
-    for fmt in ("%d %B %Y", "%d.%m.%y", "%d/%m/%Y", "%d-%m-%Y", "%B %d, %Y"):
+
+    # Strip HTML/XBRL tags that leak from iXBRL escape attributes or
+    # PDF-to-HTML converted filings
+    if "<" in date_str:
+        date_str = _HTML_TAG_RE.sub("", date_str)
+
+    # Remove invisible Unicode characters that break strptime, then
+    # collapse runs of whitespace to a single ASCII space
+    date_str = date_str.replace("\u00ad", "-")
+    date_str = _INVISIBLE_CHARS_RE.sub("", date_str)
+    date_str = re.sub(r"\s+", " ", date_str).strip()
+
+    if not date_str:
+        return None
+    if _ISO_DATE_RE.match(date_str):
+        return date_str
+
+    for fmt in ("%d %B %Y", "%d %m %Y", "%d.%m.%y", "%d.%m.%Y", "%d/%m/%Y", "%d-%m-%Y", "%B %d, %Y"):
         try:
             return datetime.strptime(date_str, fmt).strftime("%Y-%m-%d")
         except ValueError:
@@ -93,6 +122,7 @@ class BatchResult:
     files_total: int
     files_processed: int
     files_failed: int
+    files_skipped: int
     errors: list[str]
 
 
@@ -528,6 +558,12 @@ def mark_batch_complete(conn: sqlite3.Connection, batch_id: int) -> None:
     )
 
 
+def get_existing_source_files(conn: sqlite3.Connection) -> set[str]:
+    """Return all source_file values already in the filings table."""
+    cursor = conn.execute("SELECT source_file FROM filings")
+    return {row["source_file"] for row in cursor.fetchall()}
+
+
 def load_batch(
     zip_path: str | Path,
     workers: int = PARALLEL_WORKERS,
@@ -562,6 +598,7 @@ def load_batch(
     errors: list[str] = []
     files_processed = 0
     files_failed = 0
+    files_skipped = 0
 
     try:
         if owns_conn:
@@ -584,6 +621,10 @@ def load_batch(
             batch_id = create_batch(conn, zip_path, files_total)
             conn.commit()
 
+            # Load existing source files for duplicate detection
+            existing_source_files = get_existing_source_files(conn)
+            logger.info(f"Duplicate detection: {len(existing_source_files):,} existing filings in database")
+
             # Process files in chunks to limit peak memory usage.
             # Each chunk: read from ZIP -> parse -> insert to DB -> release.
             logger.info(f"Processing in chunks of {CHUNK_SIZE} (parse + insert per chunk)...")
@@ -595,30 +636,34 @@ def load_batch(
                 chunk_num = (chunk_start // CHUNK_SIZE) + 1
                 total_chunks = (files_total + CHUNK_SIZE - 1) // CHUNK_SIZE
 
-                # Read chunk from ZIP
+                # Read chunk from ZIP (Layer 1: skip non-CIC duplicates before I/O)
                 parse_jobs = []
                 for entry in chunk_entries:
-                    content = zf.read(entry)
                     source_type = detect_source_type(entry)
+                    if source_type != 'cic_zip' and entry in existing_source_files:
+                        files_skipped += 1
+                        continue
+                    content = zf.read(entry)
                     parse_jobs.append((entry, content, source_type))
 
                 # Parse chunk (parallel)
                 parsed_files: list[ParsedFile] = []
 
-                with ProcessPoolExecutor(max_workers=workers) as executor:
-                    futures = {executor.submit(parse_file_content, job): job[0] for job in parse_jobs}
+                if parse_jobs:
+                    with ProcessPoolExecutor(max_workers=workers) as executor:
+                        futures = {executor.submit(parse_file_content, job): job[0] for job in parse_jobs}
 
-                    for future in as_completed(futures):
-                        try:
-                            results = future.result()
-                            parsed_files.extend(results)
-                        except Exception as e:
-                            source_file = futures[future]
-                            parsed_files.append(ParsedFile(
-                                source_file=source_file,
-                                source_type='unknown',
-                                error=str(e)
-                            ))
+                        for future in as_completed(futures):
+                            try:
+                                results = future.result()
+                                parsed_files.extend(results)
+                            except Exception as e:
+                                source_file = futures[future]
+                                parsed_files.append(ParsedFile(
+                                    source_file=source_file,
+                                    source_type='unknown',
+                                    error=str(e)
+                                ))
 
                 # Free raw bytes before DB insertion
                 del parse_jobs
@@ -626,6 +671,11 @@ def load_batch(
                 # Insert chunk into DB
                 for pf in parsed_files:
                     try:
+                        # Layer 2: catch CIC sub-file duplicates after parsing
+                        if pf.source_file in existing_source_files:
+                            files_skipped += 1
+                            continue
+
                         if pf.error:
                             files_failed += 1
                             errors.append(f"{pf.source_file}: {pf.error}")
@@ -668,7 +718,8 @@ def load_batch(
                 del parsed_files
                 logger.info(
                     f"Chunk {chunk_num}/{total_chunks}: "
-                    f"{total_inserted}/{files_total} files ({files_processed} successful)"
+                    f"{total_inserted}/{files_total} files "
+                    f"({files_processed} successful, {files_skipped} skipped)"
                 )
 
             # Final commit
@@ -677,6 +728,7 @@ def load_batch(
 
             logger.info(
                 f"Batch complete: {files_processed} processed, "
+                f"{files_skipped} skipped, "
                 f"{files_failed} failed out of {files_total}"
             )
 
@@ -686,6 +738,7 @@ def load_batch(
                 files_total=files_total,
                 files_processed=files_processed,
                 files_failed=files_failed,
+                files_skipped=files_skipped,
                 errors=errors[:100]
             )
 
@@ -727,6 +780,7 @@ def load_batch_sequential(
     errors: list[str] = []
     files_processed = 0
     files_failed = 0
+    files_skipped = 0
 
     try:
         if owns_conn:
@@ -747,14 +801,28 @@ def load_batch_sequential(
             batch_id = create_batch(conn, zip_path, files_total)
             conn.commit()
 
+            # Load existing source files for duplicate detection
+            existing_source_files = get_existing_source_files(conn)
+            logger.info(f"Duplicate detection: {len(existing_source_files):,} existing filings in database")
+
             for i, entry in enumerate(entries, 1):
                 source_type = detect_source_type(entry)
+
+                # Layer 1: skip non-CIC duplicates before I/O
+                if source_type != 'cic_zip' and entry in existing_source_files:
+                    files_skipped += 1
+                    continue
 
                 try:
                     content = zf.read(entry)
                     parsed_files = parse_file_content((entry, content, source_type))
 
                     for pf in parsed_files:
+                        # Layer 2: catch CIC sub-file duplicates after parsing
+                        if pf.source_file in existing_source_files:
+                            files_skipped += 1
+                            continue
+
                         if pf.error:
                             files_failed += 1
                             errors.append(f"{pf.source_file}: {pf.error}")
@@ -793,13 +861,17 @@ def load_batch_sequential(
                 # Batch commit
                 if i % COMMIT_BATCH_SIZE == 0:
                     conn.commit()
-                    logger.info(f"Progress: {i}/{files_total} ({files_processed} successful)")
+                    logger.info(
+                        f"Progress: {i}/{files_total} "
+                        f"({files_processed} successful, {files_skipped} skipped)"
+                    )
 
             mark_batch_complete(conn, batch_id)
             conn.commit()
 
             logger.info(
                 f"Batch complete: {files_processed} processed, "
+                f"{files_skipped} skipped, "
                 f"{files_failed} failed out of {files_total}"
             )
 
@@ -809,6 +881,7 @@ def load_batch_sequential(
                 files_total=files_total,
                 files_processed=files_processed,
                 files_failed=files_failed,
+                files_skipped=files_skipped,
                 errors=errors[:100]
             )
 
@@ -887,6 +960,7 @@ if __name__ == "__main__":
     print(f"Filename: {result.filename}")
     print(f"Files Total: {result.files_total}")
     print(f"Files Processed: {result.files_processed}")
+    print(f"Files Skipped: {result.files_skipped}")
     print(f"Files Failed: {result.files_failed}")
 
     if result.errors:
