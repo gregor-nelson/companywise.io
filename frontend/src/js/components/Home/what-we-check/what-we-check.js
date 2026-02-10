@@ -185,8 +185,6 @@
 
     renderTab(category, index) {
       const isActive = index === this.activeIndex;
-      const rotations = [-1, 0.5, -0.5, 1];
-      const rotation = rotations[index % 4];
 
       return `
         <button
@@ -195,9 +193,7 @@
           aria-selected="${isActive}"
           aria-controls="panel-${category.id}"
           data-tab-index="${index}"
-          style="--tab-rotation: ${rotation}deg; --tab-z: ${isActive ? 10 : 5 - index};"
         >
-          <span class="wwc-tab-accent"></span>
           <i class="ph ${category.icon}"></i>
           <span class="wwc-tab-label">${category.label}</span>
         </button>

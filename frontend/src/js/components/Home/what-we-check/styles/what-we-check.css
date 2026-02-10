@@ -193,16 +193,20 @@
 
 
 /* ============================================
-   Tab Bar
+   Tab Bar — Segmented Pill Control
    ============================================ */
 
 .wwc-tabs {
   display: flex;
-  gap: var(--space-1);
-  padding: 0 var(--space-1);
+  gap: var(--space-0-5);
+  padding: var(--space-0-5);
+  background: var(--muted);
+  border: var(--border-1) solid var(--border);
+  border-radius: var(--rounded-full);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  margin-bottom: var(--space-3);
 }
 
 .wwc-tabs::-webkit-scrollbar {
@@ -213,12 +217,12 @@
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-1-5);
-  padding: var(--space-2-5) var(--space-4);
-  background: var(--muted);
-  border: var(--border-1) solid var(--border);
-  border-bottom: none;
-  border-radius: var(--rounded-xl) var(--rounded-xl) 0 0;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--rounded-full);
   font-family: var(--font);
   font-size: var(--text-xs);
   font-weight: var(--font-medium);
@@ -229,67 +233,39 @@
   transition:
     background var(--duration-200) var(--ease-out),
     color var(--duration-200) var(--ease-out),
-    transform var(--duration-200) var(--ease-out);
-  transform: rotate(var(--tab-rotation, 0deg));
-  z-index: var(--tab-z, 1);
-  overflow: hidden;
+    box-shadow var(--duration-200) var(--ease-out);
 }
 
 .wwc-tab i {
   font-size: var(--text-sm);
 }
 
-.wwc-tab-accent {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--space-0-5);
-  background: transparent;
-  transition: background var(--duration-200) var(--ease-out);
-}
-
-.wwc-tab-label {
-  display: none;
-}
-
 .wwc-tab--hovered {
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
   color: var(--text-secondary);
-  transform: rotate(0deg) translateY(calc(-1 * var(--space-0-5)));
 }
 
 .wwc-tab--active {
   background: var(--surface);
   color: var(--text);
   font-weight: var(--font-semibold);
-  transform: rotate(0deg);
-  z-index: var(--z-10);
-  border-color: color-mix(in srgb, var(--text) 6%, transparent);
-}
-
-.wwc-tab--active .wwc-tab-accent {
-  background: var(--brand);
+  box-shadow: var(--shadow-sm);
 }
 
 @media (min-width: 640px) {
-  .wwc-tab-label {
-    display: inline;
-  }
-
   .wwc-tab {
-    padding: var(--space-2-5) var(--space-5);
+    padding: var(--space-2) var(--space-4);
     font-size: var(--text-sm);
   }
 }
 
 @media (min-width: 1024px) {
   .wwc-tabs {
-    gap: var(--space-1-5);
+    gap: var(--space-1);
   }
 
   .wwc-tab {
-    padding: var(--space-3) var(--space-6);
+    padding: var(--space-2-5) var(--space-5);
   }
 }
 
@@ -300,7 +276,7 @@
 
 .wwc-card {
   background: var(--surface);
-  border-radius: 0 var(--rounded-2xl) var(--rounded-2xl) var(--rounded-2xl);
+  border-radius: var(--rounded-2xl);
   border: var(--border-1) solid color-mix(in srgb, var(--text) 6%, transparent);
   box-shadow: 0 25px 50px -12px color-mix(in srgb, var(--text) 10%, transparent);
   overflow: hidden;
