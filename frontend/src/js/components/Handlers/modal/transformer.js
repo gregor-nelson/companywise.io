@@ -134,7 +134,17 @@
     var signals = [];
 
     if (financials) {
-      if (financials.profitLoss != null) {
+      if (financials.operatingProfit != null) {
+        signals.push({
+          label: 'Profitable',
+          pass: financials.operatingProfit >= 0
+        });
+      } else if (financials.grossProfit != null) {
+        signals.push({
+          label: 'Gross profit positive',
+          pass: financials.grossProfit >= 0
+        });
+      } else if (financials.profitLoss != null) {
         signals.push({
           label: 'Profitable',
           pass: financials.profitLoss >= 0
@@ -145,6 +155,20 @@
         signals.push({
           label: 'Positive net assets',
           pass: financials.netAssets >= 0
+        });
+      }
+
+      if (financials.equity != null) {
+        signals.push({
+          label: 'Positive equity',
+          pass: financials.equity >= 0
+        });
+      }
+
+      if (financials.cash != null) {
+        signals.push({
+          label: 'Cash reserves',
+          pass: financials.cash > 0
         });
       }
     }
@@ -243,25 +267,41 @@
 
       var revFact = getNumericFact(factsData, 'TurnoverRevenue', pStart, pEnd, null);
       var plFact = getNumericFact(factsData, 'ProfitLoss', pStart, pEnd, null);
+      var gpFact = getNumericFact(factsData, 'GrossProfitLoss', pStart, pEnd, null);
+      var opFact = getNumericFact(factsData, 'OperatingProfitLoss', pStart, pEnd, null);
       var naFact = getNumericFact(factsData, 'NetAssetsLiabilities', null, null, bsDate);
+      var eqFact = getNumericFact(factsData, 'Equity', null, null, bsDate);
       var cashFact = getNumericFact(factsData, 'CashCashEquivalents', null, null, bsDate);
+      if (!cashFact) cashFact = getNumericFact(factsData, 'CashBankOnHand', null, null, bsDate);
+      var empFact = getNumericFact(factsData, 'AverageNumberEmployeesDuringPeriod', pStart, pEnd, null);
 
       var rev = revFact ? revFact.value : null;
       var pl = plFact ? plFact.value : null;
+      var gp = gpFact ? gpFact.value : null;
+      var op = opFact ? opFact.value : null;
       var na = naFact ? naFact.value : null;
+      var eq = eqFact ? eqFact.value : null;
       var cash = cashFact ? cashFact.value : null;
+      var emp = empFact ? empFact.value : null;
 
       // Only build financials object if at least one metric exists
-      if (rev != null || pl != null || na != null || cash != null) {
+      if (rev != null || pl != null || gp != null || op != null || na != null || eq != null || cash != null || emp != null) {
         financials = {
           revenue: rev,
           revenueFormatted: formatGBP(rev),
           profitLoss: pl,
           profitLossFormatted: formatGBP(pl),
+          grossProfit: gp,
+          grossProfitFormatted: formatGBP(gp),
+          operatingProfit: op,
+          operatingProfitFormatted: formatGBP(op),
           netAssets: na,
           netAssetsFormatted: formatGBP(na),
+          equity: eq,
+          equityFormatted: formatGBP(eq),
           cash: cash,
-          cashFormatted: formatGBP(cash)
+          cashFormatted: formatGBP(cash),
+          employees: emp
         };
       }
     }

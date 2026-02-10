@@ -246,18 +246,31 @@
     var turnover = getDuration('TurnoverRevenue');
     var grossProfit = getDuration('GrossProfitLoss');
     var operatingProfit = getDuration('OperatingProfitLoss');
+    var profitLoss = getDuration('ProfitLoss');
     var netAssets = getInstantPair('NetAssetsLiabilities');
+    var equity = getInstantPair('Equity');
 
     var currentAssets = getInstant('CurrentAssets');
     var currentLiabilities = getInstant('CreditorsDueWithinOneYear');
     var cash = getInstant('CashCashEquivalents');
+    if (cash === undefined) cash = getInstant('CashBankOnHand');
     var debtors = getInstant('DebtorsDueWithinOneYear');
     var stocks = getInstant('Stocks');
+    var fixedAssets = getInstant('FixedAssets');
+    var netCurrentAssets = getInstant('NetCurrentAssetsLiabilities');
+    var totalAssetsLessCurrentLiabilities = getInstant('TotalAssetsLessCurrentLiabilities');
+    var creditors = getInstant('Creditors');
+    var creditorsAfterOneYear = getInstant('CreditorsAmountsFallingDueAfterOneYear');
+
+    var employees = getDuration('AverageNumberEmployeesDuringPeriod');
 
     // Only build financials if at least one metric exists
-    var hasAnything = turnover || grossProfit || operatingProfit || netAssets ||
+    var hasAnything = turnover || grossProfit || operatingProfit || profitLoss || netAssets || equity ||
       currentAssets !== undefined || currentLiabilities !== undefined ||
-      cash !== undefined || debtors !== undefined || stocks !== undefined;
+      cash !== undefined || debtors !== undefined || stocks !== undefined ||
+      fixedAssets !== undefined || netCurrentAssets !== undefined ||
+      totalAssetsLessCurrentLiabilities !== undefined || creditors !== undefined ||
+      creditorsAfterOneYear !== undefined || employees;
 
     if (!hasAnything) return null;
 
@@ -268,12 +281,20 @@
       turnover: turnover,
       grossProfit: grossProfit,
       operatingProfit: operatingProfit,
+      profitLoss: profitLoss,
       netAssets: netAssets,
+      equity: equity,
       currentAssets: currentAssets,
       currentLiabilities: currentLiabilities,
       cash: cash,
       debtors: debtors,
-      stocks: stocks
+      stocks: stocks,
+      fixedAssets: fixedAssets,
+      netCurrentAssets: netCurrentAssets,
+      totalAssetsLessCurrentLiabilities: totalAssetsLessCurrentLiabilities,
+      creditors: creditors,
+      creditorsAfterOneYear: creditorsAfterOneYear,
+      employees: employees
     };
   }
 

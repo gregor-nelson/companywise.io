@@ -401,6 +401,10 @@
       const companyType = c.type || c.companyType || 'N/A';
       const address = c.address || 'N/A';
 
+      const employees = c.financials && c.financials.employees
+        ? (c.financials.employees.current != null ? Math.round(c.financials.employees.current) : null)
+        : null;
+
       return `
         <div class="pr-section pr-fade-up">
           <div class="pr-section-header">
@@ -435,6 +439,12 @@
                 <div class="pr-overview-label">Business Activity</div>
                 <div class="pr-overview-value">${escapeHtml(sicDescription)}</div>
               </div>
+              ${employees != null ? `
+                <div class="pr-overview-item">
+                  <div class="pr-overview-label">Employees</div>
+                  <div class="pr-overview-value">${employees}</div>
+                </div>
+              ` : ''}
               <div class="pr-overview-item pr-overview-item--full">
                 <div class="pr-overview-label">Registered Address</div>
                 <div class="pr-overview-value">${escapeHtml(address)}</div>
@@ -648,6 +658,12 @@
                   <div class="pr-financial-value">${fmt(f.operatingProfit.current)}</div>
                   ${this.renderTrend(f.operatingProfit.current, f.operatingProfit.previous)}
                 </div>
+              ` : !f.grossProfit && !f.operatingProfit && f.profitLoss ? `
+                <div class="pr-financial-card">
+                  <div class="pr-financial-label">Net Profit / Loss</div>
+                  <div class="pr-financial-value">${fmt(f.profitLoss.current)}</div>
+                  ${this.renderTrend(f.profitLoss.current, f.profitLoss.previous)}
+                </div>
               ` : ''}
               ${f.netAssets ? `
                 <div class="pr-financial-card">
@@ -656,11 +672,24 @@
                   ${this.renderTrend(f.netAssets.current, f.netAssets.previous)}
                 </div>
               ` : ''}
+              ${f.equity ? `
+                <div class="pr-financial-card">
+                  <div class="pr-financial-label">Shareholders\u2019 Equity</div>
+                  <div class="pr-financial-value">${fmt(f.equity.current)}</div>
+                  ${this.renderTrend(f.equity.current, f.equity.previous)}
+                </div>
+              ` : ''}
             </div>
 
             <!-- Balance Sheet -->
-            ${(f.currentAssets !== undefined || f.currentLiabilities !== undefined || f.cash !== undefined) ? `
+            ${(f.fixedAssets !== undefined || f.currentAssets !== undefined || f.currentLiabilities !== undefined || f.cash !== undefined || f.netCurrentAssets !== undefined || f.totalAssetsLessCurrentLiabilities !== undefined || f.creditors !== undefined || f.creditorsAfterOneYear !== undefined) ? `
               <div class="pr-balance-table">
+                ${f.fixedAssets !== undefined ? `
+                  <div class="pr-balance-row pr-balance-row--highlight">
+                    <span class="pr-balance-label">Fixed Assets</span>
+                    <span class="pr-balance-value" style="font-weight: 700;">${fmt(f.fixedAssets)}</span>
+                  </div>
+                ` : ''}
                 ${f.cash !== undefined ? `
                   <div class="pr-balance-row">
                     <span class="pr-balance-label">Cash at Bank</span>
@@ -687,8 +716,32 @@
                 ` : ''}
                 ${f.currentLiabilities !== undefined ? `
                   <div class="pr-balance-row">
-                    <span class="pr-balance-label">Current Liabilities</span>
+                    <span class="pr-balance-label">Creditors: Due Within One Year</span>
                     <span class="pr-balance-value">${fmt(f.currentLiabilities)}</span>
+                  </div>
+                ` : ''}
+                ${f.netCurrentAssets !== undefined ? `
+                  <div class="pr-balance-row pr-balance-row--highlight">
+                    <span class="pr-balance-label">Net Current Assets</span>
+                    <span class="pr-balance-value" style="font-weight: 700;">${fmt(f.netCurrentAssets)}</span>
+                  </div>
+                ` : ''}
+                ${f.totalAssetsLessCurrentLiabilities !== undefined ? `
+                  <div class="pr-balance-row pr-balance-row--highlight">
+                    <span class="pr-balance-label">Total Assets Less Current Liabilities</span>
+                    <span class="pr-balance-value" style="font-weight: 700;">${fmt(f.totalAssetsLessCurrentLiabilities)}</span>
+                  </div>
+                ` : ''}
+                ${f.creditorsAfterOneYear !== undefined ? `
+                  <div class="pr-balance-row">
+                    <span class="pr-balance-label">Creditors: Due After One Year</span>
+                    <span class="pr-balance-value">${fmt(f.creditorsAfterOneYear)}</span>
+                  </div>
+                ` : ''}
+                ${f.creditors !== undefined ? `
+                  <div class="pr-balance-row">
+                    <span class="pr-balance-label">Total Creditors</span>
+                    <span class="pr-balance-value">${fmt(f.creditors)}</span>
                   </div>
                 ` : ''}
               </div>

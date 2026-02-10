@@ -278,6 +278,12 @@
               <div class="rm-card-label">Business Activity</div>
               <div class="rm-card-value">${report.activity ? escapeHtml(report.activity) : 'Not available'}</div>
             </div>
+            ${report.financials && report.financials.employees != null ? `
+            <div class="rm-card">
+              <div class="rm-card-label">Employees</div>
+              <div class="rm-card-value">${Math.round(report.financials.employees)}</div>
+            </div>
+            ` : ''}
           </div>
           ${report.address ? `
           <div class="rm-grid rm-grid--1">
@@ -364,11 +370,19 @@
       if (fin.revenue != null) {
         tiles.push({ label: 'Revenue', value: fin.revenueFormatted, negative: fin.revenue < 0 });
       }
-      if (fin.profitLoss != null) {
+      if (fin.grossProfit != null) {
+        tiles.push({ label: 'Gross Profit', value: fin.grossProfitFormatted, negative: fin.grossProfit < 0 });
+      }
+      if (fin.operatingProfit != null) {
+        tiles.push({ label: 'Operating Profit', value: fin.operatingProfitFormatted, negative: fin.operatingProfit < 0 });
+      } else if (fin.profitLoss != null) {
         tiles.push({ label: fin.profitLoss >= 0 ? 'Profit' : 'Loss', value: fin.profitLossFormatted, negative: fin.profitLoss < 0 });
       }
       if (fin.netAssets != null) {
         tiles.push({ label: 'Net Assets', value: fin.netAssetsFormatted, negative: fin.netAssets < 0 });
+      }
+      if (fin.equity != null) {
+        tiles.push({ label: 'Equity', value: fin.equityFormatted, negative: fin.equity < 0 });
       }
       if (fin.cash != null) {
         tiles.push({ label: 'Cash', value: fin.cashFormatted, negative: fin.cash < 0 });
