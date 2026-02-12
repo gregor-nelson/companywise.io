@@ -30,7 +30,7 @@
 .fin-showcase {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
   position: relative;
 }
 
@@ -43,15 +43,15 @@
   .fin-showcase {
     position: relative;
     display: block;
-    padding: var(--space-8) var(--space-6);
-    padding-bottom: var(--space-14);
+    padding: var(--space-6) var(--space-6);
+    padding-bottom: var(--space-10);
   }
 }
 
 @media (min-width: 1024px) {
   .fin-showcase {
-    padding: var(--space-6) var(--space-4);
-    padding-bottom: var(--space-12);
+    padding: var(--space-5) var(--space-4);
+    padding-bottom: var(--space-8);
   }
 }
 
@@ -152,8 +152,6 @@
   font-weight: var(--font-semibold);
   padding: var(--space-0-5) var(--space-2);
   border-radius: var(--rounded-full);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
   flex-shrink: 0;
   margin-top: var(--space-0-5);
 }
@@ -173,31 +171,6 @@
   color: var(--success);
 }
 
-
-/* ============================================
-   Card Accent Bars (top colour stripe)
-   ============================================ */
-
-.fin-card--anchor::before {
-  content: '';
-  display: block;
-  height: 3px;
-  background: linear-gradient(to right, var(--danger), var(--warning));
-}
-
-.fin-card--float-ccj::before {
-  content: '';
-  display: block;
-  height: 2px;
-  background: var(--danger);
-}
-
-.fin-card--float-health::before {
-  content: '';
-  display: block;
-  height: 2px;
-  background: var(--success);
-}
 
 
 /* ============================================
@@ -634,7 +607,7 @@
   .fin-card--anchor {
     position: relative;
     z-index: 10;
-    max-width: 68%;
+    max-width: 78%;
     margin: 0 auto;
     box-shadow: var(--shadow-lg);
     border-color: color-mix(in srgb, var(--text) 8%, transparent);
@@ -688,7 +661,7 @@
 @media (min-width: 1024px) {
 
   .fin-card--anchor {
-    max-width: 65%;
+    max-width: 75%;
   }
 
   .fin-card--float-ccj {
@@ -703,7 +676,7 @@
 @media (min-width: 1280px) {
 
   .fin-card--anchor {
-    max-width: 60%;
+    max-width: 70%;
   }
 
   .fin-card--float-ccj {

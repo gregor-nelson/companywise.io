@@ -30,7 +30,7 @@
 .stab-showcase {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
   position: relative;
 }
 
@@ -157,8 +157,6 @@
   font-weight: var(--font-semibold);
   padding: var(--space-0-5) var(--space-2);
   border-radius: var(--rounded-full);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
   flex-shrink: 0;
   margin-top: var(--space-0-5);
 }
@@ -178,38 +176,6 @@
   color: var(--success);
 }
 
-
-/* ============================================
-   Card Accent Bars (top colour stripe)
-   ============================================ */
-
-.stab-card--anchor::before {
-  content: '';
-  display: block;
-  height: 3px;
-  background: linear-gradient(to right, var(--warning), color-mix(in srgb, var(--warning) 60%, var(--success)));
-}
-
-.stab-card--float-status::before {
-  content: '';
-  display: block;
-  height: 2px;
-  background: var(--warning);
-}
-
-.stab-card--float-address::before {
-  content: '';
-  display: block;
-  height: 2px;
-  background: var(--warning);
-}
-
-.stab-card--float-names::before {
-  content: '';
-  display: block;
-  height: 2px;
-  background: var(--brand);
-}
 
 
 /* ============================================
